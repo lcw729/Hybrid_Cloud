@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hcp-analytic-engine
+  name: hcp-analytic-engine
+  namespace: hybrid
+spec:
+  selector:
+    matchLabels:
+      app: hcp-analytic-engine
+  template:
+    metadata:
+      labels:
+        app: hcp-analytic-engine
+      name: hcp-analytic-engine
+    spec:
+      nodeName: master
+      serviceAccountName: hybrid
+      containers:
+        - name: hcp-analytic-engine
+          image: ketidevit/hcp-analytic-engine:v1.0
+          command: [ "/bin/bash", "-c", "--" ]   
+          args: [ "while true; do sleep 30; done;" ]
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Seoul

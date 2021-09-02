@@ -1,0 +1,14 @@
+--gke--
+projectID
+region
+clustername
+
+
+--aks--
+region
+resourcegroup
+
+
+--eks--
+region
+clustername

@@ -1,0 +1,10 @@
+apiVersion: "hcp.k8s.io/v1alpha1"
+kind: "ClusterRegister"
+metadata:
+  name: "eks-master"
+  namespace: "eks"
+spec:
+  platform: "eks"
+  region: "eu-west-2"
+  clustername: "eks-master"
+
