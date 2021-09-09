@@ -27,4 +27,5 @@ func GetJson(httpPostUrl string, input interface{}, target interface{}) error {
 	fmt.Println("response Headers:", response.Header)
 
 	return json.Unmarshal(jsonDataFromHttp, target)
+	// return response, err
 }

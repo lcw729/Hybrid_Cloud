@@ -46,9 +46,9 @@ var createAddonCmd = &cobra.Command{
 		// TODO: Work your own magic here
 
 		if len(args) == 0 || len(args) == 1 {
-			fmt.Println("Run 'hybridctl join --help' to view all commands")
+			fmt.Println("Run 'hybridctl create-addon --help' to view all commands")
 		} else if args[1] == "" {
-			fmt.Println("Run 'hybridctl join --help' to view all commands")
+			fmt.Println("Run 'hybridctl create-addon --help' to view all commands")
 		} else {
 			addonVersion, _ := cmd.Flags().GetString("addon-version")
 			serviceAccountRoleArn, _ := cmd.Flags().GetString("service-account-role-arn")
@@ -83,12 +83,23 @@ var createAddonCmd = &cobra.Command{
 func createAddon(createAddonInput eks.CreateAddonInput) {
 	httpPostUrl := "http://localhost:8080/createAddon"
 	var output eks.CreateAddonOutput
-	util.GetJson(httpPostUrl, createAddonInput, &output)
-	if output == (eks.CreateAddonOutput{}) {
-		fmt.Println("Addon already exists.")
-	} else {
-		fmt.Printf("%+v\n", output)
-	}
+	util.GetJson(httpPostUrl, createAddonInput, output)
+
+	// var message util.Addon
+	// response, _ := util.GetJson(httpPostUrl, createAddonInput, output)
+	// bytes, err := ioutil.ReadAll(response.Body)
+	// if err != nil {
+	// 	log.Println(bytes)
+	// }
+	// defer response.Body.Close()
+	// json.Unmarshal(bytes, &message)
+	// json.Unmarshal(bytes, &output)
+	// if output.Addon == nil {
+	// 	json.Unmarshal(bytes, &message)
+	// 	fmt.Println(message.Message_)
+	// } else {
+	// 	fmt.Println(output)
+	// }
 }
 
 func init() {
@@ -98,11 +109,11 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// joinCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// create-addonCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// joinCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// create-addonCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	createAddonCmd.Flags().StringP("addon-version", "", "", "enter addon version")
 	createAddonCmd.Flags().StringP("service-account-role-arn", "", "", "enter service account rolearn")
 	createAddonCmd.Flags().StringP("resolve-conflicts", "", "", "enter addon version")

@@ -53,8 +53,21 @@ var deleteAddonCmd = &cobra.Command{
 func deleteAddon(deleteAddonInput eks.DeleteAddonInput) {
 	httpPostUrl := "http://localhost:8080/deleteAddon"
 	var output eks.DeleteAddonOutput
+	// var message util.Addon
 	util.GetJson(httpPostUrl, deleteAddonInput, &output)
-	fmt.Printf("%+v\n", output)
+	fmt.Println(output)
+	// bytes, err := ioutil.ReadAll(response.Body)
+	// if err != nil {
+	// 	log.Println(bytes)
+	// }
+	// defer response.Body.Close()
+	// json.Unmarshal(bytes, &output)
+	// if output.Addon == nil {
+	// 	json.Unmarshal(bytes, &message)
+	// 	fmt.Println(message.Message_)
+	// } else {
+	// 	fmt.Println(output)
+	// }
 }
 
 func init() {

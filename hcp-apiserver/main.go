@@ -3,6 +3,7 @@ package main
 import (
 	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
 	"Hybrid_Cluster/hcp-apiserver/handler"
+	"Hybrid_Cluster/hybridctl/util"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -89,8 +90,14 @@ func describeAddon(w http.ResponseWriter, req *http.Request) {
 	parser(w, req, &describeAddonInput)
 	out, err := handler.DescribeAddon(describeAddonInput)
 	checkErr(w, err)
-	jsonData, _ := json.Marshal(&out)
-	w.Write([]byte(jsonData))
+	if err != nil {
+		jsonData, _ := json.Marshal(err)
+		w.Write(jsonData)
+	} else {
+		jsonData, _ := json.Marshal(&out)
+		fmt.Println(jsonData)
+		w.Write(jsonData)
+	}
 }
 
 func describeAddonVersions(w http.ResponseWriter, req *http.Request) {
@@ -228,6 +235,19 @@ func updateClusterConfig(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
+func aksStart(w http.ResponseWriter, req *http.Request) {
+	var input util.EksAPIParameter
+	parser(w, req, &input)
+	response, err := handler.AksStart(input)
+	checkErr(w, err)
+	bytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	defer response.Body.Close()
+	w.Write(bytes)
+}
+
 func main() {
 	http.HandleFunc("/join", join)
 	http.HandleFunc("/unjoin", unjoin)
@@ -248,5 +268,6 @@ func main() {
 	http.HandleFunc("/tagResource", tagResource)
 	http.HandleFunc("/untagResource", untagResource)
 	http.HandleFunc("/updateClusterConfig", updateClusterConfig)
+	http.HandleFunc("/aksStart", aksStart)
 	http.ListenAndServe(":8080", nil)
 }

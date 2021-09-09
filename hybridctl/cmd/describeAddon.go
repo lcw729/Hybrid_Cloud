@@ -53,8 +53,23 @@ var describeAddonCmd = &cobra.Command{
 func describeAddon(describeAddonInput eks.DescribeAddonInput) {
 	httpPostUrl := "http://localhost:8080/describeAddon"
 	var output eks.DescribeAddonOutput
+	// var message util.Addon
 	util.GetJson(httpPostUrl, describeAddonInput, &output)
-	fmt.Printf("%+v\n", output)
+	fmt.Println(output)
+	// bytes, err := ioutil.ReadAll(response.Body)
+	// if err != nil {
+	// 	log.Println(bytes)
+	// }
+	// defer response.Body.Close()
+	// json.Unmarshal(bytes, &output)
+	// fmt.Println(string(bytes))
+	// if output.Addon == nil {
+	// 	fmt.Println("A")
+	// 	json.Unmarshal(bytes, &message)
+	// 	fmt.Println(message.Message_)
+	// } else {
+	// 	fmt.Println(output)
+	// }
 }
 
 func init() {
