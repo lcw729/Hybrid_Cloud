@@ -15,11 +15,13 @@
 package cmd
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"reflect"
 	"strconv"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -27,11 +29,8 @@ import (
 	resourcev1alpha1 "Hybrid_Cluster/apis/clusterRegister/v1alpha1"
 	clusterRegisterv1alpha1 "Hybrid_Cluster/clientset/v1alpha1"
 	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
-	handler "Hybrid_Cluster/hcp-apiserver/handler"
 
 	cobrautil "Hybrid_Cluster/hybridctl/util"
-
-	apiserver "Hybrid_Cluster/hcp-apiserver/Defaultjoin"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -97,7 +96,6 @@ DESCRIPTION
 		// TODO: Work your own magic here
 
 		if len(args) == 0 {
-			defaultJoin()
 		} else {
 			switch args[0] {
 			case "aks":
@@ -201,13 +199,14 @@ DESCRIPTION
 					}
 					fmt.Printf("Please enter your the name of the cluster to register: ")
 					fmt.Scanln(&clustername)
+					// gke_cr := strings.Replace(projectid+"-"+cobrautil.GKEregion[num]+"-"+clustername+"-hcp", " ", "", -1)
 					newclusterRegister := &resourcev1alpha1.ClusterRegister{
 						TypeMeta: metav1.TypeMeta{
 							Kind:       "ClusterRegister",
 							APIVersion: "hcp.k8s.io/v1alpha1",
 						},
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      strings.Replace(strings.Replace(projectid, "-", "_", -1)+"_"+strings.Replace(cobrautil.GKEregion[4], "-", "_", -1)+"_"+strings.Replace(clustername, "-", "_", -1)+"_hcp", " ", "", -1),
+							Name:      clustername,
 							Namespace: "gke",
 						},
 						Spec: resourcev1alpha1.ClusterRegisterSpec{
@@ -217,6 +216,7 @@ DESCRIPTION
 							Projectid:   projectid,
 						},
 					}
+
 					_, err = clusterRegisterClientSet.ClusterRegister("gke").Create(newclusterRegister)
 
 					if err != nil {
@@ -233,44 +233,24 @@ DESCRIPTION
 }
 
 func join(info mappingTable.ClusterInfo) {
-	// httpPostUrl := "http://localhost:8080/join"
-	// jsonData, _ := json.Marshal(&info)
+	httpPostUrl := "http://localhost:8080/join"
+	jsonData, _ := json.Marshal(&info)
 
-	// buff := bytes.NewBuffer(jsonData)
-	// request, _ := http.NewRequest("POST", httpPostUrl, buff)
-	// request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	buff := bytes.NewBuffer(jsonData)
+	request, _ := http.NewRequest("POST", httpPostUrl, buff)
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
-	// client := &http.Client{}
-	// response, err := client.Do(request)
+	client := &http.Client{}
+	response, err := client.Do(request)
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer response.Body.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
 
-	// fmt.Println("response Status:", response.Status)
-	// fmt.Println("response Headers:", response.Header)
-	handler.Join(info)
-}
-
-func defaultJoin() {
-	// httpPostUrl := "http://localhost:8080/defaultJoin"
-
-	// req, err := http.NewRequest("GET", httpPostUrl, nil)
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// client := &http.Client{}
-	// resp, err := client.Do(req)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer resp.Body.Close()
-
-	// fmt.Println("response Status:", resp.Status)
-	// fmt.Println("response Headers:", resp.Header)
-	apiserver.DefaultJoin()
+	fmt.Println("response Status:", response.Status)
+	fmt.Println("response Headers:", response.Header)
+	// handler.Join(info)
 }
 
 func createPlatformNamespace() {

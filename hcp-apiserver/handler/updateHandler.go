@@ -47,3 +47,21 @@ func UpdateClusterConfig(input eks.UpdateClusterConfigInput) (*eks.UpdateCluster
 
 	return out, err
 }
+
+func UpdateNodegroupConfig(input eks.UpdateNodegroupConfigInput) (*eks.UpdateNodegroupConfigOutput, error) {
+
+	eksSvc := GetEKSClient(input.ClusterName)
+
+	input = eks.UpdateNodegroupConfigInput{
+		ClientRequestToken: input.ClientRequestToken,
+		ClusterName:        input.ClusterName,
+		Labels:             input.Labels,
+		NodegroupName:      input.NodegroupName,
+		ScalingConfig:      input.ScalingConfig,
+		Taints:             input.Taints,
+		UpdateConfig:       input.UpdateConfig,
+	}
+	out, err := eksSvc.UpdateNodegroupConfig(&input)
+
+	return out, err
+}

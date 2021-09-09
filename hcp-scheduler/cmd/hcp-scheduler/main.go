@@ -28,7 +28,7 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 	// ResourceExtensionSchedule()
-	optimalArrangement()
+	ResourceExtensionSchedule()
 	// time := time.Second * 2
 
 }

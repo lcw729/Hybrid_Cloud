@@ -88,12 +88,12 @@ type KubeFedClusterStatus struct {
 // cluster and encapsulates the details necessary to communicate with
 // the cluster.
 type KubeFedCluster struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",omitempty" protobuf:"bytes,1,opt"`
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,2,opt,name=metadata"`
 
-	Spec KubeFedClusterSpec `json:"spec"`
+	Spec KubeFedClusterSpec `json:"spec,omitempty" protobuf:"bytes,3,opt,name=spec"`
 	// +optional
-	Status KubeFedClusterStatus `json:"status,omitempty"`
+	Status KubeFedClusterStatus `json:"status,omitempty" protobuf:"bytes,4,opt,name=status"`
 }
 
 // ClusterCondition describes current state of a cluster.
@@ -121,7 +121,7 @@ type ClusterCondition struct {
 type KubeFedClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KubeFedCluster `json:"items"`
+	Items           []KubeFedCluster `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
 func init() {

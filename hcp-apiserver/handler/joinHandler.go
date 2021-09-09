@@ -29,6 +29,17 @@ import (
 
 	   "fmt"
 
+
+
+
+
+
+
+
+
+
+
+
 	   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	   _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	   "k8s.io/client-go/tools/clientcmd"
@@ -39,7 +50,6 @@ import (
 	clusterRegister "Hybrid_Cluster/clientset/v1alpha1"
 	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
 	"context"
-	"encoding/base64"
 	"flag"
 	"log"
 	"os/exec"
@@ -48,51 +58,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
-	"google.golang.org/api/container/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-
-	KubeFedCluster "Hybrid_Cluster/apis/kubefedcluster/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 
 	rbacv1 "k8s.io/api/rbac/v1"
 
+	KubeFedCluster "Hybrid_Cluster/apis/kubefedcluster/v1alpha1"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 
 	"fmt"
 
+	util "Hybrid_Cluster/hcp-apiserver/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/tools/clientcmd/api"
-	"sigs.k8s.io/aws-iam-authenticator/pkg/token"
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
-
-/*
-func getAKSClient(authorizer autorest.Authorizer) (containerservice.ManagedClustersClient, error) {
-    aksClient := containerservice.NewManagedClustersClient(config.SubscriptionID())
-    aksClient.Authorizer = authorizer
-    aksClient.AddToUserAgent(config.UserAgent())
-    aksClient.PollingDuration = time.Hour * 1
-    return aksClient, nil
-}
-
-func GetAKS(ctx context.Context, resourceGroupName, resourceName string) (c containerservice.ManagedCluster, err error) {
-    aksClient, err := getAKSClient()
-    if err != nil {
-        return c, fmt.Errorf("cannot get AKS client: %v", err)
-    }
-
-    c, err = aksClient.Get(ctx, resourceGroupName, resourceName)
-    if err != nil {
-        return c, fmt.Errorf("cannot get AKS managed cluster %v from resource group %v: %v", resourceName, resourceGroupName, err)
-    }
-
-    return c, nil
-}
-*/
 
 func Join(info mappingTable.ClusterInfo) bool {
 
@@ -112,12 +95,6 @@ func Join(info mappingTable.ClusterInfo) bool {
 	fmt.Println("--> join process start")
 
 	if info.PlatformName == "gke" {
-		/*
-		   fmt.Printf("-->  request API to converter [GKE cluster]\n\n")
-		   converter.JoinConverter(info)
-		*/
-		// GKE CLIENTSET
-		// var projectId = "keti-container"
 		projectId := clusterRegisters.Spec.Projectid
 		fProjectId := flag.String("projectId", projectId, "specify a project id to examine")
 		flag.Parse()
@@ -125,8 +102,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 			log.Fatal("must specific -projectId")
 		}
 
-		// explicit("/home/keti/Downloads/keti-container-7033d28f6fc4.json", projectId)
-		kubeConfig, err := getK8sClusterConfigs(context.TODO(), projectId)
+		kubeConfig, err := util.GetK8sClusterConfigs(context.TODO(), projectId)
 		if err != nil {
 			log.Println(err)
 		}
@@ -134,7 +110,6 @@ func Join(info mappingTable.ClusterInfo) bool {
 		var join_cluster_client *kubernetes.Clientset
 		var join_cluster_config *rest.Config
 		for clusterName := range kubeConfig.Clusters {
-			// clusterName "gke_keti-container_us-central1-a_cluster-1"
 			gkeClusterName := "gke" + "_" + clusterRegisters.Spec.Projectid + "_" + clusterRegisters.Spec.Region + "_" + info.ClusterName
 			if clusterName == gkeClusterName {
 				join_cluster_config, err = clientcmd.NewNonInteractiveClientConfig(*kubeConfig, gkeClusterName, &clientcmd.ConfigOverrides{CurrentContext: clusterName}, nil).ClientConfig()
@@ -163,17 +138,13 @@ func Join(info mappingTable.ClusterInfo) bool {
 		JoinCluster(info, join_cluster_client, join_cluster_config.Host)
 
 	} else if info.PlatformName == "eks" {
-		/*
-		   fmt.Printf("-->  request API to converter [EKS cluster]\n\n")
-		   converter.JoinConverter(info)
-		*/
+
 		sess := session.Must(session.NewSession(&aws.Config{
 			Region: aws.String(clusterRegisters.Spec.Region),
 		}))
 		eksSvc := eks.New(sess)
 
 		input := &eks.DescribeClusterInput{
-			// clusterName eks-master
 			Name: aws.String(info.ClusterName),
 		}
 		result, err := eksSvc.DescribeCluster(input)
@@ -181,62 +152,22 @@ func Join(info mappingTable.ClusterInfo) bool {
 			fmt.Println(err)
 		}
 
-		join_cluster_client, err := newClientset(result.Cluster)
+		join_cluster_client, err := util.NewClientset(result.Cluster)
 		if err != nil {
 			fmt.Println(err)
 		}
 		JoinCluster(info, join_cluster_client, *result.Cluster.Endpoint)
 	}
 
-	/*
-	   fmt.Printf("--> connection to VAS\n")
-	   httpPostUrl := "http://10.0.5.43:8080/join"
-	   reqBody := bytes.NewBufferString("Post plain text")
-	   response, err := http.Post(httpPostUrl, "text/plain", reqBody)
-
-	   if err != nil {
-	       log.Print(err.Error())
-	   }
-	   defer response.Body.Close()
-
-	   fmt.Println("response Status:", response.Status)
-	   fmt.Println("response Headers:", response.Header)
-	   fmt.Println("--> joinCluster func call")
-	*/
-
 	fmt.Println("--> join Done!")
 	fmt.Println("---joinHandler end---")
 	return true
 }
 
-/*
-kubectl delete ns "kube-federation-system" --context gke_keti-container_us-central1-a_cluster-1;
-kubectl delete clusterroles.rbac.authorization.k8s.io kubefed-controller-manager:cluster-1 --context gke_keti-container_us-central1-a_cluster-1 ;
-kubectl delete clusterrolebindings.rbac.authorization.k8s.io kubefed-controller-manager:cluster-1-hcp --context gke_keti-container_us-central1-a_cluster-1;
-kubectl delete kubefedclusters cluster-1 -n kube-federation-system --context kube-master
-
-kubectl delete ns "kube-federation-system" --context aks-master;
-kubectl delete sa aks-master-hcp -n kube-federation-system --context aks-master;
-kubectl delete clusterroles.rbac.authorization.k8s.io kubefed-controller-manager:aks-master --context aks-master ;
-kubectl delete clusterrolebindings.rbac.authorization.k8s.io kubefed-controller-manager:aks-master-hcp --context aks-master;
-kubectl delete kubefedclusters aks-master -n kube-federation-system --context master
-
-kubectl delete ns "kube-federation-system" --context eks-master;
-kubectl delete sa eks-master-hcp -n kube-federation-system --context eks-master;
-kubectl delete clusterroles.rbac.authorization.k8s.io kubefed-controller-manager:eks-master --context eks-master ;
-kubectl delete clusterrolebindings.rbac.authorization.k8s.io kubefed-controller-manager:eks-master-hcp --context eks-master;
-kubectl delete kubefedclusters eks-master -n kube-federation-system --context master
-*/
-
 func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.Clientset, APIEndPoint string) bool {
 
-	//var join_cluster_client *kubernetes.Clientset
-
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	// join_cluster_config, _ := cobrautil.BuildConfigFromFlags(info.ClusterName, "/root/.kube/config")
-
 	master_client := kubernetes.NewForConfigOrDie(master_config)
-	// join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
 
 	// 1. CREATE namespace "kube-federation-system"
 	Namespace := corev1.Namespace{
@@ -377,7 +308,6 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 		fmt.Println("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
-	// 6. CREATE kubefedcluster (in master)
 	kubefedcluster := &fedv1b1.KubeFedCluster{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "KubeFedCluster",
@@ -388,8 +318,6 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 			Namespace: "kube-federation-system",
 		},
 		Spec: fedv1b1.KubeFedClusterSpec{
-			// APIEndpoint: *result.Cluster.Endpoint,
-			// APIEndpoint: join_cluster_config.Host,
 			APIEndpoint: APIEndPoint,
 			CABundle:    join_cluster_secret.Data["ca.crt"],
 			SecretRef: fedv1b1.LocalSecretReference{
@@ -413,109 +341,3 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 
 	return true
 }
-
-func newClientset(cluster *eks.Cluster) (*kubernetes.Clientset, error) {
-	opts := &token.GetTokenOptions{
-		ClusterID: aws.StringValue(cluster.Name),
-	}
-	gen, err := token.NewGenerator(true, false)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	tok, err := gen.GetWithOptions(opts)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	ca, err := base64.StdEncoding.DecodeString(aws.StringValue(cluster.CertificateAuthority.Data))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	clientset, err := kubernetes.NewForConfig(
-		&rest.Config{
-			Host:        aws.StringValue(cluster.Endpoint),
-			BearerToken: tok.Token,
-			TLSClientConfig: rest.TLSClientConfig{
-				CAData: ca,
-			},
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	return clientset, nil
-}
-
-func getK8sClusterConfigs(ctx context.Context, projectId string) (*api.Config, error) {
-	svc, err := container.NewService(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("container.NewService: %w", err)
-	}
-
-	// Basic config structure
-	ret := api.Config{
-		APIVersion: "v1",
-		Kind:       "Config",
-		Clusters:   map[string]*api.Cluster{},  // Clusters is a map of referencable names to cluster configs
-		AuthInfos:  map[string]*api.AuthInfo{}, // AuthInfos is a map of referencable names to user configs
-		Contexts:   map[string]*api.Context{},  // Contexts is a map of referencable names to context configs
-	}
-
-	// Ask Google for a list of all kube clusters in the given project.
-	resp, err := svc.Projects.Zones.Clusters.List(projectId, "-").Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("clusters list project=%s: %w", projectId, err)
-	}
-
-	for _, f := range resp.Clusters {
-		name := fmt.Sprintf("gke_%s_%s_%s", projectId, f.Zone, f.Name)
-		cert, err := base64.StdEncoding.DecodeString(f.MasterAuth.ClusterCaCertificate)
-		if err != nil {
-			return nil, fmt.Errorf("invalid certificate cluster=%s cert=%s: %w", name, f.MasterAuth.ClusterCaCertificate, err)
-		}
-		// example: gke_my-project_us-central1-b_cluster-1 => https://XX.XX.XX.XX
-		ret.Clusters[name] = &api.Cluster{
-			CertificateAuthorityData: cert,
-			Server:                   "https://" + f.Endpoint,
-		}
-		// Just reuse the context name as an auth name.
-		ret.Contexts[name] = &api.Context{
-			Cluster:  name,
-			AuthInfo: name,
-		}
-		// GCP specific configation; use cloud platform scope.
-		ret.AuthInfos[name] = &api.AuthInfo{
-			AuthProvider: &api.AuthProviderConfig{
-				Name: "gcp",
-				Config: map[string]string{
-					"scopes": "https://www.googleapis.com/auth/cloud-platform",
-				},
-			},
-		}
-	}
-
-	return &ret, nil
-}
-
-// func explicit(jsonPath, projectID string) {
-//     ctx := context.Background()
-//     client, err := storage.NewClient(ctx, option.WithCredentialsFile(jsonPath))
-//     if err != nil {
-//             log.Fatal(err)
-//     }
-//     defer client.Close()
-//     fmt.Println("Buckets:")
-//     it := client.Buckets(ctx, projectID)
-//     for {
-//             battrs, err := it.Next()
-//             if err == iterator.Done {
-//                     break
-//             }
-//             if err != nil {
-//                     log.Fatal(err)
-//             }
-//             fmt.Println(battrs.Name)
-//     }
-// }

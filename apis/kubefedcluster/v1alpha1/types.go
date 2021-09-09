@@ -15,6 +15,7 @@ type KubeFedClusterInterface interface {
 	List(opts metav1.ListOptions) (*fedv1b1.KubeFedClusterList, error)
 	Get(name string, options metav1.GetOptions) (*fedv1b1.KubeFedCluster, error)
 	Create(kubefedcluster *fedv1b1.KubeFedCluster) (*fedv1b1.KubeFedCluster, error)
+	Delete(ctx context.Context, name string, opts metav1.DeleteOptions) (*fedv1b1.KubeFedCluster, error)
 	Watch(opts metav1.ListOptions) (watch.Interface, error)
 	// ...
 }
@@ -60,6 +61,20 @@ func (c *KubeFedClusterClient) Create(kubefedcluster *fedv1b1.KubeFedCluster) (*
 		Body(kubefedcluster).
 		Do(context.TODO()).
 		Into(&result)
+
+	return &result, err
+}
+
+func (c *KubeFedClusterClient) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) (*fedv1b1.KubeFedCluster, error) {
+	result := fedv1b1.KubeFedCluster{}
+	err := c.restClient.
+		Delete().
+		Namespace(c.ns).
+		Resource("kubefedclusters").
+		Name(name).
+		VersionedParams(&opts, scheme.ParameterCodec).
+		Do(ctx).
+		Error()
 
 	return &result, err
 }

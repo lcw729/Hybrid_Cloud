@@ -1,7 +1,6 @@
 package main
 
 import (
-	"Hybrid_Cluster/hcp-analytic-engine/analyticEngine"
 	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
 	"Hybrid_Cluster/hcp-apiserver/handler"
 	"encoding/json"
@@ -31,68 +30,28 @@ func checkErr(w http.ResponseWriter, err error) {
 }
 
 // hybridctl join <platformName> <ClusterName>
-func join(info mappingTable.ClusterInfo) {
+func join(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Println("---ok---")
-	// clusterInfo := mappingTable.ClusterInfo{}
-	// var info = mappingTable.ClusterInfo{
-	//  PlatformName: clusterInfo["PlatformName"].(string),
-	//  ClusterName:  clusterInfo["ClusterName"].(string),
-	// }
-	// parser(w, req, &clusterInfo)
-	// w.Header().Set("Content-Type", "application/json")
-	handler.Join(info)
-}
-
-func DefaultJoin() {
-	fmt.Println("-----------------------------------------")
-	fmt.Println("default Join Process Start")
-	if policyCheck() {
-		fmt.Println("[Option1] Policy exist")
-		fmt.Println("--Target Cluster: cluster-1")
-		var info mappingTable.ClusterInfo
-		info.ClusterName = "cluster-1"
-		info.PlatformName = "gke"
-		// handler.Join(info)
-	} else {
-		fmt.Println("[Option2] Policy is nonexistent")
-		fmt.Println("Call Analytic Engine")
-		/*
-			url := "http://localhost:8090/HybridctlAnalyticEngine"
-			req, err := http.NewRequest("GET", url, nil)
-			if err != nil {
-				fmt.Println(err)
-			}
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				fmt.Println(err)
-			}
-			defer resp.Body.Close()
-
-			fmt.Println("response Status:", resp.Status)
-			fmt.Println("response Headers:", resp.Header)
-			if err != nil {
-				log.Println(err)
-			}
-			defer resp.Body.Close()
-		*/
-		analyticEngine.HybridctlAnalyticEngine()
-		fmt.Println("--Target Cluster: cluster-1")
-		/* TODO: Analysis result로 대체 */
-		var info mappingTable.ClusterInfo
-		info.ClusterName = "cluster-1"
-		info.PlatformName = "gke"
-		// handler.Join(info)
+	clusterInfo := mappingTable.ClusterInfo{}
+	parser(w, req, &clusterInfo)
+	var info = mappingTable.ClusterInfo{
+		PlatformName: clusterInfo.PlatformName,
+		ClusterName:  clusterInfo.ClusterName,
 	}
+	handler.Join(info)
+	w.Header().Set("Content-Type", "application/json")
 }
 
-func policyCheck() bool {
-	fmt.Println("-----------------------------------------")
-	fmt.Println("Policy Engine Checking")
-	fmt.Println("Send Result to User Requirement Checking Module")
-	fmt.Println("-----------------------------------------")
-	return false
+func unjoin(w http.ResponseWriter, req *http.Request) {
+	clusterInfo := mappingTable.ClusterInfo{}
+	parser(w, req, &clusterInfo)
+	var info = mappingTable.ClusterInfo{
+		PlatformName: clusterInfo.PlatformName,
+		ClusterName:  clusterInfo.ClusterName,
+	}
+	handler.Unjoin(info)
+	w.Header().Set("Content-Type", "application/json")
 }
 
 func createAddon(w http.ResponseWriter, req *http.Request) {
@@ -270,8 +229,9 @@ func updateClusterConfig(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	// http.HandleFunc("/join", join)
-	// // http.HandleFunc("/defaultJoin", defaultJoin)
+	http.HandleFunc("/join", join)
+	http.HandleFunc("/unjoin", unjoin)
+	// http.HandleFunc("/defaultJoin", defaultJoin)
 	http.HandleFunc("/createAddon", createAddon)
 	http.HandleFunc("/deleteAddon", deleteAddon)
 	http.HandleFunc("/describeAddon", describeAddon)
@@ -290,45 +250,3 @@ func main() {
 	http.HandleFunc("/updateClusterConfig", updateClusterConfig)
 	http.ListenAndServe(":8080", nil)
 }
-
-/*
-*** optionCheck Module ***
-- kubernetes Platform Check
-*/
-// func OptionCheck(w http.ResponseWriter, req *http.Request) {
-//  fmt.Println("---Checking Options start---")
-
-// cli := make(map[string]interface{})
-
-// info, err := ioutil.ReadAll(req.Body)
-// json.Unmarshal([]byte(jsonDataFromHttp), &cli)
-// defer req.Body.Close()
-// if err != nil {
-//  panic(err)
-// }
-// handler.JoinHandler(info)
-
-// info := mappingTable.CommandInfo{Cmd: cli["Cmd"].(string), Platform: cli["PlatformName"].(string), ClusterName: cli["ClusterName"].(string)}
-// platform 이름 기입여부 체크
-// switch info.Platform {
-// case "gke", "aks", "eks":
-//  printInfo(info.Platform, info.ClusterName)
-//  handler.JoinHandler(info)
-// default:
-//  schedulingPlatform()
-//  handler.JoinHandler(info)
-// }
-
-// w.Header().Set("Content-Type", "application/json")
-// w.WriteHeader(http.StatusOK)
-// }
-
-// func printInfo(PlatformName string, clusterName string) {
-//  fmt.Println("kubernetes engine Name : ", PlatformName)
-//  fmt.Printf("Cluster Name : %s\n", clusterName)
-//  fmt.Printf("---Checking Options Done---\n\n")
-// }
-
-// func schedulingPlatform() {
-//  fmt.Println("---SchedulingPlatform---")
-// }
