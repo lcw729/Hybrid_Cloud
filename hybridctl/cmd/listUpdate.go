@@ -59,7 +59,7 @@ func listUpdate(listUpdateInput eks.ListUpdatesInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(listUpdateCmd)
+	EksCmd.AddCommand(listUpdateCmd)
 
 	// Here you will define your flags and configuration settings.
 

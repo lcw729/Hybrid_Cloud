@@ -66,7 +66,7 @@ func describeAddonVersions(describeAddonVersionsInput eks.DescribeAddonVersionsI
 }
 
 func init() {
-	RootCmd.AddCommand(describeAddonVersionsCmd)
+	EksCmd.AddCommand(describeAddonVersionsCmd)
 
 	// Here you will define your flags and configuration settings.
 

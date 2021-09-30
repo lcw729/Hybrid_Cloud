@@ -62,7 +62,7 @@ func AssociateIdentityProvicerConfig(AssociateIdentityProviderConfigInput eks.As
 }
 
 func init() {
-	RootCmd.AddCommand(associateIdentityProviderConfigCmd)
+	EksCmd.AddCommand(associateIdentityProviderConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 

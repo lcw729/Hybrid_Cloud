@@ -48,7 +48,7 @@ func unTagResource(input eks.UntagResourceInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(untagResourceCmd)
+	EksCmd.AddCommand(untagResourceCmd)
 
 	// Here you will define your flags and configuration settings.
 

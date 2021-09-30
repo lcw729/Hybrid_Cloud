@@ -43,7 +43,7 @@ func TagResource(input eks.TagResourceInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(tagResourceCmd)
+	EksCmd.AddCommand(tagResourceCmd)
 
 	// Here you will define your flags and configuration settings.
 

@@ -57,7 +57,7 @@ func disassociateIdentityProvicerConfig(input eks.DisassociateIdentityProviderCo
 }
 
 func init() {
-	RootCmd.AddCommand(disassociateIdentityProviderConfigCmd)
+	EksCmd.AddCommand(disassociateIdentityProviderConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 

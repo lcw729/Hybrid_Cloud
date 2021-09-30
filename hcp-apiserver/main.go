@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 )
@@ -235,10 +236,26 @@ func updateClusterConfig(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
+// aks
+
 func aksStart(w http.ResponseWriter, req *http.Request) {
 	var input util.EksAPIParameter
 	parser(w, req, &input)
 	response, err := handler.AksStart(input)
+	checkErr(w, err)
+	bytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	defer response.Body.Close()
+	fmt.Println(string(bytes))
+	w.Write(bytes)
+}
+
+func aksStop(w http.ResponseWriter, req *http.Request) {
+	var input util.EksAPIParameter
+	parser(w, req, &input)
+	response, err := handler.AksStop(input)
 	checkErr(w, err)
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -269,5 +286,13 @@ func main() {
 	http.HandleFunc("/untagResource", untagResource)
 	http.HandleFunc("/updateClusterConfig", updateClusterConfig)
 	http.HandleFunc("/aksStart", aksStart)
+	http.HandleFunc("/aksStop", aksStop)
 	http.ListenAndServe(":8080", nil)
+}
+
+func init() {
+	os.Setenv("ClientId", "5a7002e5-86e6-42c8-a844-976f4b95760d")
+	os.Setenv("ClientSecret", "I.E76p.jvKWFJxf3Ufqf1H_c66--ww53J2")
+	os.Setenv("SubscriptionId", "ccfc0c6c-d3c6-4de2-9a6c-c09ca498ff73")
+	os.Setenv("TenantId", "c8ea91b5-6aac-4c5c-ae34-9717a872159f")
 }

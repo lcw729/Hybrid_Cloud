@@ -61,7 +61,7 @@ func updateClusterConfig(input eks.UpdateClusterConfigInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(updateClusterConfigCmd)
+	EksCmd.AddCommand(updateClusterConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 

@@ -66,7 +66,7 @@ func describeUpdate(describeUpdateInput eks.DescribeUpdateInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(describeUpdateCmd)
+	EksCmd.AddCommand(describeUpdateCmd)
 
 	// Here you will define your flags and configuration settings.
 

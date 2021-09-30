@@ -61,7 +61,7 @@ func updateAddon(updateAddonInput eks.UpdateAddonInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(updateAddonCmd)
+	EksCmd.AddCommand(updateAddonCmd)
 
 	// Here you will define your flags and configuration settings.
 

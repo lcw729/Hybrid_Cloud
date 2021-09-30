@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"Hybrid_Cluster/hybridctl/util"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/spf13/cobra"
@@ -56,7 +55,7 @@ func AssociateEncryptionConfig(AssociateEncryptionConfigInput eks.AssociateEncry
 }
 
 func init() {
-	RootCmd.AddCommand(associateEncryptionConfigCmd)
+	EksCmd.AddCommand(associateEncryptionConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 

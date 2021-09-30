@@ -52,7 +52,7 @@ func listTagsForResource(listTagsForResourceInput eks.ListTagsForResourceInput) 
 }
 
 func init() {
-	RootCmd.AddCommand(listTagsForResourceCmd)
+	EksCmd.AddCommand(listTagsForResourceCmd)
 
 	// Here you will define your flags and configuration settings.
 

@@ -65,7 +65,7 @@ func listIdentityProviderConfigs(input eks.ListIdentityProviderConfigsInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(listIdentityProviderConfigsCmd)
+	EksCmd.AddCommand(listIdentityProviderConfigsCmd)
 
 	// Here you will define your flags and configuration settings.
 

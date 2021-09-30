@@ -74,7 +74,7 @@ func updateNodegroupConfig(input eks.UpdateNodegroupConfigInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(updateNodegroupConfigCmd)
+	EksCmd.AddCommand(updateNodegroupConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 

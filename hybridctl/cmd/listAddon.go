@@ -44,6 +44,7 @@ var listAddonCmd = &cobra.Command{
 			fmt.Println("Run 'hybridctl join --help' to view all commands")
 		} else {
 			listAddonInput.ClusterName = &args[0]
+			fmt.Println(args[0])
 			maxResults, _ := cmd.Flags().GetInt64("max-result")
 			nextToken, _ := cmd.Flags().GetString("next-token")
 			if maxResults != 0 {
@@ -65,7 +66,7 @@ func listAddon(listAddonInput eks.ListAddonsInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(listAddonCmd)
+	EksCmd.AddCommand(listAddonCmd)
 
 	// Here you will define your flags and configuration settings.
 

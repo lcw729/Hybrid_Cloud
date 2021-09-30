@@ -73,7 +73,7 @@ func describeAddon(describeAddonInput eks.DescribeAddonInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(describeAddonCmd)
+	EksCmd.AddCommand(describeAddonCmd)
 
 	// Here you will define your flags and configuration settings.
 

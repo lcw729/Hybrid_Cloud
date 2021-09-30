@@ -52,7 +52,7 @@ func describeIdentityProvicerConfig(input eks.DescribeIdentityProviderConfigInpu
 }
 
 func init() {
-	RootCmd.AddCommand(describeIdentityProviderConfigCmd)
+	EksCmd.AddCommand(describeIdentityProviderConfigCmd)
 
 	// Here you will define your flags and configuration settings.
 

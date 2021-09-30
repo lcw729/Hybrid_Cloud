@@ -71,7 +71,7 @@ func deleteAddon(deleteAddonInput eks.DeleteAddonInput) {
 }
 
 func init() {
-	RootCmd.AddCommand(deleteAddonCmd)
+	EksCmd.AddCommand(deleteAddonCmd)
 
 	// Here you will define your flags and configuration settings.
 
