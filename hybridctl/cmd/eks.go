@@ -1,17 +1,3 @@
-// Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cmd
 
 import (
@@ -23,11 +9,26 @@ var EksCmd = &cobra.Command{
 	Use:   "eks",
 	Short: "A brief description of your command",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-	},
 }
 
 func init() {
 	RootCmd.AddCommand(EksCmd)
+	EksCmd.AddCommand(associateEncryptionConfigCmd)
+	EksCmd.AddCommand(associateIdentityProviderConfigCmd)
+	EksCmd.AddCommand(createAddonCmd)
+	EksCmd.AddCommand(deleteAddonCmd)
+	EksCmd.AddCommand(describeAddonCmd)
+	EksCmd.AddCommand(describeAddonVersionsCmd)
+	EksCmd.AddCommand(describeIdentityProviderConfigCmd)
+	EksCmd.AddCommand(describeUpdateCmd)
+	EksCmd.AddCommand(disassociateIdentityProviderConfigCmd)
+	EksCmd.AddCommand(listAddonCmd)
+	EksCmd.AddCommand(listIdentityProviderConfigsCmd)
+	EksCmd.AddCommand(listTagsForResourceCmd)
+	EksCmd.AddCommand(listUpdateCmd)
+	EksCmd.AddCommand(tagResourceCmd)
+	EksCmd.AddCommand(untagResourceCmd)
+	EksCmd.AddCommand(updateAddonCmd)
+	EksCmd.AddCommand(updateClusterConfigCmd)
+	EksCmd.AddCommand(updateNodegroupConfigCmd)
 }
