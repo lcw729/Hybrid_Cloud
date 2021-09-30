@@ -2,6 +2,7 @@ package cmd
 
 import (
 	util "Hybrid_Cluster/hybridctl/util"
+	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -32,4 +33,27 @@ func aksStop(p util.EksAPIParameter) {
 	} else {
 		fmt.Println(string(bytes))
 	}
+}
+
+func aksRotateCerts(p util.EksAPIParameter) {
+	httpPostUrl := "http://localhost:8080/aksRotateCerts"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
+}
+
+func aksGetOSoptions(p util.EksAPIParameter) {
+	httpPostUrl := "http://localhost:8080/aksGetOSoptions"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	CloudErr := util.CloudError{}
+	errJson := json.Unmarshal(bytes, &CloudErr)
+	fmt.Println(errJson)
+	if errJson == nil {
+		fmt.Println("Success")
+		fmt.Println(string(bytes))
+	} else {
+		fmt.Println(err)
+	}
+
 }

@@ -25,7 +25,7 @@ func parser(w http.ResponseWriter, req *http.Request, input interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func checkErr(w http.ResponseWriter, err error) {
+func checkErr(err error) {
 	if err != nil {
 		log.Println(err)
 	}
@@ -62,7 +62,7 @@ func createAddon(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &createAddonInput)
 	out, err := handler.CreateAddon(createAddonInput)
-	// checkErr(w, err)
+	// checkErr(err)
 	var jsonData []byte
 	if err != nil {
 		log.Println(err)
@@ -79,7 +79,7 @@ func deleteAddon(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &deleteAddonInput)
 	out, err := handler.DeleteAddon(deleteAddonInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -90,7 +90,7 @@ func describeAddon(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &describeAddonInput)
 	out, err := handler.DescribeAddon(describeAddonInput)
-	checkErr(w, err)
+	checkErr(err)
 	if err != nil {
 		jsonData, _ := json.Marshal(err)
 		w.Write(jsonData)
@@ -107,7 +107,7 @@ func describeAddonVersions(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &describeAddonVersionsInput)
 	out, err := handler.DescribeAddonVersions(describeAddonVersionsInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write(jsonData)
 
@@ -119,7 +119,7 @@ func listAddon(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &listAddonInput)
 	out, err := handler.ListAddon(listAddonInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 
@@ -131,7 +131,7 @@ func updateAddon(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &updateAddonInput)
 	out, err := handler.UpdateAddon(updateAddonInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -141,7 +141,7 @@ func listUpdate(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &listUpdateInput)
 	out, err := handler.ListUpdate(listUpdateInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -151,7 +151,7 @@ func describeUpdate(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &describeUpdateInput)
 	out, err := handler.DescribeUpdate(describeUpdateInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -161,7 +161,7 @@ func listTagsForResource(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &listTagsForResourceInput)
 	out, err := handler.ListTagsForResource(listTagsForResourceInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -171,7 +171,7 @@ func associateIdentityProviderConfig(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &associateIdentityProviderConfigInput)
 	out, err := handler.AssociateIdentityProviderConfig(associateIdentityProviderConfigInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -181,7 +181,7 @@ func disassociateIdentityProviderConfig(w http.ResponseWriter, req *http.Request
 
 	parser(w, req, &disassociateIdentityProviderConfigInput)
 	out, err := handler.DisassociateIdentityProviderConfig(disassociateIdentityProviderConfigInput)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -191,7 +191,7 @@ func describeIdentityProviderConfig(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &input)
 	out, err := handler.DescribeIdentityProviderConfig(input)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -201,7 +201,7 @@ func listIdentityProviderConfigs(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &input)
 	out, err := handler.ListIdentityProviderConfigs(input)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -211,7 +211,7 @@ func tagResource(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &input)
 	out, err := handler.TagResource(input)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -221,7 +221,7 @@ func untagResource(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &input)
 	out, err := handler.UntagResource(input)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -231,7 +231,7 @@ func updateClusterConfig(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &input)
 	out, err := handler.UpdateClusterConfig(input)
-	checkErr(w, err)
+	checkErr(err)
 	jsonData, _ := json.Marshal(&out)
 	w.Write([]byte(jsonData))
 }
@@ -242,11 +242,9 @@ func aksStart(w http.ResponseWriter, req *http.Request) {
 	var input util.EksAPIParameter
 	parser(w, req, &input)
 	response, err := handler.AksStart(input)
-	checkErr(w, err)
+	checkErr(err)
 	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Println(err)
-	}
+	checkErr(err)
 	defer response.Body.Close()
 	fmt.Println(string(bytes))
 	w.Write(bytes)
@@ -256,11 +254,31 @@ func aksStop(w http.ResponseWriter, req *http.Request) {
 	var input util.EksAPIParameter
 	parser(w, req, &input)
 	response, err := handler.AksStop(input)
-	checkErr(w, err)
+	checkErr(err)
 	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Println(err)
-	}
+	checkErr(err)
+	defer response.Body.Close()
+	w.Write(bytes)
+}
+
+func aksRotateCerts(w http.ResponseWriter, req *http.Request) {
+	var input util.EksAPIParameter
+	parser(w, req, &input)
+	response, err := handler.AksRotateCerts(input)
+	checkErr(err)
+	bytes, err := ioutil.ReadAll(response.Body)
+	checkErr(err)
+	defer response.Body.Close()
+	w.Write(bytes)
+}
+
+func aksGetOSoptions(w http.ResponseWriter, req *http.Request) {
+	var input util.EksAPIParameter
+	parser(w, req, &input)
+	response, err := handler.AksGetOSoptions(input)
+	checkErr(err)
+	bytes, err := ioutil.ReadAll(response.Body)
+	checkErr(err)
 	defer response.Body.Close()
 	w.Write(bytes)
 }
@@ -287,6 +305,8 @@ func main() {
 	http.HandleFunc("/updateClusterConfig", updateClusterConfig)
 	http.HandleFunc("/aksStart", aksStart)
 	http.HandleFunc("/aksStop", aksStop)
+	http.HandleFunc("/aksRotateCerts", aksRotateCerts)
+	http.HandleFunc("/aksGetOSoptions", aksGetOSoptions)
 	http.ListenAndServe(":8080", nil)
 }
 

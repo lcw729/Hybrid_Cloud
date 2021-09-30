@@ -40,10 +40,9 @@ func GetResponseBody(method string, httpPostUrl string, input interface{}) ([]by
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, "GetResponseBody Func")
 	}
 	defer response.Body.Close()
 	bytes, err := ioutil.ReadAll(response.Body)
-
 	return bytes, err
 }

@@ -16,10 +16,8 @@ var StartCmd = &cobra.Command{
 		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
 		clusterName, _ := cmd.Flags().GetString("name")
 		EksAPIParameter := util.EksAPIParameter{
-			SubscriptionId:    "",
 			ResourceGroupName: resourceGroupName,
 			ResourceName:      clusterName,
-			ApiVersion:        "",
 		}
 		aksStart(EksAPIParameter)
 
@@ -35,12 +33,40 @@ var StopCmd = &cobra.Command{
 		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
 		clusterName, _ := cmd.Flags().GetString("name")
 		EksAPIParameter := util.EksAPIParameter{
-			SubscriptionId:    "",
 			ResourceGroupName: resourceGroupName,
 			ResourceName:      clusterName,
-			ApiVersion:        "",
 		}
 		aksStop(EksAPIParameter)
 
+	},
+}
+
+var RotateCertsCmd = &cobra.Command{
+	Use:   "rotate-certs",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks rotate-certs --name <clusterName> --resource-group <ResourceGroupName>`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+		clusterName, _ := cmd.Flags().GetString("name")
+		EksAPIParameter := util.EksAPIParameter{
+			ResourceGroupName: resourceGroupName,
+			ResourceName:      clusterName,
+		}
+		aksRotateCerts(EksAPIParameter)
+	},
+}
+
+var GetOSoptionsCmd = &cobra.Command{
+	Use:   "get-os-options",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks get-os-options --location`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		location, _ := cmd.Flags().GetString("location")
+		EksAPIParameter := util.EksAPIParameter{
+			Location: location,
+		}
+		aksGetOSoptions(EksAPIParameter)
 	},
 }

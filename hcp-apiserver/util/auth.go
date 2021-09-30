@@ -68,11 +68,17 @@ func GetBearer() bearerToken {
 	return token
 }
 
-func AuthorizationAndPost(hosturl string) (*http.Response, error) {
+func AuthorizationAndHTTP(method string, hosturl string) (*http.Response, error) {
 	params := url.Values{}
 	params.Add("resource", `https://management.azure.com/`)
-	body := strings.NewReader(params.Encode())
-	request, _ := http.NewRequest("POST", hosturl, body)
+	var request *http.Request
+	switch method {
+	case "POST":
+		body := strings.NewReader(params.Encode())
+		request, _ = http.NewRequest(method, hosturl, body)
+	case "GET":
+		request, _ = http.NewRequest(method, hosturl, nil)
+	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Add("Authorization", "Bearer "+GetBearer().Access_token)
 
