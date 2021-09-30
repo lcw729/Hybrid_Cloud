@@ -28,7 +28,7 @@ import (
 
 	resourcev1alpha1 "Hybrid_Cluster/apis/clusterRegister/v1alpha1"
 	clusterRegisterv1alpha1 "Hybrid_Cluster/clientset/v1alpha1"
-	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
+	mappingTable "Hybrid_Cluster/hcp-apiserver/converter"
 
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 

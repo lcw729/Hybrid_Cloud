@@ -3,7 +3,7 @@ package handler
 import (
 	KubeFedCluster "Hybrid_Cluster/apis/kubefedcluster/v1alpha1"
 	clusterRegister "Hybrid_Cluster/clientset/v1alpha1"
-	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
+	mappingTable "Hybrid_Cluster/hcp-apiserver/converter"
 	util "Hybrid_Cluster/hcp-apiserver/util"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 	"context"

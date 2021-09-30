@@ -9,7 +9,7 @@ import (
 var StartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "A brief description of your command",
-	Long:  ``,
+	Long:  `hybridctl aks start --name <clusterName> --resource-group <ResourceGroupName>`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 
@@ -29,9 +29,7 @@ var StartCmd = &cobra.Command{
 var StopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "A brief description of your command",
-	Long: ` 
-
-	`,
+	Long:  `hybridctl aks stop --name <clusterName> --resource-group <ResourceGroupName>`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		resourceGroupName, _ := cmd.Flags().GetString("resource-group")

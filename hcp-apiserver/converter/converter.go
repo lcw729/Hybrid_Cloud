@@ -1,10 +1,5 @@
 package converter
 
-import (
-	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
-	"fmt"
-)
-
 // func Converter(info handler.Cli) string {
 // 	fmt.Println("---converter start---")
 
@@ -20,25 +15,25 @@ import (
 // }
 
 // kubernetes platform 구분
-func JoinConverter(info mappingTable.ClusterInfo) string {
-	fmt.Println("---converter start---")
+// func JoinConverter(info mappingTable.ClusterInfo) string {
+// 	fmt.Println("---converter start---")
 
-	switch info.PlatformName {
-	case "gke":
-		fmt.Println("--> mapping GKE API Arguments & send API to Handler")
-		api := mappingTable.GetInfo(info)
-		return api
-	case "aks":
-		fmt.Println("--> mapping AKS API Arguments & send API to Handler")
-		api := mappingTable.AksGetCredential(info)
-		fmt.Println("---return API---")
-		fmt.Printf("---converter end---\n")
-		return api
-	case "eks":
-		fmt.Println("--> mapping EKS API Arguments & send API to Handler")
-		api := mappingTable.GetInfo(info)
-		return api
-	default:
-		return ""
-	}
-}
+// 	switch info.PlatformName {
+// 	case "gke":
+// 		fmt.Println("--> mapping GKE API Arguments & send API to Handler")
+// 		api := mappingTable.GetInfo(info)
+// 		return api
+// 	case "aks":
+// 		fmt.Println("--> mapping AKS API Arguments & send API to Handler")
+// 		api := mappingTable.AksGetCredential(info)
+// 		fmt.Println("---return API---")
+// 		fmt.Printf("---converter end---\n")
+// 		return api
+// 	case "eks":
+// 		fmt.Println("--> mapping EKS API Arguments & send API to Handler")
+// 		api := mappingTable.GetInfo(info)
+// 		return api
+// 	default:
+// 		return ""
+// 	}
+// }

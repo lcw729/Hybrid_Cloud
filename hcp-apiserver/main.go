@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
-	"Hybrid_Cluster/hcp-apiserver/handler"
+	mappingTable "Hybrid_Cluster/hcp-apiserver/converter"
+	handler "Hybrid_Cluster/hcp-apiserver/handler"
 	"Hybrid_Cluster/hybridctl/util"
 	"encoding/json"
 	"fmt"

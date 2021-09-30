@@ -1,54 +1,7 @@
 package handler
 
 import (
-	/*
-	   clusterRegister "Hybrid_Cluster/clientset/clusterRegister/v1alpha1"
-	   "Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
-	   "context"
-	   "encoding/base64"
-	   "flag"
-	   "log"
-	   "os/exec"
-	   "time"
-
-	   "google.golang.org/api/container/v1"
-	   "k8s.io/client-go/kubernetes"
-	   "k8s.io/client-go/rest"
-
-	   KubeFedCluster "Hybrid_Cluster/apis/kubefedcluster/v1alpha1"
-
-	   "github.com/aws/aws-sdk-go/aws"
-	   "github.com/aws/aws-sdk-go/aws/session"
-	   corev1 "k8s.io/api/core/v1"
-
-
-	   "github.com/aws/aws-sdk-go/service/eks"
-	   rbacv1 "k8s.io/api/rbac/v1"
-
-	   cobrautil "Hybrid_Cluster/hybridctl/util"
-
-	   "fmt"
-
-
-
-
-
-
-
-
-
-
-
-
-	   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	   _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	   "k8s.io/client-go/tools/clientcmd"
-	   "k8s.io/client-go/tools/clientcmd/api"
-	   "sigs.k8s.io/aws-iam-authenticator/pkg/token"
-	   fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
-	*/
 	clusterRegister "Hybrid_Cluster/clientset/v1alpha1"
-	"Hybrid_Cluster/hcp-apiserver/converter/mappingTable"
 	"context"
 	"flag"
 	"log"
@@ -70,7 +23,9 @@ import (
 
 	"fmt"
 
+	mappingTable "Hybrid_Cluster/hcp-apiserver/converter"
 	util "Hybrid_Cluster/hcp-apiserver/util"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/tools/clientcmd"

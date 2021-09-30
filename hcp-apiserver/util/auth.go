@@ -4,30 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 )
 
-type AzureAuth struct {
-	clientId       string
-	clientSecret   string
-	subscriptionId string
-	tenantId       string
-}
+// type AzureAuth struct {
+// 	clientId       string
+// 	clientSecret   string
+// 	subscriptionId string
+// 	tenantId       string
+// }
 
-func GetAzureAuth() AzureAuth {
-	auth := AzureAuth{}
-	data, err := ioutil.ReadFile("~/.azure/test.auth")
-	if err != nil {
-		log.Println(err)
-	}
-	json.Unmarshal(data, &auth)
+// func GetAzureAuth() AzureAuth {
+// 	auth := AzureAuth{}
+// 	data, err := ioutil.ReadFile("~/.azure/test.auth")
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	json.Unmarshal(data, &auth)
 
-	return auth
-}
+// 	return auth
+// }
 
 type bearerToken struct {
 	Token_type     string `json:"token_type" protobuf:"bytes,1,opt,name=token_type"`
@@ -38,13 +37,6 @@ type bearerToken struct {
 	Resource       string `json:"resource" protobuf:"bytes,6,opt,name=resource"`
 	Access_token   string `json:"access_token" protobuf:"bytes,7,opt,name=access_token"`
 }
-
-// type azureAuth struct {
-// 	clientId       string
-// 	clientSecret   string
-// 	subscriptionId string
-// 	tenantId       string
-// }
 
 func GetBearer() bearerToken {
 
@@ -74,4 +66,22 @@ func GetBearer() bearerToken {
 	json.Unmarshal(bytes, &token)
 
 	return token
+}
+
+func AuthorizationAndPost(hosturl string) (*http.Response, error) {
+	params := url.Values{}
+	params.Add("resource", `https://management.azure.com/`)
+	body := strings.NewReader(params.Encode())
+	request, _ := http.NewRequest("POST", hosturl, body)
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Add("Authorization", "Bearer "+GetBearer().Access_token)
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("err2 : ", err)
+	} else {
+		fmt.Println(response.Status)
+	}
+	return response, err
 }
