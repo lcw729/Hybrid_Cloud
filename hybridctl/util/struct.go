@@ -6,6 +6,7 @@ type EksAPIParameter struct {
 	ResourceName      string
 	ApiVersion        string
 	Location          string
+	ConfigName        string
 }
 
 type Addon struct {

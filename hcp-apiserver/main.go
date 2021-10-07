@@ -1,18 +1,24 @@
 package main
 
 import (
-	mappingTable "Hybrid_Cluster/hcp-apiserver/converter"
-	handler "Hybrid_Cluster/hcp-apiserver/handler"
+	"Hybrid_Cluster/hcp-apiserver/converter"
 	"Hybrid_Cluster/hybridctl/util"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
+
+	handler "Hybrid_Cluster/hcp-apiserver/handler"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 )
+
+func checkErr(err error) {
+	if err != nil {
+		log.Println(err)
+	}
+}
 
 func parser(w http.ResponseWriter, req *http.Request, input interface{}) {
 	jsonDataFromHttp, err := ioutil.ReadAll(req.Body)
@@ -25,19 +31,12 @@ func parser(w http.ResponseWriter, req *http.Request, input interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func checkErr(err error) {
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-// hybridctl join <platformName> <ClusterName>
 func join(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Println("---ok---")
-	clusterInfo := mappingTable.ClusterInfo{}
+	clusterInfo := converter.ClusterInfo{}
 	parser(w, req, &clusterInfo)
-	var info = mappingTable.ClusterInfo{
+	var info = converter.ClusterInfo{
 		PlatformName: clusterInfo.PlatformName,
 		ClusterName:  clusterInfo.ClusterName,
 	}
@@ -46,9 +45,9 @@ func join(w http.ResponseWriter, req *http.Request) {
 }
 
 func unjoin(w http.ResponseWriter, req *http.Request) {
-	clusterInfo := mappingTable.ClusterInfo{}
+	clusterInfo := converter.ClusterInfo{}
 	parser(w, req, &clusterInfo)
-	var info = mappingTable.ClusterInfo{
+	var info = converter.ClusterInfo{
 		PlatformName: clusterInfo.PlatformName,
 		ClusterName:  clusterInfo.ClusterName,
 	}
@@ -62,7 +61,6 @@ func createAddon(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &createAddonInput)
 	out, err := handler.CreateAddon(createAddonInput)
-	// checkErr(err)
 	var jsonData []byte
 	if err != nil {
 		log.Println(err)
@@ -236,8 +234,6 @@ func updateClusterConfig(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
-// aks
-
 func aksStart(w http.ResponseWriter, req *http.Request) {
 	var input util.EksAPIParameter
 	parser(w, req, &input)
@@ -286,7 +282,6 @@ func aksGetOSoptions(w http.ResponseWriter, req *http.Request) {
 func main() {
 	http.HandleFunc("/join", join)
 	http.HandleFunc("/unjoin", unjoin)
-	// http.HandleFunc("/defaultJoin", defaultJoin)
 	http.HandleFunc("/createAddon", createAddon)
 	http.HandleFunc("/deleteAddon", deleteAddon)
 	http.HandleFunc("/describeAddon", describeAddon)
@@ -308,11 +303,4 @@ func main() {
 	http.HandleFunc("/aksRotateCerts", aksRotateCerts)
 	http.HandleFunc("/aksGetOSoptions", aksGetOSoptions)
 	http.ListenAndServe(":8080", nil)
-}
-
-func init() {
-	os.Setenv("ClientId", "5a7002e5-86e6-42c8-a844-976f4b95760d")
-	os.Setenv("ClientSecret", "I.E76p.jvKWFJxf3Ufqf1H_c66--ww53J2")
-	os.Setenv("SubscriptionId", "ccfc0c6c-d3c6-4de2-9a6c-c09ca498ff73")
-	os.Setenv("TenantId", "c8ea91b5-6aac-4c5c-ae34-9717a872159f")
 }
