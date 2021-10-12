@@ -1,0 +1,15 @@
+apiVersion: hcp.k8s.io/v1alpha1
+kind: hcppolicy
+metadata:
+  name: watching-level
+  namespace: hybrid
+spec:
+  template:
+    spec:
+      targetController:
+        kind: 
+      policies:
+        - type: Level
+          value:
+            - "1"
+  policyStatus: Enabled

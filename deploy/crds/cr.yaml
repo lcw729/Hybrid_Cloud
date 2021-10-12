@@ -1,0 +1,23 @@
+apiVersion: hcp.k8s.io/v1alpha1
+kind: hcpPolicy
+metadata:
+  name: example-hcppolicy
+  namespace: hybrid
+spec:
+  replicas: 8
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - image: nginx
+            name: nginx
