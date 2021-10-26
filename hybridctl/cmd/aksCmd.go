@@ -465,3 +465,165 @@ var MCShowCmd = &cobra.Command{
 		maintenanceconfigurationShow(EKSAPIParameter)
 	},
 }
+
+// TODO: Github Path 입력 필수
+//       사전에 Deploy-to-azure 다운받아야함.
+var AKSAppUp = &cobra.Command{
+	Use:   "app",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks app up`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		AKSAPIParameter := util.AKSAPIParameter{}
+		p, _ := cmd.Flags().GetString("acr")
+		if p != "" {
+			AKSAPIParameter.Acr = p
+		}
+
+		p, _ = cmd.Flags().GetString("aks-cluster")
+		if p != "" {
+			AKSAPIParameter.AksCluster = p
+		}
+
+		p, _ = cmd.Flags().GetString("branch-name")
+		if p != "" {
+			AKSAPIParameter.BranchName = p
+		}
+
+		p, _ = cmd.Flags().GetString("do-not-wait")
+		if p != "" {
+			AKSAPIParameter.DoNotWait = p
+		}
+
+		p, _ = cmd.Flags().GetString("port")
+		if p != "" {
+			AKSAPIParameter.Port = p
+		}
+
+		p, _ = cmd.Flags().GetString("repository")
+		if p != "" {
+			AKSAPIParameter.Repository = p
+		}
+		fmt.Println(AKSAPIParameter)
+		appUp(AKSAPIParameter)
+	},
+}
+
+// TODO: disable-browser Boolean 처리
+var AKSBrowse = &cobra.Command{
+	Use:   "browse",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks browse`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+		clusterName, _ := cmd.Flags().GetString("name")
+		AKSAPIParameter := util.AKSAPIParameter{
+			Name:          clusterName,
+			ResourceGroup: resourceGroupName,
+		}
+		p, _ := cmd.Flags().GetBool("disable-browser")
+		fmt.Printf("%t", p)
+		if !p {
+			AKSAPIParameter.DisableBrowser = p
+		}
+
+		t, _ := cmd.Flags().GetString("listen-address")
+		if t != "" {
+			AKSAPIParameter.ListenAddress = t
+		}
+
+		t, _ = cmd.Flags().GetString("listen-port")
+		if t != "" {
+			AKSAPIParameter.ListenPort = t
+		}
+
+		t, _ = cmd.Flags().GetString("subscription")
+		if t != "" {
+			AKSAPIParameter.Subscription = t
+		}
+		fmt.Println(AKSAPIParameter)
+		browse(AKSAPIParameter)
+	},
+}
+
+var AKSCheckAcr = &cobra.Command{
+	Use:   "check-acr",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks check-acr`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+		clusterName, _ := cmd.Flags().GetString("name")
+		acr, _ := cmd.Flags().GetString("acr")
+		AKSAPIParameter := util.AKSAPIParameter{
+			Name:          clusterName,
+			ResourceGroup: resourceGroupName,
+			Acr:           acr,
+		}
+		p, _ := cmd.Flags().GetString("subscription")
+		if p != "" {
+			AKSAPIParameter.Subscription = p
+		}
+		fmt.Println(AKSAPIParameter)
+		checkAcr(AKSAPIParameter)
+	},
+}
+
+// TODO: get-upgrades 명령어 처리 이전에 az login되어 있어야함
+var AKSGetUpgrades = &cobra.Command{
+	Use:   "get-upgrades",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks get-upgrades`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+		clusterName, _ := cmd.Flags().GetString("name")
+		AKSAPIParameter := util.AKSAPIParameter{
+			Name:          clusterName,
+			ResourceGroup: resourceGroupName,
+		}
+		p, _ := cmd.Flags().GetString("subscription")
+		if p != "" {
+			AKSAPIParameter.Subscription = p
+		}
+		fmt.Println(AKSAPIParameter)
+		getUpgrades(AKSAPIParameter)
+	},
+}
+
+var AKSGetVersions = &cobra.Command{
+	Use:   "get-versions",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks get-versions`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		location, _ := cmd.Flags().GetString("location")
+		AKSAPIParameter := util.AKSAPIParameter{
+			Location: location,
+		}
+		p, _ := cmd.Flags().GetString("subscription")
+		if p != "" {
+			AKSAPIParameter.Subscription = p
+		}
+		fmt.Println(AKSAPIParameter)
+		HTTPPostRequest(AKSAPIParameter, "getVersions")
+	},
+}
+
+var AKSKanalyze = &cobra.Command{
+	Use:   "kanalyze",
+	Short: "A brief description of your command",
+	Long:  `hybridctl aks kanalyze`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+		clusterName, _ := cmd.Flags().GetString("name")
+		AKSAPIParameter := util.AKSAPIParameter{
+			Name:          clusterName,
+			ResourceGroup: resourceGroupName,
+		}
+		fmt.Println(AKSAPIParameter)
+		HTTPPostRequest(AKSAPIParameter, "kanalyze")
+	},
+}

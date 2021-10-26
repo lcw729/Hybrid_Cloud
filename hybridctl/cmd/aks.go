@@ -57,5 +57,12 @@ func init() {
 	MaintenanceconfigurationCmd.AddCommand(MCUpdateCmd)
 	MaintenanceconfigurationCmd.AddCommand(MCListCmd)
 	MaintenanceconfigurationCmd.AddCommand(MCShowCmd)
+
+	aksCmd.AddCommand(AKSAppUp)
+	aksCmd.AddCommand(AKSBrowse)
+	aksCmd.AddCommand(AKSCheckAcr)
+	aksCmd.AddCommand(AKSGetUpgrades)
+	aksCmd.AddCommand(AKSGetVersions)
+	aksCmd.AddCommand(AKSKanalyze)
 	aksFlags()
 }

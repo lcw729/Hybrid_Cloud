@@ -2,7 +2,6 @@ package cmd
 
 import (
 	util "Hybrid_Cluster/hybridctl/util"
-	"encoding/json"
 	"fmt"
 	"log"
 )
@@ -139,15 +138,7 @@ func aksGetOSoptions(p util.EKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/aksGetOSoptions"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
-	CloudErr := util.CloudError{}
-	errJson := json.Unmarshal(bytes, &CloudErr)
-	fmt.Println(errJson)
-	if errJson == nil {
-		fmt.Println("Success")
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(err)
-	}
+	fmt.Println(string(bytes))
 
 }
 
@@ -155,58 +146,68 @@ func maintenanceconfigurationCreateOrUpdate(p util.EKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationCreateOrUpdate"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
-	CloudErr := util.CloudError{}
-	errJson := json.Unmarshal(bytes, &CloudErr)
-	fmt.Println(errJson)
-	if errJson == nil {
-		fmt.Println("Success")
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(err)
-	}
+	fmt.Println(string(bytes))
 }
 
 func maintenanceconfigurationList(p util.EKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationList"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
-	CloudErr := util.CloudError{}
-	errJson := json.Unmarshal(bytes, &CloudErr)
-	fmt.Println(errJson)
-	if errJson == nil {
-		fmt.Println("Success")
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(err)
-	}
+	fmt.Println(string(bytes))
 }
 
 func maintenanceconfigurationDelete(p util.EKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationDelete"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
-	CloudErr := util.CloudError{}
-	errJson := json.Unmarshal(bytes, &CloudErr)
-	fmt.Println(errJson)
-	if errJson == nil {
-		fmt.Println("Success")
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(err)
-	}
+	fmt.Println(string(bytes))
 }
 
 func maintenanceconfigurationShow(p util.EKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationShow"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
-	CloudErr := util.CloudError{}
-	errJson := json.Unmarshal(bytes, &CloudErr)
-	fmt.Println(errJson)
-	if errJson == nil {
-		fmt.Println("Success")
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(err)
-	}
+	fmt.Println(string(bytes))
+}
+
+func appUp(p util.AKSAPIParameter) {
+	httpPostUrl := "http://localhost:8080/appUp"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
+}
+
+func browse(p util.AKSAPIParameter) {
+	httpPostUrl := "http://localhost:8080/browse"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
+}
+
+func checkAcr(p util.AKSAPIParameter) {
+	httpPostUrl := "http://localhost:8080/checkAcr"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
+}
+
+func getUpgrades(p util.AKSAPIParameter) {
+	httpPostUrl := "http://localhost:8080/getUpgrades"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
+}
+
+func getVersions(p util.AKSAPIParameter) {
+	httpPostUrl := "http://localhost:8080/getUpgrades"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
+}
+
+func HTTPPostRequest(p util.AKSAPIParameter, cmd string) {
+	httpPostUrl := "http://localhost:8080/" + cmd
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
 }

@@ -23,6 +23,23 @@ type EKSAPIParameter struct {
 	ConfigFile        Config
 }
 
+type AKSAPIParameter struct {
+	Acr             string
+	AksCluster      string
+	BranchName      string
+	DoNotWait       string
+	Port            string
+	BindingSelector string
+	Repository      string
+	Name            string
+	ResourceGroup   string
+	DisableBrowser  bool
+	ListenAddress   string
+	ListenPort      string
+	Subscription    string
+	Location        string
+}
+
 type AKSAddon struct {
 	ResourceGroupName          string
 	ClusterName                string
@@ -49,6 +66,38 @@ type AKSPodIdentity struct {
 	BindingSelector    string
 	PodLabels          string
 }
+
+// type AKSAppUp struct {
+// 	Acr             string
+// 	AksCluster      string
+// 	BranchName      string
+// 	DoNotWait       string
+// 	Port            string
+// 	BindingSelector string
+// 	Repository      string
+// }
+// type AKSBrowse struct {
+// 	Name           string
+// 	ResourceGroup  string
+// 	DisableBrowser bool
+// 	ListenAddress  string
+// 	ListenPort     string
+// 	Subscription   string
+// }
+
+// type AKSAcr struct {
+// 	Name          string
+// 	ResourceGroup string
+// 	Acr           string
+// 	Subscription  string
+// }
+
+// type AKSCheckAcr struct {
+// 	Acr           string
+// 	Name          string
+// 	ResourceGroup string
+// 	Subscription  string
+// }
 
 type CloudError struct {
 	// Error - Details about the error.
