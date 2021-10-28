@@ -1,0 +1,88 @@
+
+
+# behavior:
+#   scaleDown:
+#     stabilizationWindowSeconds: 300
+#     policies:
+#     - type: Percent
+#       value: 100
+#       periodSeconds: 15
+#   scaleUp:
+#     stabilizationWindowSeconds: 0
+#     policies:
+#     - type: Percent
+#       value: 100
+#       periodSeconds: 15
+#     - type: Pods
+#       value: 4
+#       periodSeconds: 15
+#     selectPolicy: Max
+
+
+
+# metadata:
+#   name: app-vpa
+# spec:
+#   targetRef:
+#     apiVersion: "apps/v1"
+#     kind: Deployment
+#     name: app
+#   resourcePolicy:
+#     containerPolicies:
+#       - containerName: '*'
+#         controlledResources:
+#           - cpu
+#           - memory
+#         maxAllowed:
+#           cpu: 1
+#           memory: 500Mi
+#         minAllowed:
+#           cpu: 100m
+#           memory: 50Mi
+#   updatePolicy:
+#     updateMode: "Auto"
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+      - name: ubuntu-container
+        image: ubuntu
+        volumeMounts:
+        - name: shared-data
+          mountPath: /pod-data
+        command: ["/bin/sh"]
+        args: ["-c", "echo Hello, TechRepublic > /pod-data/index.html"]
+
+
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+
+  - name: ubuntu-container
+    image: ubuntu
+    volumeMounts:
+    - name: shared-data
+      mountPath: /pod-data
+    command: ["/bin/sh"]
+    args: ["-c", "echo Hello, TechRepublic > /pod-data/index.html"]
