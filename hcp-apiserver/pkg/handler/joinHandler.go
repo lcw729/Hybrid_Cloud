@@ -124,25 +124,25 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	master_client := kubernetes.NewForConfigOrDie(master_config)
 
-	// 1. CREATE namespace "kube-federation-system"
-	Namespace := corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "kube-federation-system",
-		},
-	}
+	// // 1. CREATE namespace "kube-federation-system"
+	// Namespace := corev1.Namespace{
+	// 	TypeMeta: metav1.TypeMeta{
+	// 		Kind:       "Namespace",
+	// 		APIVersion: "v1",
+	// 	},
+	// 	ObjectMeta: metav1.ObjectMeta{
+	// 		Name: "kube-federation-system",
+	// 	},
+	// }
 
-	ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
+	// ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
 
-	if err_ns != nil {
-		log.Println(err_ns)
-		return false
-	} else {
-		fmt.Println("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + info.ClusterName)
-	}
+	// if err_ns != nil {
+	// 	log.Println(err_ns)
+	// 	return false
+	// } else {
+	// 	fmt.Println("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + info.ClusterName)
+	// }
 
 	// 2. CREATE service account
 	ServiceAccount := corev1.ServiceAccount{

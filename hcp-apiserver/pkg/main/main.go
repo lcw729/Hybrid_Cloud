@@ -3,18 +3,27 @@ package main
 import (
 	"Hybrid_Cluster/hcp-apiserver/pkg/converter"
 	"Hybrid_Cluster/hybridctl/util"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
 
+	grpc "google.golang.org/grpc"
+
 	handler "Hybrid_Cluster/hcp-apiserver/pkg/handler"
+	cmdpb "Hybrid_Cluster/proto/v1/cmd"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 )
+
+type cmdServer struct {
+	cmdpb.CmdServer
+}
 
 func checkErr(err error) {
 	if err != nil {
@@ -133,6 +142,33 @@ func listAddon(w http.ResponseWriter, req *http.Request) {
 		jsonData, _ = json.Marshal(&out)
 	}
 	w.Write([]byte(jsonData))
+
+}
+
+func (c *cmdServer) ListAddon(ctx context.Context, in *cmdpb.ListAddonRequest) (*cmdpb.ListAddonResponse, error) {
+	var listAddonInput eks.ListAddonsInput
+	// jsonDataFromHttp, err := ioutil.ReadAll(in)
+	// fmt.Printf(string(jsonDataFromHttp))
+	listAddonInput.ClusterName = &in.AksAddon.ClusterName
+	// defer req.Body.Close()
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// }
+	fmt.Println(listAddonInput.ClusterName)
+	out, err := handler.ListAddon(listAddonInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	fmt.Println(string(jsonData))
+	var output = string(jsonData)
+	return &cmdpb.ListAddonResponse{
+		Output: &cmdpb.Output{
+			Message: output,
+		},
+	}, nil
 
 }
 
@@ -767,17 +803,17 @@ func configurationDelete(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	// lis, err := net.Listen("tcp", ":"+portNumber)
-	// if err != nil {
-	// 	log.Fatalf("failed to listen: %v", err)
-	// }
+	lis, err := net.Listen("tcp", ":"+portNumber)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
-	// grpcServer := grpc.NewServer()
-
-	// log.Printf("Start gRPC server on %s port", portNumber)
-	// if err := grpcServer.Serve(lis); err != nil {
-	// 	log.Fatalf("failed to server: %s", err)
-	// }
+	grpcServer := grpc.NewServer()
+	cmdpb.RegisterCmdServer(grpcServer, &cmdServer{})
+	log.Printf("Start gRPC server on %s port", portNumber)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to server: %s", err)
+	}
 	http.HandleFunc("/join", join)
 	http.HandleFunc("/unjoin", unjoin)
 	http.HandleFunc("/createAddon", createAddon)
