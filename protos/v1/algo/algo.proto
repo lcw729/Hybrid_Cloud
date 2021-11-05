@@ -1,0 +1,42 @@
+// protos/v1/algo/algo.proto
+syntax = "proto3";
+
+option go_package = "Hybrid_Cluster/protos/v1/algo";
+
+package v1.algo;
+
+service Algo {
+    rpc ClusterWeightCalculator(ClusterWeightCalculatorRequest) returns (ClusterWeightCalculatorResponse);
+ //   rpc ResourceConfigurationManagement(ResourceConfigurationManagementRequest) returns (ResourceConfigurationManagementResponse);
+}
+
+message WeightResult {
+    int32 cluster_id = 1;
+    string cluster_name = 2;
+    int32 cluster_weight = 3;
+}
+
+
+//message ClusterInfo {
+//    int32 cluster_id = 1;
+//    string cluster_name = 2;
+//}
+
+// client - scheduler
+message ClusterWeightCalculatorRequest {}
+
+// server - AnalyticEngine
+message ClusterWeightCalculatorResponse{
+   repeated WeightResult weight_result = 1;
+}
+
+// client - scheduler
+//message ResourceConfigurationManagementRequest {
+//    repeated ClusterInfo target_cluster = 1;
+//}
+
+// server - AnalyticEngine
+//message ResourceConfigurationManagementResponse{
+//    bool status = 1;
+//   string test_message = 2;
+//}

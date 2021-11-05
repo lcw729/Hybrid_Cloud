@@ -28,7 +28,7 @@ func (c *HCPPolicyClient) List(opts metav1.ListOptions) (*policyv1alpha1.HCPPoli
 	err := c.restClient.
 		Get().
 		Namespace(c.ns).
-		Resource("hcppolicy").
+		Resource("hcppolicys").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Do(context.TODO()).
 		Into(&result)
@@ -41,7 +41,7 @@ func (c *HCPPolicyClient) Get(name string, opts metav1.GetOptions) (*policyv1alp
 	err := c.restClient.
 		Get().
 		Namespace(c.ns).
-		Resource("hcppolicy").
+		Resource("hcppolicys").
 		Name(name).
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Do(context.TODO()).
@@ -55,7 +55,7 @@ func (c *HCPPolicyClient) Create(deployment *policyv1alpha1.HCPPolicy) (*policyv
 	err := c.restClient.
 		Post().
 		Namespace(c.ns).
-		Resource("hcppolicy").
+		Resource("hcppolicys").
 		Body(deployment).
 		Do(context.TODO()).
 		Into(&result)
@@ -68,7 +68,7 @@ func (c *HCPPolicyClient) Watch(opts metav1.ListOptions) (watch.Interface, error
 	return c.restClient.
 		Get().
 		Namespace(c.ns).
-		Resource("hcppolicy").
+		Resource("hcppolicys").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Watch(context.TODO())
 }

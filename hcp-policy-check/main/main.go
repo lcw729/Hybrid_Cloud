@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Hybrid_Cluster/hcp-analytic-engine/analyticEngine"
+	analyticEngine "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
 	monitoringEngine "Hybrid_Cluster/hcp-monitoring-engine/metricCollector"
 	"fmt"
 )

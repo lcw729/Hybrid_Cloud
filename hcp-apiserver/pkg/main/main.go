@@ -16,7 +16,7 @@ import (
 	grpc "google.golang.org/grpc"
 
 	handler "Hybrid_Cluster/hcp-apiserver/pkg/handler"
-	cmdpb "Hybrid_Cluster/proto/v1/cmd"
+	cmdpb "Hybrid_Cluster/protos/v1/cmd"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 )

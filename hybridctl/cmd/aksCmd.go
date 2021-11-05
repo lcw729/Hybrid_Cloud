@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	cmdpb "Hybrid_Cluster/proto/v1/cmd"
+	cmdpb "Hybrid_Cluster/protos/v1/cmd"
 
 	"github.com/spf13/cobra"
 )

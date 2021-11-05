@@ -2,7 +2,7 @@ package cmd
 
 import (
 	util "Hybrid_Cluster/hybridctl/util"
-	cmdpb "Hybrid_Cluster/proto/v1/cmd"
+	cmdpb "Hybrid_Cluster/protos/v1/cmd"
 	"context"
 	"fmt"
 	"log"

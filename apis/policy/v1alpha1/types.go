@@ -11,7 +11,7 @@ import (
 // +k8s:openapi-gen=true
 
 type HCPPolicyTemplate struct {
-	Spec HCPPolicyTemplateSpec
+	Spec HCPPolicyTemplateSpec `json:"spec"`
 }
 
 type HCPPolicyTemplateSpec struct {
