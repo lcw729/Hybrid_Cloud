@@ -1,0 +1,13 @@
+apiVersion: hcp.k8s.io/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: resource-configuration-cycle
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: cycle
+          value:
+            - "2"                                       
+  policyStatus: Enabled

@@ -1,0 +1,13 @@
+apiVersion: hcp.k8s.io/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: warning-level
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: level
+          value:
+            - "3"
+  policyStatus: Enabled
