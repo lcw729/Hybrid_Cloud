@@ -9,5 +9,5 @@ spec:
       policies:
         - type: cycle
           value:
-            - "2"                                       
+            - "6"                                       
   policyStatus: Enabled

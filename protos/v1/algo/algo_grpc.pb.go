@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AlgoClient interface {
 	ClusterWeightCalculator(ctx context.Context, in *ClusterWeightCalculatorRequest, opts ...grpc.CallOption) (*ClusterWeightCalculatorResponse, error)
+	OptimalArrangement(ctx context.Context, in *OptimalArrangementRequest, opts ...grpc.CallOption) (*OptimalArrangementResponse, error)
 }
 
 type algoClient struct {
@@ -38,11 +39,21 @@ func (c *algoClient) ClusterWeightCalculator(ctx context.Context, in *ClusterWei
 	return out, nil
 }
 
+func (c *algoClient) OptimalArrangement(ctx context.Context, in *OptimalArrangementRequest, opts ...grpc.CallOption) (*OptimalArrangementResponse, error) {
+	out := new(OptimalArrangementResponse)
+	err := c.cc.Invoke(ctx, "/v1.algo.Algo/OptimalArrangement", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AlgoServer is the server API for Algo service.
 // All implementations must embed UnimplementedAlgoServer
 // for forward compatibility
 type AlgoServer interface {
 	ClusterWeightCalculator(context.Context, *ClusterWeightCalculatorRequest) (*ClusterWeightCalculatorResponse, error)
+	OptimalArrangement(context.Context, *OptimalArrangementRequest) (*OptimalArrangementResponse, error)
 	mustEmbedUnimplementedAlgoServer()
 }
 
@@ -52,6 +63,9 @@ type UnimplementedAlgoServer struct {
 
 func (UnimplementedAlgoServer) ClusterWeightCalculator(context.Context, *ClusterWeightCalculatorRequest) (*ClusterWeightCalculatorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClusterWeightCalculator not implemented")
+}
+func (UnimplementedAlgoServer) OptimalArrangement(context.Context, *OptimalArrangementRequest) (*OptimalArrangementResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OptimalArrangement not implemented")
 }
 func (UnimplementedAlgoServer) mustEmbedUnimplementedAlgoServer() {}
 
@@ -84,6 +98,24 @@ func _Algo_ClusterWeightCalculator_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Algo_OptimalArrangement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OptimalArrangementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AlgoServer).OptimalArrangement(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/v1.algo.Algo/OptimalArrangement",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AlgoServer).OptimalArrangement(ctx, req.(*OptimalArrangementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Algo_ServiceDesc is the grpc.ServiceDesc for Algo service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -94,6 +126,10 @@ var Algo_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClusterWeightCalculator",
 			Handler:    _Algo_ClusterWeightCalculator_Handler,
+		},
+		{
+			MethodName: "OptimalArrangement",
+			Handler:    _Algo_OptimalArrangement_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

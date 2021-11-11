@@ -27,9 +27,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
-	ResourceExtensionSchedule(c, ctx)
+	optimalArrangement(c, ctx)
+	// ResourceExtensionSchedule(c, ctx)
 	// ResourceConfigurationSchedule(c, ctx)
-
 
 }
 
@@ -57,53 +57,14 @@ func ResourceExtensionSchedule(c algopb.AlgoClient, ctx context.Context) {
 	}
 }
 
-// func ResourceConfigurationSchedule(c algopb.AlgoClient, ctx context.Context) {
-// 	fmt.Println("-----------------------------------------")
-// 	fmt.Println("[step 1] Get MultiMetric")
-// 	// monitoringEngine.MetricCollector()
-// 	fmt.Println("-----------------------------------------")
-// 	fmt.Println("[step 2] Get Policy - watching level & warning level")
-// 	fmt.Println("< Watching Level > \n", policy.GetWatchingLevel())
-// 	fmt.Println("< Warning  Level > \n", policy.GetWarningLevel())
-// 	fmt.Println("[step 3] Calculate watching level")
-// 	var targetCluster []*algopb.ClusterInfo
-
-// 	targetCluster = append(targetCluster, &algopb.ClusterInfo{
-// 		ClusterId: 1,
-// 		ClusterName :"cluster1",
-// 	})
-// 	targetCluster = append(targetCluster, &algopb.ClusterInfo{
-// 		ClusterId: 2,
-// 		ClusterName :"cluster2",
-// 	})
-// 	targetCluster = append(targetCluster, &algopb.ClusterInfo{
-// 		ClusterId: 3,
-// 		ClusterName :"cluster3",
-// 	})
-// 	fmt.Println(targetCluster)
-// 	in := &algopb.ResourceConfigurationManagementRequest{
-// 		TargetCluster: targetCluster,
-// 	}
-// 	r, err := c.ResourceConfigurationManagement(ctx, in)
-// 	if err != nil {
-// 		log.Fatalf("could not request: %v", err)
-// 	}
-
-// 	log.Printf("Status: %v", r.Status)
-// 	log.Printf("TestMessage: %v", r.TestMessage)
-// }
-
-func optimalArrangement() {
+func optimalArrangement(c algopb.AlgoClient, ctx context.Context) {
 	fmt.Println("---------------------------------------------------------------")
 	fmt.Println("[ Scheduler Start ]")
-	fmt.Println("[step 1] Check Policy from Policy manager - DRF, Affinity")
-	fmt.Println("----> Policy Value: Affinity")
-	fmt.Println("----> Policy Value: DRF")
-	fmt.Println("[step 2] Call Affinity Calulator")
-	// analyticEngine.AffinityCalculator()
-	fmt.Println("[step 3] Profiling Pod & Node")
-	// analyticEngine.DRF()
-	fmt.Println("[step 4] Checking Pending POD Queue")
-	fmt.Println("----> [case 1] If there are no suitable resources, wait ")
-	fmt.Println("----> [case 2] Select suitable target resources and resource request ")
+	var in = algopb.OptimalArrangementRequest{}
+	r, err := c.OptimalArrangement(ctx, &in)
+	if err != nil {
+		log.Fatalf("could not request: %v", err)
+	}
+
+	log.Printf("Config: %v ", r)
 }
