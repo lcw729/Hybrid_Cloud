@@ -3,12 +3,8 @@ package cmd
 import (
 	util "Hybrid_Cluster/hybridctl/util"
 	cmdpb "Hybrid_Cluster/protos/v1/cmd"
-	"context"
 	"fmt"
 	"log"
-	"time"
-
-	"google.golang.org/grpc"
 )
 
 func checkErr(err error) {
@@ -33,29 +29,30 @@ func addonEnable(p util.AKSAddon) {
 }
 
 func addonList(p cmdpb.AKSAddon) {
+	/*
+		conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			log.Fatalf("did not connect: %v", err)
+		}
+		defer conn.Close()
+		c := cmdpb.NewCmdClient(conn)
 
-	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := cmdpb.NewCmdClient(conn)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+		defer cancel()
+		var in = &cmdpb.ListAddonRequest{
+			AksAddon: &p,
+		}
+		r, err := c.ListAddon(ctx, in)
+		if err != nil {
+			log.Fatalf("could not request: %v", err)
+		}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	defer cancel()
-	var in = &cmdpb.ListAddonRequest{
-		AksAddon: &p,
-	}
-	r, err := c.ListAddon(ctx, in)
-	if err != nil {
-		log.Fatalf("could not request: %v", err)
-	}
-
-	log.Printf("Config: %v", r.Output.Message)
-	// httpPostUrl := "http://localhost:8080/addonList"
-	// bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	// checkErr(err)
-	// fmt.Println(string(bytes))
+		log.Printf("Config: %v", r.Output.Message)
+	*/
+	httpPostUrl := "http://localhost:8080/addonList"
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	fmt.Println(string(bytes))
 }
 
 func addonListAvailable() {

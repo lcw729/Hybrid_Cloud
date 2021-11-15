@@ -1,7 +1,10 @@
 package handler
 
 import (
-	clusterRegister "Hybrid_Cluster/clientset/v1alpha1"
+	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	"context"
+
+	// /root/Go/src/Hybrid_Cluster/pkg/client/clientset/v1alpha1
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,7 +14,7 @@ import (
 
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
@@ -25,7 +28,7 @@ func GetEKSClient(clusterName *string) *eks.EKS {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	clusterRegisterClientSet, err := clusterRegister.NewForConfig(master_config)
 	checkErr(err)
-	clusterRegisters, err := clusterRegisterClientSet.ClusterRegister("eks").Get(*clusterName, metav1.GetOptions{})
+	clusterRegisters, err := clusterRegisterClientSet.ClusterRegisters("eks").Get(context.TODO(), *clusterName, v1.GetOptions{})
 	checkErr(err)
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(clusterRegisters.Spec.Region),

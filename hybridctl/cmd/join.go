@@ -26,9 +26,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 
-	resourcev1alpha1 "Hybrid_Cluster/apis/clusterRegister/v1alpha1"
-	clusterRegisterv1alpha1 "Hybrid_Cluster/clientset/v1alpha1"
 	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
+	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/clusterRegister/v1alpha1"
+	clusterRegisterv1alpha1 "Hybrid_Cluster/pkg/client/clientset/v1alpha1"
 
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 

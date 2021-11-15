@@ -1,11 +1,11 @@
 package handler
 
 import (
-	KubeFedCluster "Hybrid_Cluster/apis/kubefedcluster/v1alpha1"
-	clusterRegister "Hybrid_Cluster/clientset/v1alpha1"
 	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
 	util "Hybrid_Cluster/hcp-apiserver/pkg/util"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
+	KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
 	"context"
 	"flag"
 	"fmt"
@@ -29,10 +29,10 @@ func Unjoin(info mappingTable.ClusterInfo) {
 		log.Println(err)
 	}
 
-	clusterRegisters, err := clusterRegisterClientSet.ClusterRegister(info.PlatformName).Get(info.ClusterName, metav1.GetOptions{})
+	clusterRegisters, _ := clusterRegisterClientSet.ClusterRegisters(info.PlatformName).Get(context.TODO(), info.ClusterName, metav1.GetOptions{})
 
 	if info.PlatformName == "gke" {
-		projectId := clusterRegisters.Spec.Projectid
+		projectId := clusterRegisters.Spec.ProjectId
 		fProjectId := flag.String("projectId", projectId, "specify a project id to examine")
 		flag.Parse()
 		if *fProjectId == "" {
@@ -47,7 +47,7 @@ func Unjoin(info mappingTable.ClusterInfo) {
 		var join_cluster_client *kubernetes.Clientset
 		var join_cluster_config *rest.Config
 		for clusterName := range kubeConfig.Clusters {
-			gkeClusterName := "gke" + "_" + clusterRegisters.Spec.Projectid + "_" + clusterRegisters.Spec.Region + "_" + info.ClusterName
+			gkeClusterName := "gke" + "_" + clusterRegisters.Spec.ProjectId + "_" + clusterRegisters.Spec.Region + "_" + info.ClusterName
 			if clusterName == gkeClusterName {
 				join_cluster_config, err = clientcmd.NewNonInteractiveClientConfig(*kubeConfig, gkeClusterName, &clientcmd.ConfigOverrides{CurrentContext: clusterName}, nil).ClientConfig()
 				if err != nil {

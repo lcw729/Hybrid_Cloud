@@ -3,7 +3,6 @@ package main
 import (
 	"Hybrid_Cluster/hcp-apiserver/pkg/converter"
 	"Hybrid_Cluster/hybridctl/util"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -145,32 +144,32 @@ func listAddon(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func (c *cmdServer) ListAddon(ctx context.Context, in *cmdpb.ListAddonRequest) (*cmdpb.ListAddonResponse, error) {
-	var listAddonInput eks.ListAddonsInput
-	// jsonDataFromHttp, err := ioutil.ReadAll(in)
-	// fmt.Printf(string(jsonDataFromHttp))
-	listAddonInput.ClusterName = &in.AksAddon.ClusterName
-	// defer req.Body.Close()
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// }
-	fmt.Println(listAddonInput.ClusterName)
-	out, err := handler.ListAddon(listAddonInput)
-	var jsonData []byte
-	if err != nil {
-		jsonData, _ = json.Marshal(&err)
-	} else {
-		jsonData, _ = json.Marshal(&out)
-	}
-	fmt.Println(string(jsonData))
-	var output = string(jsonData)
-	return &cmdpb.ListAddonResponse{
-		Output: &cmdpb.Output{
-			Message: output,
-		},
-	}, nil
+// func (c *cmdServer) ListAddon(ctx context.Context, in *cmdpb.ListAddonRequest) (*cmdpb.ListAddonResponse, error) {
+// 	var listAddonInput eks.ListAddonsInput
+// 	// jsonDataFromHttp, err := ioutil.ReadAll(in)
+// 	// fmt.Printf(string(jsonDataFromHttp))
+// 	listAddonInput.ClusterName = &in.AksAddon.ClusterName
+// 	// defer req.Body.Close()
+// 	// if err != nil {
+// 	// 	log.Println(err.Error())
+// 	// }
+// 	fmt.Println(listAddonInput.ClusterName)
+// 	out, err := handler.ListAddon(listAddonInput)
+// 	var jsonData []byte
+// 	if err != nil {
+// 		jsonData, _ = json.Marshal(&err)
+// 	} else {
+// 		jsonData, _ = json.Marshal(&out)
+// 	}
+// 	fmt.Println(string(jsonData))
+// 	var output = string(jsonData)
+// 	return &cmdpb.ListAddonResponse{
+// 		Output: &cmdpb.Output{
+// 			Message: output,
+// 		},
+// 	}, nil
 
-}
+// }
 
 func updateAddon(w http.ResponseWriter, req *http.Request) {
 

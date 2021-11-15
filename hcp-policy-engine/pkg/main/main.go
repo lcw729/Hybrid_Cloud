@@ -19,41 +19,42 @@ package main
 import (
 	// "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
 
+	controller "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
+	"Hybrid_Cluster/util/clusterManager"
+	"flag"
+	"time"
+
+	v1alpha1hcppolicy "Hybrid_Cluster/pkg/client/clientset/hcppolicy/v1alpha1/clientset/versioned"
+
+	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/klog/v2"
+
+	informers "Hybrid_Cluster/pkg/client/informers/externalversions"
+
+	"k8s.io/sample-controller/pkg/signals"
 )
 
+// var c chan string
+
 func main() {
-	// logLevel.KetiLogInit()
+	klog.InitFlags(nil)
+	flag.Parse()
 
-	// for {
-	// 	cm := clusterManager.NewClusterManager()
-	// 	stopCh := signals.SetupSignalHandler()
+	stopCh := signals.SetupSignalHandler()
 
-	// 	host_ctx := "kube-master"
-	// 	host_cfg := cm.Host_config
-	// 	live := cluster.New(host_ctx, host_cfg, cluster.Options{})
+	cm := clusterManager.NewClusterManager()
+	hcppolicyclient, err := v1alpha1hcppolicy.NewForConfig(cm.Host_config)
+	if err != nil {
+		klog.Info(err)
+	}
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(cm.Host_kubeClient, time.Second*30)
+	hcppolicyInformerFactory := informers.NewSharedInformerFactory(hcppolicyclient, time.Second*30)
 
-	// 	ghosts := []*cluster.Cluster{}
-
-	// 	for _, ghost_cluster := range cm.Cluster_list.Items {
-	// 		ghost_ctx := ghost_cluster.Name
-	// 		ghost_cfg := cm.Cluster_configs[ghost_ctx]
-	// 		fmt.Println(ghost_ctx)
-	// 		ghost := cluster.New(ghost_ctx, ghost_cfg, cluster.Options{})
-	// 		ghosts = append(ghosts, ghost)
-	// 	}
-
-	// co, err := controller.NewController(live, ghosts, live.Namespace, cm)
-	// if err != nil {
-	// 	log.Println("err New Controller - PolicyEngine", err)
-	// }
-	// m := manager.New()
-	// m.AddController(co)
-
-	// if err := m.Start(stopCh); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// }
-
+	controller := controller.NewController(cm.Host_kubeClient, hcppolicyclient, hcppolicyInformerFactory.Hcp().V1alpha1().HCPPolicies())
+	kubeInformerFactory.Start(stopCh)
+	hcppolicyInformerFactory.Start(stopCh)
+	if err := controller.Run(2, stopCh); err != nil {
+		klog.Fatalf("Error running controller: %s", err.Error())
+	}
 }

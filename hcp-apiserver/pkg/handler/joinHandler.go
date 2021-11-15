@@ -1,9 +1,16 @@
 package handler
 
 import (
-	clusterRegister "Hybrid_Cluster/clientset/v1alpha1"
+	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
+	util "Hybrid_Cluster/hcp-apiserver/pkg/util"
+	cobrautil "Hybrid_Cluster/hybridctl/util"
+
+	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os/exec"
 	"time"
@@ -13,22 +20,30 @@ import (
 	"github.com/aws/aws-sdk-go/service/eks"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 
+	// clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	// "context"
+	// "flag"
+	// "log"
+	// "os/exec"
+	// "time"
+	// "github.com/aws/aws-sdk-go/aws"
+	// "github.com/aws/aws-sdk-go/aws/session"
+	// "github.com/aws/aws-sdk-go/service/eks"
+	// "k8s.io/client-go/kubernetes"
+	// "k8s.io/client-go/rest"
 	corev1 "k8s.io/api/core/v1"
-
 	rbacv1 "k8s.io/api/rbac/v1"
 
-	KubeFedCluster "Hybrid_Cluster/apis/kubefedcluster/v1alpha1"
-	cobrautil "Hybrid_Cluster/hybridctl/util"
-
-	"fmt"
-
-	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
-	util "Hybrid_Cluster/hcp-apiserver/pkg/util"
-
+	// cobrautil "Hybrid_Cluster/hybridctl/util"
+	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	// "fmt"
+	// mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
+	// util "Hybrid_Cluster/hcp-apiserver/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/tools/clientcmd"
+	// _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	// "k8s.io/client-go/tools/clientcmd"
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
 
@@ -40,7 +55,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 		log.Println(err)
 	}
 
-	clusterRegisters, err := clusterRegisterClientSet.ClusterRegister(info.PlatformName).Get(info.ClusterName, metav1.GetOptions{})
+	clusterRegisters, err := clusterRegisterClientSet.ClusterRegisters(info.PlatformName).Get(context.TODO(), info.ClusterName, metav1.GetOptions{})
 
 	if err != nil {
 		log.Println(err)
@@ -50,7 +65,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 	fmt.Println("--> join process start")
 
 	if info.PlatformName == "gke" {
-		projectId := clusterRegisters.Spec.Projectid
+		projectId := clusterRegisters.Spec.ProjectId
 		fProjectId := flag.String("projectId", projectId, "specify a project id to examine")
 		flag.Parse()
 		if *fProjectId == "" {
@@ -65,7 +80,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 		var join_cluster_client *kubernetes.Clientset
 		var join_cluster_config *rest.Config
 		for clusterName := range kubeConfig.Clusters {
-			gkeClusterName := "gke" + "_" + clusterRegisters.Spec.Projectid + "_" + clusterRegisters.Spec.Region + "_" + info.ClusterName
+			gkeClusterName := "gke" + "_" + clusterRegisters.Spec.ProjectId + "_" + clusterRegisters.Spec.Region + "_" + info.ClusterName
 			if clusterName == gkeClusterName {
 				join_cluster_config, err = clientcmd.NewNonInteractiveClientConfig(*kubeConfig, gkeClusterName, &clientcmd.ConfigOverrides{CurrentContext: clusterName}, nil).ClientConfig()
 				if err != nil {
@@ -82,7 +97,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 		JoinCluster(info, join_cluster_client, join_cluster_config.Host)
 	} else if info.PlatformName == "aks" {
 
-		cmd := exec.Command("az", "aks", "get-credentials", "--resource-group", clusterRegisters.Spec.Resourcegroup, "--name", clusterRegisters.Spec.Clustername)
+		cmd := exec.Command("az", "aks", "get-credentials", "--resource-group", clusterRegisters.Spec.Resourcegroup, "--name", clusterRegisters.Spec.Name)
 		_, err := cmd.Output()
 		if err != nil {
 			log.Println(err)
