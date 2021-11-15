@@ -4,8 +4,8 @@ import (
 	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
 	util "Hybrid_Cluster/hcp-apiserver/pkg/util"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
-	KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
 	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	KubeFedCluster "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/clientset/versioned/typed/kubefedcluster/v1alpha1"
 	"context"
 	"flag"
 	"fmt"
@@ -100,7 +100,7 @@ func unjoinCluster(info mappingTable.ClusterInfo, cluster_client *kubernetes.Cli
 	}
 
 	var status = false
-	kubefedList, err := apiextensionsClientSet.KubeFedCluster("kube-federation-system").List(metav1.ListOptions{})
+	kubefedList, err := apiextensionsClientSet.KubeFedClusters("kube-federation-system").List(context.TODO(), metav1.ListOptions{})
 	fmt.Printf("kubefedList.Items: %v\n", kubefedList.Items[0].ObjectMeta.Name)
 
 	if err != nil {
@@ -159,9 +159,9 @@ func unjoinCluster(info mappingTable.ClusterInfo, cluster_client *kubernetes.Cli
 		}
 
 		// 5. Delete Kubefedcluster
-		_, err_nkfc := apiextensionsClientSet.KubeFedCluster("kube-federation-system").Delete(context.TODO(), info.ClusterName, metav1.DeleteOptions{})
-		if err_nkfc != nil {
-			log.Println(err_nkfc)
+		err := apiextensionsClientSet.KubeFedClusters("kube-federation-system").Delete(context.TODO(), info.ClusterName, metav1.DeleteOptions{})
+		if err != nil {
+			log.Println(err)
 		} else {
 			fmt.Println("[Step 5] Create KubefedCluster Resource [" + info.ClusterName + "] in hcp")
 		}

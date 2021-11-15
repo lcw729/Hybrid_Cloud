@@ -6,8 +6,10 @@ import (
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 
 	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
-	KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	"Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
 	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	KubeFedCluster "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/clientset/versioned/typed/kubefedcluster/v1alpha1"
 	"context"
 	"flag"
 	"fmt"
@@ -302,7 +304,7 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 		log.Println(err)
 	}
 
-	newkubefedcluster, err_nkfc := apiextensionsClientSet.KubeFedCluster("kube-federation-system").Create(kubefedcluster)
+	newkubefedcluster, err_nkfc := apiextensionsClientSet.KubeFedClusters("kube-federation-system").Create(context.TODO(), (*v1alpha1.KubeFedCluster)(kubefedcluster), metav1.CreateOptions{})
 	if err_nkfc != nil {
 		log.Println(err_nkfc)
 	} else {
