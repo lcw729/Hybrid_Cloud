@@ -7,22 +7,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
 
-	grpc "google.golang.org/grpc"
-
 	handler "Hybrid_Cluster/hcp-apiserver/pkg/handler"
-	cmdpb "Hybrid_Cluster/protos/v1/cmd"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 )
 
-type cmdServer struct {
-	cmdpb.CmdServer
-}
+// type cmdServer struct {
+// 	cmdpb.CmdServer
+// }
 
 func checkErr(err error) {
 	if err != nil {
@@ -30,11 +26,11 @@ func checkErr(err error) {
 	}
 }
 
-const portNumber = "8080"
+// const portNumber = "8080"
 
 func parser(w http.ResponseWriter, req *http.Request, input interface{}) {
 	jsonDataFromHttp, err := ioutil.ReadAll(req.Body)
-	fmt.Printf(string(jsonDataFromHttp))
+	fmt.Println(string(jsonDataFromHttp))
 	json.Unmarshal(jsonDataFromHttp, input)
 	defer req.Body.Close()
 	if err != nil {
@@ -191,8 +187,12 @@ func listUpdate(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &listUpdateInput)
 	out, err := handler.ListUpdate(listUpdateInput)
-	checkErr(err)
-	jsonData, _ := json.Marshal(&out)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
 	w.Write([]byte(jsonData))
 }
 
@@ -201,8 +201,12 @@ func describeUpdate(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &describeUpdateInput)
 	out, err := handler.DescribeUpdate(describeUpdateInput)
-	checkErr(err)
-	jsonData, _ := json.Marshal(&out)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
 	w.Write([]byte(jsonData))
 }
 
@@ -225,6 +229,20 @@ func associateIdentityProviderConfig(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &associateIdentityProviderConfigInput)
 	out, err := handler.AssociateIdentityProviderConfig(associateIdentityProviderConfigInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Write([]byte(jsonData))
+}
+
+func associateEncryptionConfig(w http.ResponseWriter, req *http.Request) {
+	var associateEncryptionConfigInput eks.AssociateEncryptionConfigInput
+
+	parser(w, req, &associateIdentityProviderConfigInput)
+	out, err := handler.AssociateEncryptionConfig(associateIEncryptionConfigInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -309,8 +327,12 @@ func updateClusterConfig(w http.ResponseWriter, req *http.Request) {
 
 	parser(w, req, &input)
 	out, err := handler.UpdateClusterConfig(input)
-	checkErr(err)
-	jsonData, _ := json.Marshal(&out)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
 	w.Write([]byte(jsonData))
 }
 
@@ -760,7 +782,8 @@ func connectedDisableFeatures(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAPIParameter
 	parser(w, req, input)
 	args := []string{"connectedk8s", "disable-features", "--name", input.Name, "-g", input.ResourceGroup, "--features"}
-	for _, f := range input.Features {
+	for i := range input.Features {
+		f := input.Features[i]
 		args = append(args, f)
 	}
 	cmd := exec.Command("az", args...)
@@ -802,17 +825,17 @@ func configurationDelete(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	lis, err := net.Listen("tcp", ":"+portNumber)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+	// lis, err := net.Listen("tcp", ":"+portNumber)
+	// if err != nil {
+	// 	log.Fatalf("failed to listen: %v", err)
+	// }
 
-	grpcServer := grpc.NewServer()
-	cmdpb.RegisterCmdServer(grpcServer, &cmdServer{})
-	log.Printf("Start gRPC server on %s port", portNumber)
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to server: %s", err)
-	}
+	// grpcServer := grpc.NewServer()
+	// cmdpb.RegisterCmdServer(grpcServer, &cmdServer{})
+	// log.Printf("Start gRPC server on %s port", portNumber)
+	// if err := grpcServer.Serve(lis); err != nil {
+	// 	log.Fatalf("failed to server: %s", err)
+	// }
 	http.HandleFunc("/join", join)
 	http.HandleFunc("/unjoin", unjoin)
 	http.HandleFunc("/createAddon", createAddon)

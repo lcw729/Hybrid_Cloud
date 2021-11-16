@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"Hybrid_Cluster/hybridctl/util"
-	cobrautil "Hybrid_Cluster/hybridctl/util"
 	"encoding/json"
 	"fmt"
 
@@ -371,7 +370,7 @@ var MCAddCmd = &cobra.Command{
 		// data, _ := ioutil.ReadFile(configFile)
 		// fmt.Println(string(data))
 
-		byteValue := cobrautil.OpenAndReadJsonFile(configFile)
+		byteValue := util.OpenAndReadJsonFile(configFile)
 		json.Unmarshal(byteValue, &config)
 
 		fmt.Println(config)

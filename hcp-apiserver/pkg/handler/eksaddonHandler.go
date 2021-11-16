@@ -24,23 +24,28 @@ func checkErr(err error) {
 	}
 }
 
-func GetEKSClient(clusterName *string) *eks.EKS {
+func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	clusterRegisterClientSet, err := clusterRegister.NewForConfig(master_config)
 	checkErr(err)
 	clusterRegisters, err := clusterRegisterClientSet.ClusterRegisters("eks").Get(context.TODO(), *clusterName, v1.GetOptions{})
-	checkErr(err)
+	if err != nil {
+		return nil, err
+	}
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(clusterRegisters.Spec.Region),
 	}))
 	eksSvc := eks.New(sess)
-	return eksSvc
+	return eksSvc, nil
 }
 
 func CreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error) {
 
 	// println(*addonInput.ClusterName)
-	eksSvc := GetEKSClient(addonInput.ClusterName)
+	eksSvc, err := GetEKSClient(addonInput.ClusterName)
+	if eksSvc == nil {
+		return nil, err
+	}
 	newAddonInput := &eks.CreateAddonInput{
 		AddonName:             addonInput.AddonName,
 		AddonVersion:          addonInput.AddonVersion,
@@ -57,8 +62,10 @@ func CreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error
 
 func DeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, error) {
 
-	eksSvc := GetEKSClient(addonInput.ClusterName)
-
+	eksSvc, err := GetEKSClient(addonInput.ClusterName)
+	if eksSvc == nil {
+		return nil, err
+	}
 	newAddonInput := &eks.DeleteAddonInput{
 		AddonName:   addonInput.AddonName,
 		ClusterName: addonInput.ClusterName,
@@ -70,8 +77,10 @@ func DeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, error
 
 func DescribeAddon(addonInput eks.DescribeAddonInput) (*eks.DescribeAddonOutput, error) {
 
-	eksSvc := GetEKSClient(addonInput.ClusterName)
-
+	eksSvc, err := GetEKSClient(addonInput.ClusterName)
+	if eksSvc == nil {
+		return nil, err
+	}
 	newAddonInput := &eks.DescribeAddonInput{
 		AddonName:   addonInput.AddonName,
 		ClusterName: addonInput.ClusterName,
@@ -98,8 +107,10 @@ func DescribeAddonVersions(addonInput eks.DescribeAddonVersionsInput) (*eks.Desc
 
 func ListAddon(addonInput eks.ListAddonsInput) (*eks.ListAddonsOutput, error) {
 
-	eksSvc := GetEKSClient(addonInput.ClusterName)
-
+	eksSvc, err := GetEKSClient(addonInput.ClusterName)
+	if eksSvc == nil {
+		return nil, err
+	}
 	newAddonInput := &eks.ListAddonsInput{
 		ClusterName: addonInput.ClusterName,
 	}
@@ -110,8 +121,10 @@ func ListAddon(addonInput eks.ListAddonsInput) (*eks.ListAddonsOutput, error) {
 
 func UpdateAddon(addonInput eks.UpdateAddonInput) (*eks.UpdateAddonOutput, error) {
 
-	eksSvc := GetEKSClient(addonInput.ClusterName)
-
+	eksSvc, err := GetEKSClient(addonInput.ClusterName)
+	if eksSvc == nil {
+		return nil, err
+	}
 	newAddonInput := &eks.UpdateAddonInput{
 		ClusterName: addonInput.ClusterName,
 		AddonName:   addonInput.AddonName,

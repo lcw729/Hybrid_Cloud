@@ -28,6 +28,7 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
+	// fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
 
 // KubeFedClustersGetter has a method to return a KubeFedClusterInterface.

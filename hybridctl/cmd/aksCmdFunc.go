@@ -10,6 +10,7 @@ import (
 func checkErr(err error) {
 	if err != nil {
 		log.Println(err)
+		return
 	}
 }
 
@@ -219,12 +220,12 @@ func getUpgrades(p util.AKSAPIParameter) {
 	fmt.Println(string(bytes))
 }
 
-func getVersions(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/getUpgrades"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	fmt.Println(string(bytes))
-}
+// func getVersions(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/getUpgrades"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	fmt.Println(string(bytes))
+// }
 
 func HTTPPostRequest(p util.AKSAPIParameter, cmd string) {
 	httpPostUrl := "http://localhost:8080/" + cmd

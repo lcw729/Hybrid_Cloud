@@ -96,7 +96,10 @@ func Join(info mappingTable.ClusterInfo) bool {
 			}
 		}
 
-		JoinCluster(info, join_cluster_client, join_cluster_config.Host)
+		if JoinCluster(info, join_cluster_client, join_cluster_config.Host) {
+			clusterRegisters.Status.Join = true
+		}
+
 	} else if info.PlatformName == "aks" {
 
 		cmd := exec.Command("az", "aks", "get-credentials", "--resource-group", clusterRegisters.Spec.Resourcegroup, "--name", clusterRegisters.Spec.Name)
@@ -107,7 +110,9 @@ func Join(info mappingTable.ClusterInfo) bool {
 
 		join_cluster_config, _ := cobrautil.BuildConfigFromFlags(info.ClusterName, "/root/.kube/config")
 		join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
-		JoinCluster(info, join_cluster_client, join_cluster_config.Host)
+		if JoinCluster(info, join_cluster_client, join_cluster_config.Host) {
+			clusterRegisters.Status.Join = true
+		}
 
 	} else if info.PlatformName == "eks" {
 
@@ -128,7 +133,9 @@ func Join(info mappingTable.ClusterInfo) bool {
 		if err != nil {
 			fmt.Println(err)
 		}
-		JoinCluster(info, join_cluster_client, *result.Cluster.Endpoint)
+		if JoinCluster(info, join_cluster_client, *result.Cluster.Endpoint) {
+			clusterRegisters.Status.Join = true
+		}
 	}
 
 	fmt.Println("--> join Done!")
@@ -141,25 +148,25 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	master_client := kubernetes.NewForConfigOrDie(master_config)
 
-	// // 1. CREATE namespace "kube-federation-system"
-	// Namespace := corev1.Namespace{
-	// 	TypeMeta: metav1.TypeMeta{
-	// 		Kind:       "Namespace",
-	// 		APIVersion: "v1",
-	// 	},
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name: "kube-federation-system",
-	// 	},
-	// }
+	// 1. CREATE namespace "kube-federation-system"
+	Namespace := corev1.Namespace{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Namespace",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "kube-federation-system",
+		},
+	}
 
-	// ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
+	ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
 
-	// if err_ns != nil {
-	// 	log.Println(err_ns)
-	// 	return false
-	// } else {
-	// 	fmt.Println("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + info.ClusterName)
-	// }
+	if err_ns != nil {
+		log.Println(err_ns)
+		return false
+	} else {
+		fmt.Println("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + info.ClusterName)
+	}
 
 	// 2. CREATE service account
 	ServiceAccount := corev1.ServiceAccount{
@@ -241,6 +248,7 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 
 	if err_crb != nil {
 		log.Println(err_crb)
+		return false
 	} else {
 		fmt.Println("< Step 4 > Create ClusterRoleBinding Resource [" + crb.Name + "] in " + info.ClusterName)
 	}
@@ -255,6 +263,7 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 	join_cluster_secret, err_sc := join_cluster_client.CoreV1().Secrets("kube-federation-system").Get(context.TODO(), join_cluster_sa.Secrets[0].Name, metav1.GetOptions{})
 	if err_sc != nil {
 		log.Println(err_sc)
+		return false
 	} else {
 		fmt.Println("< Step 5-1 > Get Secret Resource [" + join_cluster_secret.Name + "] From " + info.ClusterName)
 	}
@@ -276,13 +285,14 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 
 	if err_secret != nil {
 		log.Println(err_secret)
+		return false
 	} else {
 		fmt.Println("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
 	kubefedcluster := &fedv1b1.KubeFedCluster{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "KubeFedCluster",
+			Kind:       "kubefedcluster",
 			APIVersion: "core.kubefed.io/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -302,11 +312,13 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 	apiextensionsClientSet, err := KubeFedCluster.NewForConfig(master_config)
 	if err != nil {
 		log.Println(err)
+		return false
 	}
-
 	newkubefedcluster, err_nkfc := apiextensionsClientSet.KubeFedClusters("kube-federation-system").Create(context.TODO(), (*v1alpha1.KubeFedCluster)(kubefedcluster), metav1.CreateOptions{})
+
 	if err_nkfc != nil {
 		log.Println(err_nkfc)
+		return false
 	} else {
 		fmt.Println("< Step 6 > Create KubefedCluster Resource [" + newkubefedcluster.Name + "] in hcp")
 	}
