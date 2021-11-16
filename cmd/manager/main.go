@@ -16,25 +16,14 @@ limitations under the License.
 
 package main
 
-import (
-	//"flag"
-	"log"
+import ( //"flag"
 	//"strings"
 	//"context"
-
 	//"admiralty.io/multicluster-controller/pkg/controller"
-	"admiralty.io/multicluster-controller/pkg/cluster"
-	"admiralty.io/multicluster-controller/pkg/manager"
-
 	//"admiralty.io/multicluster-controller/pkg/reconcile"
 	//"admiralty.io/multicluster-service-account/pkg/config"
 	//"k8s.io/api/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
-	templateresource "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
-	cobrautil "Hybrid_Cluster/hybridctl/util"
-
-	"k8s.io/sample-controller/pkg/signals"
 	//"k8s.io/client-go/rest"
 	//genericclient "sigs.k8s.io/kubefed/pkg/client/generic"
 	//fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
@@ -81,22 +70,21 @@ func main() {
 	   	}
 	*/
 
-	// cm := templateresource.NewClusterManager()
+	// cm := clusterManager.NewClusterManager()
 
-	host_ctx := "kube-master"
-	namespace := "hybrid"
-	host_cfg, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	// host_cfg := cm.Host_config
-	live := cluster.New(host_ctx, host_cfg, cluster.Options{CacheOptions: cluster.CacheOptions{Namespace: namespace}})
+	// host_ctx := "kube-master"
+	// namespace := "hybrid"
+	// host_cfg, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	// // host_cfg := cm.Host_config
+	// live := cluster.New(host_ctx, host_cfg, cluster.Options{CacheOptions: cluster.CacheOptions{Namespace: namespace}})
+	// ghosts := []*cluster.Cluster{}
 
-	ghosts := []*cluster.Cluster{}
+	// co, _ := templateresource.NewController(live, ghosts, namespace, cm)
 
-	co, _ := templateresource.NewController(live, ghosts, namespace)
-
-	m := manager.New()
-	m.AddController(co)
-	if err := m.Start(signals.SetupSignalHandler()); err != nil {
-		log.Fatal(err)
-	}
+	// m := manager.New()
+	// m.AddController(co)
+	// if err := m.Start(signals.SetupSignalHandler()); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 }

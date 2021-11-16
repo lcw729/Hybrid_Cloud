@@ -1,0 +1,15 @@
+apiVersion: hcp.k8s.io/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: optimal-arrangement-algorithm
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: Algorithm
+          value:
+            - Affinity
+  RangeOfApplication: All
+  policyStatus: Disabled
+
