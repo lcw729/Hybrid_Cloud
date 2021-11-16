@@ -8,10 +8,10 @@ import (
 	"time"
 
 	algorithm "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
+	"Hybrid_Cluster/hcp-analytic-engine/util"
+	monitoringEngine "Hybrid_Cluster/hcp-monitoring-engine/metricCollector"
 	"Hybrid_Cluster/hcp-scheduler/pkg/policy"
 	algopb "Hybrid_Cluster/protos/v1/algo"
-
-	monitoringEngine "Hybrid_Cluster/hcp-monitoring-engine/metricCollector"
 
 	"google.golang.org/grpc"
 )
@@ -60,6 +60,25 @@ func (a *algoServer) ClusterWeightCalculator(ctx context.Context, in *algopb.Clu
 	}, nil
 }
 
+func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalArrangementRequest) (*algopb.OptimalArrangementResponse, error) {
+	var c *util.Cluster
+	var n *util.NodeScore
+	if algorithm.OptimalArrangementAlgorithm() {
+		c, n = algorithm.OptimalNodeSelector()
+		fmt.Println(c.ClusterInfo, n.Score)
+	}
+	return &algopb.OptimalArrangementResponse{
+		Status: true,
+		Cluster: &algopb.Cluster{
+			ClusterInfo: (*algopb.ClusterInfo)(c.ClusterInfo),
+		},
+		Node: &algopb.NodeScore{
+			NodeId: n.NodeId,
+			Score:  n.Score,
+		},
+	}, nil
+}
+
 func main() {
 
 	lis, err := net.Listen("tcp", ":"+portNumber)
@@ -77,7 +96,7 @@ func main() {
 		for {
 			time.Sleep(time.Second * time.Duration(cycle))
 			fmt.Println("-------------------------LOOP START----------------------------")
-			algorithm.ResourceConfigurationManagement()
+			algorithm.WatchingLevelCalculator()
 		}
 	} else {
 		fmt.Println("Error : Cycle should be positive")
