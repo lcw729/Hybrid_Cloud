@@ -17,65 +17,44 @@ limitations under the License.
 package main
 
 import (
-	"Hybrid_Cluster/hcplog"
+	// "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
 
+	controller "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
 	"Hybrid_Cluster/util/clusterManager"
-	"Hybrid_Cluster/util/controller/logLevel"
-	"log"
+	"flag"
+	"time"
 
-	"admiralty.io/multicluster-controller/pkg/cluster"
-	"admiralty.io/multicluster-controller/pkg/manager"
+	v1alpha1hcppolicy "Hybrid_Cluster/pkg/client/clientset/hcppolicy/v1alpha1/clientset/versioned"
+
+	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/klog/v2"
 
-	"Hybrid_Cluster/hcp-policy-engine/pkg/controller"
-	"Hybrid_Cluster/util/controller/reshape"
+	informers "Hybrid_Cluster/pkg/client/informers/externalversions"
+
+	"k8s.io/sample-controller/pkg/signals"
 )
 
+// var c chan string
+
 func main() {
-	logLevel.KetiLogInit()
+	klog.InitFlags(nil)
+	flag.Parse()
 
-	for {
-		cm := clusterManager.NewClusterManager()
+	stopCh := signals.SetupSignalHandler()
 
-		host_ctx := "openmcp"
-		namespace := "openmcp"
-
-		host_cfg := cm.Host_config
-		live := cluster.New(host_ctx, host_cfg, cluster.Options{})
-
-		ghosts := []*cluster.Cluster{}
-
-		for _, ghost_cluster := range cm.Cluster_list.Items {
-			ghost_ctx := ghost_cluster.Name
-			ghost_cfg := cm.Cluster_configs[ghost_ctx]
-
-			ghost := cluster.New(ghost_ctx, ghost_cfg, cluster.Options{})
-			ghosts = append(ghosts, ghost)
-		}
-
-		co, err := controller.NewController(live, ghosts, namespace, cm)
-		if err != nil {
-			hcplog.V(0).Info("err New Controller - PolicyEngine", err)
-		}
-		cont_reshape, err := reshape.NewController(live, ghosts, namespace, cm)
-		if err != nil {
-			hcplog.V(0).Info("err New Controller - Reshape", err)
-		}
-		contLoglevel, err := logLevel.NewController(live, ghosts, namespace)
-		if err != nil {
-			hcplog.V(0).Info("err New Controller - logLevel", err)
-		}
-
-		m := manager.New()
-		m.AddController(co)
-		m.AddController(cont_reshape)
-		m.AddController(contLoglevel)
-
-		stop := reshape.SetupSignalHandler()
-
-		if err := m.Start(stop); err != nil {
-			log.Fatal(err)
-		}
+	cm := clusterManager.NewClusterManager()
+	hcppolicyclient, err := v1alpha1hcppolicy.NewForConfig(cm.Host_config)
+	if err != nil {
+		klog.Info(err)
 	}
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(cm.Host_kubeClient, time.Second*30)
+	hcppolicyInformerFactory := informers.NewSharedInformerFactory(hcppolicyclient, time.Second*30)
 
+	controller := controller.NewController(cm.Host_kubeClient, hcppolicyclient, hcppolicyInformerFactory.Hcp().V1alpha1().HCPPolicies())
+	kubeInformerFactory.Start(stopCh)
+	hcppolicyInformerFactory.Start(stopCh)
+	if err := controller.Run(2, stopCh); err != nil {
+		klog.Fatalf("Error running controller: %s", err.Error())
+	}
 }
