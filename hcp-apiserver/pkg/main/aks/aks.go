@@ -4,6 +4,7 @@ import (
 	"Hybrid_Cluster/hcp-apiserver/pkg/handler"
 	"Hybrid_Cluster/hcp-apiserver/pkg/util"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -135,8 +136,34 @@ func AddonList(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAddon
 	util.Parser(w, req, &input)
 	cmd := exec.Command("az", "aks", "addon", "list", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName)
-
+	// errMsg := ExampleCmd_StderrPipe(cmd)
+	// fmt.Println(string(errMsg))
+	errMsg := ExampleCmd_StderrPipe(cmd)
 	output, err := cmd.Output()
+	// errMsg := ExampleCmd_StderrPipe(cmd)
+	w.Write(errMsg)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		w.Write(output)
+	}
+	// output, err := cmd.Output()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// } else {
+	// 	w.Write(output)
+	// }
+}
+
+func AddonListAvailable(w http.ResponseWriter, req *http.Request) {
+	var input util.AKSAddon
+	util.Parser(w, req, &input)
+	cmd := exec.Command("az", "aks", "addon", "list-available")
+	errMsg := ExampleCmd_StderrPipe(cmd)
+	fmt.Println(string(errMsg))
+	output, err := cmd.Output()
+	// errMsg := ExampleCmd_StderrPipe(cmd)
+	// w.Write(errMsg)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -144,17 +171,23 @@ func AddonList(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func AddonListAvailable(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
-	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "addon", "list-available")
-
-	output, err := cmd.Output()
+func ExampleCmd_StderrPipe(cmd *exec.Cmd) []byte {
+	// cmd := exec.Command("sh", "-c", "echo stdout; echo 1>&2 stderr")
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		fmt.Println(err)
-	} else {
-		w.Write(output)
+		log.Fatal(err)
 	}
+
+	// if err := cmd.Start(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	slurp, _ := io.ReadAll(stderr)
+	fmt.Printf("%s\n", slurp)
+	return slurp
+	// if err := cmd.Wait(); err != nil {
+	// 	log.Fatal(err)
+	// }
 }
 
 func AddonShow(w http.ResponseWriter, req *http.Request) {

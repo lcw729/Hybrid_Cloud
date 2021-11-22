@@ -20,9 +20,9 @@ package v1alpha1
 
 import (
 	hcppolicyv1alpha1 "Hybrid_Cluster/pkg/apis/hcppolicy/v1alpha1"
-	versioned "Hybrid_Cluster/pkg/client/clientset/versioned"
-	internalinterfaces "Hybrid_Cluster/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "Hybrid_Cluster/pkg/client/listers/hcppolicy/v1alpha1"
+	versioned "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
+	internalinterfaces "Hybrid_Cluster/pkg/client/policy/v1alpha1/informers/externalversions/internalinterfaces"
+	v1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/listers/hcppolicy/v1alpha1"
 	"context"
 	time "time"
 
