@@ -17,8 +17,6 @@ limitations under the License.
 */
 
 import (
-	// "Hybrid_Cluster/hcp-has-engine/pkg/controller"
-
 	controller "Hybrid_Cluster/hcp-has-controller/pkg/controller"
 	"Hybrid_Cluster/util/clusterManager"
 	"flag"
