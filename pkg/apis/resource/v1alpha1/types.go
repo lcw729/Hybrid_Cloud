@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	hpav1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	vpav1alpha1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/poc.autoscaling.k8s.io/v1alpha1"
+	vpav1beta1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta1"
 )
 
 // +genclient
@@ -18,13 +18,14 @@ type HCPHybridAutoScaler struct {
 
 type HCPHybridAutoScalerSpec struct {
 	WarningCount   int32
+	CurrentStep    string         `json:"step"`
 	ScalingOptions ScalingOptions `json:"scalingOptions,omitempty" protobuf:"bytes,2,opt,name=scalingoptions"`
 }
 
 type ScalingOptions struct {
 	// CpaTemplate CpaTemplate                        `json:"cpaTemplate,omitempty" protobuf:"bytes,1,opt,name=cpatemplate"`
-	HpaTemplate hpav1.HorizontalPodAutoscaler     `json:"hpaTemplate,omitempty" protobuf:"bytes,2,opt,name=hpatemplate"`
-	VpaTemplate vpav1alpha1.VerticalPodAutoscaler `json:"vpaTemplate,omitempty" protobuf:"bytes,3,opt,name=vpatemplate"`
+	HpaTemplate hpav1.HorizontalPodAutoscaler    `json:"hpaTemplate,omitempty" protobuf:"bytes,2,opt,name=hpatemplate"`
+	VpaTemplate vpav1beta1.VerticalPodAutoscaler `json:"vpaTemplate,omitempty" protobuf:"bytes,3,opt,name=vpatemplate"`
 }
 
 type HCPHybridAutoScalerStatus struct {

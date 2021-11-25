@@ -210,16 +210,55 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	options := hcphas.Spec.ScalingOptions
+	hpa_template := hcphas.Spec.ScalingOptions.HpaTemplate
 	if hcphas.Spec.WarningCount == 1 {
-		if options.HpaTemplate.GetName() != "" {
+		if hcphas.Spec.CurrentStep == "HAS" {
+			// Sync 생성
 			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
 			command := "create"
-			sendSyncHPA(target_cluster, command, options.HpaTemplate)
+			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
+			if err != nil {
+				utilruntime.HandleError(fmt.Errorf(err.Error()))
+				return err
+			} else {
+				klog.Info("Success to Create Sync resource : ", h)
+				// hcphas 변경
+				hcphas.Status.LastSpec = hcphas.Spec
+				hcphas.Spec.CurrentStep = "Sync"
+			}
 		}
 	} else if hcphas.Spec.WarningCount == 2 {
-
+		if hcphas.Spec.CurrentStep == "HAS" && hpa_template.Spec.MaxReplicas > hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas {
+			// Sync 생성
+			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
+			command := "update"
+			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
+			if err != nil {
+				utilruntime.HandleError(fmt.Errorf(err.Error()))
+				return err
+			} else {
+				klog.Info("Success to Create Sync resource : ", h)
+				// hcphas 변경
+				hcphas.Status.LastSpec = hcphas.Spec
+				hcphas.Spec.CurrentStep = "Sync"
+			}
+		}
 	} else if hcphas.Spec.WarningCount == 3 {
-
+		if hcphas.Spec.CurrentStep == "VPA" {
+			// Sync 생성
+			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
+			command := "update"
+			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
+			if err != nil {
+				utilruntime.HandleError(fmt.Errorf(err.Error()))
+				return err
+			} else {
+				klog.Info("Success to Create Sync resource : ", h)
+				// hcphas 변경
+				hcphas.Status.LastSpec = hcphas.Spec
+				hcphas.Spec.CurrentStep = "Sync"
+			}
+		}
 	} else {
 		utilruntime.HandleError(fmt.Errorf("warning count is out of range"))
 	}

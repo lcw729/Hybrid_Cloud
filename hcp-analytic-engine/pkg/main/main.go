@@ -134,17 +134,21 @@ func main() {
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			WarningCount: 1,
+			CurrentStep:  "HAS", // HAS -> Sync -> Done
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
 				HpaTemplate: hpa,
 			},
 		},
+		// Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+		// 	CurrentStep: "HAS", // HAS -> Sync -> Done
+		// },
 	}
 	// hpa := &hpav1.HorizontalPodAutoscaler{}
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
 	if err != nil {
 		fmt.Println(err)
 	}
-	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("default").Create(context.TODO(), instance, metav1.CreateOptions{})
+	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
 	if err != nil {
 		fmt.Println(err)
 	}
