@@ -17,8 +17,6 @@ import (
 	"k8s.io/sample-controller/pkg/signals"
 )
 
-// var c chan string
-
 func main() {
 	klog.InitFlags(nil)
 	flag.Parse()
