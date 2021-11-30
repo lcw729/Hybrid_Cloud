@@ -20,11 +20,10 @@ type HCPClusterSpec struct {
 	Name          string `json:"name"`
 	Resourcegroup string `json:"resourcegroup"`
 	ProjectId     string `json:"projectid"`
-	JoinStatus    bool
 }
 
 type HCPClusterStatus struct {
-	JoinStatus bool `json:"join"`
+	Join bool `json:"join"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
