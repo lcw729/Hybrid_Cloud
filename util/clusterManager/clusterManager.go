@@ -43,6 +43,7 @@ func ListKubeFedClusters(genClient genericclient.Client, namespace string) *fedv
 	if err != nil {
 		fmt.Printf("Error retrieving list of federated clusters: %+v\n", err)
 	}
+
 	if len(tempClusterList.Items) == 0 {
 		fmt.Println("No federated clusters found")
 	}
@@ -73,6 +74,7 @@ func KubeFedClusterConfigs(clusterList *fedv1b1.KubeFedClusterList, genClient ge
 	}
 	return clusterConfigs
 }
+
 func KubeFedClusterGenClients(clusterList *fedv1b1.KubeFedClusterList, cluster_configs map[string]*rest.Config) map[string]genericclient.Client {
 
 	cluster_clients := make(map[string]genericclient.Client)
@@ -84,6 +86,7 @@ func KubeFedClusterGenClients(clusterList *fedv1b1.KubeFedClusterList, cluster_c
 	}
 	return cluster_clients
 }
+
 func KubeFedClusterKubeClients(clusterList *fedv1b1.KubeFedClusterList, cluster_configs map[string]*rest.Config) map[string]*kubernetes.Clientset {
 
 	cluster_clients := make(map[string]*kubernetes.Clientset)

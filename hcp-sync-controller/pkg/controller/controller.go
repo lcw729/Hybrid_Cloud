@@ -94,26 +94,6 @@ func NewController(
 		},
 	})
 
-	// Set up an event handler for when Deployment resources change. This
-	// handler will lookup the owner of the given Deployment, and if it is
-	// owned by a Foo resource then the handler will enqueue that Foo resource for
-	// processing. This way, we don't need to implement custom logic for
-	// handling Deployment resources. More info on this pattern:
-	// https://github.com/kubernetes/community/blob/8cafef897a22026d42f5e5bb3f104febe7e29830/contributors/devel/controllers.md
-	// deploymentInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-	// 	AddFunc: controller.handleObject,
-	// 	UpdateFunc: func(old, new interface{}) {
-	// 		newDepl := new.(*appsv1.Deployment)
-	// 		oldDepl := old.(*appsv1.Deployment)
-	// 		if newDepl.ResourceVersion == oldDepl.ResourceVersion {
-	// 			// Periodic resync will send update events for all known Deployments.
-	// 			// Two different versions of the same Deployment will always have different RVs.
-	// 			return
-	// 		}
-	// 		controller.handleObject(new)
-	// 	},
-	// 	DeleteFunc: controller.handleObject,
-	// })
 	return controller
 }
 
@@ -251,6 +231,38 @@ func (c *Controller) syncHandler(key string) error {
 		fmt.Println(err)
 		return err
 	}
+
+	// if obj.GetKind() == "Deployment" {
+	// 	subInstance := &appsv1.Deployment{}
+	// 	if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
+	// 		// do error check
+	// 		fmt.Println(err)
+	// 		return err
+	// 	}
+	// 	if command == "create" {
+	// 		err = clientset.Create(context.TODO(), subInstance)
+	// 		if err == nil {
+	// 			klog.V(2).Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+	// 		} else {
+	// 			klog.V(0).Info("[Error] Cannot Create Deployment : ", err)
+	// 		}
+	// 	} else if command == "delete" {
+	// 		err = clientset.Delete(context.TODO(), subInstance, subInstance.Namespace, subInstance.Name)
+	// 		if err == nil {
+	// 			klog.V(2).Info("Deleted Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+	// 		} else {
+	// 			klog.V(0).Info("[Error] Cannot Delete Deployment : ", err)
+	// 		}
+	// 	} else if command == "update" {
+	// 		err = clientset.Update(context.TODO(), subInstance)
+	// 		if err == nil {
+	// 			klog.V(2).Info("Updated Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+	// 		} else {
+	// 			klog.V(0).Info("[Error] Cannot Update Deployment : ", err)
+	// 		}
+	// 	}
+
+	// } else
 	if obj.GetKind() == "HorizontalPodAutoscaler" {
 		subInstance := &hpav1.HorizontalPodAutoscaler{}
 		if err := json.Unmarshal(jsonbody, &subInstance); err != nil {

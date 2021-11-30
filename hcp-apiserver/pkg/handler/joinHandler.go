@@ -7,9 +7,8 @@ import (
 
 	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
 	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
-	"Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
 	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
-	KubeFedCluster "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/clientset/versioned/typed/kubefedcluster/v1alpha1"
+	"Hybrid_Cluster/util/clusterManager"
 	"context"
 	"flag"
 	"fmt"
@@ -23,6 +22,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	kubefed "sigs.k8s.io/kubefed/pkg/kubefedctl"
 
 	// clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
 	// "context"
@@ -37,6 +37,7 @@ import (
 	// "k8s.io/client-go/rest"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"sigs.k8s.io/kubefed/pkg/kubefedctl/options"
 
 	// cobrautil "Hybrid_Cluster/hybridctl/util"
 	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
@@ -46,8 +47,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	// _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	// "k8s.io/client-go/tools/clientcmd"
-	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
+
+// type joinFederation struct {
+// 	options.GlobalSubcommandOptions
+// 	options.CommonJoinOptions
+// 	joinFederationOptions
+// }
+
+// type joinFederationOptions struct {
+// 	secretName      string
+// 	scope           apiextv1.ResourceScope
+// 	errorOnExisting bool
+// }
 
 func Join(info mappingTable.ClusterInfo) bool {
 
@@ -290,38 +302,51 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 		fmt.Println("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
-	kubefedcluster := &fedv1b1.KubeFedCluster{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "kubefedcluster",
-			APIVersion: "core.kubefed.io/v1beta1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      info.ClusterName,
-			Namespace: "kube-federation-system",
-		},
-		Spec: fedv1b1.KubeFedClusterSpec{
-			APIEndpoint: APIEndPoint,
-			CABundle:    join_cluster_secret.Data["ca.crt"],
-			SecretRef: fedv1b1.LocalSecretReference{
-				Name: cluster_secret.Name,
-			},
-			// DisabledTLSValidations: disabledTLSValidations,
-		},
-	}
-
-	apiextensionsClientSet, err := KubeFedCluster.NewForConfig(master_config)
+	cm := clusterManager.NewClusterManager()
+	scope, err := options.GetScopeFromKubeFedConfig(master_config, ns.Name)
 	if err != nil {
-		log.Println(err)
 		return false
 	}
-	newkubefedcluster, err_nkfc := apiextensionsClientSet.KubeFedClusters("kube-federation-system").Create(context.TODO(), (*v1alpha1.KubeFedCluster)(kubefedcluster), metav1.CreateOptions{})
-
-	if err_nkfc != nil {
-		log.Println(err_nkfc)
+	newkubefedcluster, err := kubefed.JoinCluster(cm.Host_config, cm.Cluster_configs[info.ClusterName], ns.Name, master_config.Host, info.ClusterName, cluster_secret.Name, scope, false, false)
+	if err != nil {
+		log.Println(err)
 		return false
 	} else {
 		fmt.Println("< Step 6 > Create KubefedCluster Resource [" + newkubefedcluster.Name + "] in hcp")
 	}
+	/*
+		kubefedcluster := &fedv1b1.KubeFedCluster{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "kubefedcluster",
+				APIVersion: "core.kubefed.io/v1beta1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      info.ClusterName,
+				Namespace: "kube-federation-system",
+			},
+			Spec: fedv1b1.KubeFedClusterSpec{
+				APIEndpoint: APIEndPoint,
+				CABundle:    join_cluster_secret.Data["ca.crt"],
+				SecretRef: fedv1b1.LocalSecretReference{
+					Name: cluster_secret.Name,
+				},
+				// DisabledTLSValidations: disabledTLSValidations,
+			},
+		}
 
+		apiextensionsClientSet, err := KubeFedCluster.NewForConfig(master_config)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		newkubefedcluster, err_nkfc := apiextensionsClientSet.KubeFedClusters("kube-federation-system").Create(context.TODO(), (*v1alpha1.KubeFedCluster)(kubefedcluster), metav1.CreateOptions{})
+
+		if err_nkfc != nil {
+			log.Println(err_nkfc)
+			return false
+		} else {
+			fmt.Println("< Step 6 > Create KubefedCluster Resource [" + newkubefedcluster.Name + "] in hcp")
+		}
+	*/
 	return true
 }

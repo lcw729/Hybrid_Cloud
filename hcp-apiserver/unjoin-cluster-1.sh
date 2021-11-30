@@ -5,6 +5,12 @@
 # kubectl delete kubefedclusters cluster-1 -n kube-federation-system --context kube-master
 
 
+kubectl delete ns "kube-federation-system" --context eks-cluster;
+kubectl delete sa eks-cluster-hcp -n kube-federation-system eks-cluster;
+kubectl delete clusterroles.rbac.authorization.k8s.io kubefed-controller-manager:eks-cluster eks-cluster ;
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io kubefed-controller-manager:eks-cluster-hcp eks-cluster;
+kubectl delete kubefedclusters.hcp.k8s.io eks-cluster -n kube-federation-system --context kube-master
+
 kubectl delete ns "kube-federation-system" --context arn:aws:eks:us-east-2:741566967679:cluster/eks-cluster;
 kubectl delete sa eks-cluster-hcp -n kube-federation-system --context arn:aws:eks:us-east-2:741566967679:cluster/eks-cluster;
 kubectl delete clusterroles.rbac.authorization.k8s.io kubefed-controller-manager:eks-cluster --context arn:aws:eks:us-east-2:741566967679:cluster/eks-cluster ;
