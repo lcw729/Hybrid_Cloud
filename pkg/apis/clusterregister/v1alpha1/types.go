@@ -6,31 +6,30 @@ import (
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type HCPCluster struct {
+type ClusterRegister struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   HCPClusterSpec   `json:"spec,omitempty"`
-	Status HCPClusterStatus `json:"status,omitempty"`
+	Spec   ClusterRegisterSpec   `json:"spec,omitempty"`
+	Status ClusterRegisterStatus `json:"status,omitempty"`
 }
 
-type HCPClusterSpec struct {
+type ClusterRegisterSpec struct {
 	Platform      string `json:"platform"`
 	Region        string `json:"region"`
 	Name          string `json:"name"`
 	Resourcegroup string `json:"resourcegroup"`
 	ProjectId     string `json:"projectid"`
-	JoinStatus    bool
 }
 
-type HCPClusterStatus struct {
-	JoinStatus bool `json:"join"`
+type ClusterRegisterStatus struct {
+	Join bool `json:"join"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type HCPClusterList struct {
+type ClusterRegisterList struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Items []HCPCluster `json:"items"`
+	Items []ClusterRegister `json:"items"`
 }

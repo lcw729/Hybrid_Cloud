@@ -1,6 +1,6 @@
 package util
 
-type kubeConfig struct {
+type KubeConfig struct {
 	APIVersion string `yaml:"apiVersion"`
 	Clusters   []struct {
 		Cluster struct {
