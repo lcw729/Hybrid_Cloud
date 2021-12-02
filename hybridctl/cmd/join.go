@@ -15,17 +15,12 @@
 package cmd
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
-
-	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
 
 	"Hybrid_Cluster/hybridctl/util"
 
@@ -177,28 +172,6 @@ func CheckHCPClusterListToJoin(platform string, clustername string) bool {
 	return false
 }
 
-// func CmdExec(cmdStr string) (string, error) {
-// 	cmd := exec.Command("bash", "-c", cmdStr)
-// 	cmd.Env = append(cmd.Env, "KUBECONFIG=~/.kube/kubeconfig")
-// 	output, err := cmd.Output()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return "", err
-// 	}
-// 	return string(output), err
-// }
-
-// func CmdExecsh(path string, args []string) (string, error) {
-// 	cmd := exec.Command("/bin/sh", args...)
-// 	cmd.Args = args
-// 	output, err := cmd.Output()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return "", err
-// 	}
-// 	return string(output), err
-// }
-
 func CreateHCPCluster(platform string, clustername string) {
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 	if err != nil {
@@ -230,27 +203,6 @@ func CreateHCPCluster(platform string, clustername string) {
 	} else {
 		fmt.Printf("success to register %s in %s\n", newhcpcluster.Name, newhcpcluster.Namespace)
 	}
-}
-
-func Request(info mappingTable.ClusterInfo) {
-	httpPostUrl := "http://localhost:8080/join"
-	jsonData, _ := json.Marshal(&info)
-
-	buff := bytes.NewBuffer(jsonData)
-	request, _ := http.NewRequest("POST", httpPostUrl, buff)
-	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer response.Body.Close()
-
-	fmt.Println("response Status:", response.Status)
-	fmt.Println("response Headers:", response.Header)
-	// handler.Join(info)
 }
 
 func createPlatformNamespace() {
