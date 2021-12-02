@@ -267,14 +267,14 @@ func (c *Controller) syncHandler(key string) error {
 					}
 				}
 			} else {
-				klog.Infof("%s is in a unstable state", clustername)
-				klog.Infof("Try to Join %s again", clustername)
-				hcpcluster.Spec.JoinStatus = "WAIT"
-				_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
-				if err != nil {
-					klog.Info(err)
-					return err
-				}
+				// klog.Infof("%s is in a unstable state", clustername)
+				// klog.Infof("Try to Join %s again", clustername)
+				// hcpcluster.Spec.JoinStatus = "WAIT"
+				// _, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+				// if err != nil {
+				// 	klog.Info(err)
+				// 	return err
+				// }
 
 			}
 		}
