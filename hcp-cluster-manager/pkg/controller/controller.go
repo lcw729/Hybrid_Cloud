@@ -1,14 +1,13 @@
 package controller
 
 import (
-	"Hybrid_Cluster/hybridctl/util"
+	cobrautil "Hybrid_Cluster/hybridctl/util"
 	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/informers/externalversions/hcpcluster/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
 	hcpclusterscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 
-	// "Hybrid_Cluster/util/clusterManager"
-
+	"Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
 	"log"
@@ -218,13 +217,11 @@ func (c *Controller) syncHandler(key string) error {
 	joinstatus := hcpcluster.Spec.JoinStatus
 	platform := hcpcluster.Spec.ClusterPlatform
 	clustername := hcpcluster.Name
+	var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
+	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 	if joinstatus == "WAIT" {
 		klog.Info("[JOIN START]")
-		var master_config, _ = util.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-		// var master_client = kubernetes.NewForConfigOrDie(master_config)
-		join_cluster_config, _ := util.BuildConfigFromFlags(clustername, "/root/.kube/config")
-		// join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
-		hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 		if err != nil {
 			klog.Info(err)
 			return err
@@ -239,6 +236,46 @@ func (c *Controller) syncHandler(key string) error {
 			} else {
 				klog.Info("success to join %s", clustername)
 			}
+		} else {
+			klog.Info("fail to join %s", clustername)
+		}
+	} else if joinstatus == "JOIN" {
+		cm := clusterManager.NewClusterManager()
+		// config, err := util.MarshalKubeConfig(hcpcluster.Spec.KubeconfigInfo)
+		if err != nil {
+			klog.Info(err)
+			return err
+		}
+		cluster_list := cm.Cluster_list
+		for _, cluster := range cluster_list.Items {
+
+			// kubefedclusterList 존재 여부 확인
+			if join_cluster_config.Host == cluster.Spec.APIEndpoint {
+				klog.Infof("%s is in a kubefedclusterList", clustername)
+				// kubefedcluster 상태 확인
+				kubefed_Type := cluster.Status.Conditions[0].Type
+				if kubefed_Type == "Ready" {
+					klog.Infof("%s is in a stable state", clustername)
+				} else {
+					klog.Infof("%s is in a unstable state", clustername)
+					klog.Info("Type: ", kubefed_Type)
+					hcpcluster.Spec.JoinStatus = "UNREADY"
+					_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+					if err != nil {
+						klog.Info(err)
+						return err
+					}
+				}
+			} else {
+				klog.Infof("%s is in a unstable state", clustername)
+				klog.Infof("Try to Join %s again", clustername)
+				hcpcluster.Spec.JoinStatus = "WAIT"
+				_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+				if err != nil {
+					klog.Info(err)
+					return err
+				}
+			}
 		}
 	}
 
@@ -250,17 +287,11 @@ func JoinCluster(platform string,
 	clustername string,
 	master_config *rest.Config,
 	join_cluster_config *rest.Config,
-	// master_client *kubernetes.Clientset,
-	// join_cluster_client *kubernetes.Clientset,
 	hcp_cluster *hcpclusterv1alpha1.Clientset) bool {
 
 	master_client := kubernetes.NewForConfigOrDie(master_config)
 	join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
-	// cluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(platform).Get(context.TODO(), clustername, metav1.GetOptions{})
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return false
-	// }
+
 	// 1. CREATE namespace "kube-federation-system"
 	Namespace := corev1.Namespace{
 		TypeMeta: metav1.TypeMeta{
@@ -402,18 +433,6 @@ func JoinCluster(platform string,
 		klog.Info("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
-	// cm := clusterManager.NewClusterManager()
-	// scope, err := options.GetScopeFromKubeFedConfig(master_config, ns.Name)
-	// if err != nil {
-	// 	return false
-	// }
-	// newkubefedcluster, err := kubefed.JoinCluster(cm.Host_config, cm.Cluster_configs[clustername], ns.Name, master_config.Host, clustername, cluster_secret.Name, scope, false, false)
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return false
-	// } else {
-	// 	klog.Info("< Step 6 > Create KubefedCluster Resource [" + newkubefedcluster.Name + "] in hcp")
-	// }
 	kubefedcluster := &fedv1b1.KubeFedCluster{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "kubefedcluster",
@@ -425,7 +444,7 @@ func JoinCluster(platform string,
 		},
 		Spec: fedv1b1.KubeFedClusterSpec{
 			APIEndpoint: join_cluster_config.Host,
-			CABundle:    join_cluster_secret.Data["ca.crt"],
+			// CABundle:    join_cluster_secret.Data["ca.crt"],
 			SecretRef: fedv1b1.LocalSecretReference{
 				Name: cluster_secret.Name,
 			},
@@ -445,23 +464,3 @@ func JoinCluster(platform string,
 
 	return true
 }
-
-// func CheckHCPClusterList(platform string, clustername string) bool {
-// 	master_config, _ := util.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-// 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	cluster_list, err := hcp_cluster.HcpV1alpha1().HCPClusters(platform).List(context.TODO(), metav1.ListOptions{})
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-
-// 	for _, cluster := range cluster_list.Items {
-// 		if cluster.Spec.ClusterPlatform == platform && cluster.Name == clustername {
-// 			return true
-// 		}
-// 	}
-// 	klog.Info("ERROR: no such Cluster")
-// 	return false
-// }
