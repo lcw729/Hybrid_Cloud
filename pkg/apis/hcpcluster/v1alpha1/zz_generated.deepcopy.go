@@ -56,7 +56,7 @@ func (in *HCPCluster) DeepCopyObject() runtime.Object {
 func (in *HCPClusterList) DeepCopyInto(out *HCPClusterList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]HCPCluster, len(*in))

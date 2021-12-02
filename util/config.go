@@ -1,5 +1,7 @@
 package util
 
+import "encoding/json"
+
 type KubeConfig struct {
 	APIVersion string `yaml:"apiVersion"`
 	Clusters   []struct {
@@ -45,4 +47,10 @@ type KubeConfig struct {
 			} `yaml:"exec,omitempty"`
 		} `yaml:"user"`
 	} `yaml:"users"`
+}
+
+func MarshalKubeConfig(data []byte) (KubeConfig, error) {
+	var kubeconfig KubeConfig
+	err := json.Unmarshal(data, &kubeconfig)
+	return kubeconfig, err
 }

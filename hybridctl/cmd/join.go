@@ -27,7 +27,7 @@ import (
 
 	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
 
-	cobrautil "Hybrid_Cluster/hybridctl/util"
+	"Hybrid_Cluster/hybridctl/util"
 
 	hcpclusterapis "Hybrid_Cluster/pkg/apis/hcpcluster/v1alpha1"
 	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
@@ -38,7 +38,7 @@ import (
 )
 
 var checkAKS, checkEKS, checkGKE = false, false, false
-var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+var master_config, _ = util.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 var master_client = kubernetes.NewForConfigOrDie(master_config)
 
 type Cli struct {
@@ -105,10 +105,11 @@ DESCRIPTION
 			case "gke":
 				fmt.Println("kubernetes engine Name : ", args[0])
 				fmt.Printf("Cluster Name : %s\n", args[1])
-				cli := mappingTable.ClusterInfo{
-					PlatformName: args[0],
-					ClusterName:  args[1]}
-				join(cli)
+				platform := args[0]
+				clustername := args[1]
+				if !CheckHCPClusterListToJoin(platform, clustername) {
+					return
+				}
 			case "register":
 				platform := args[1]
 				if platform == "" {
@@ -125,7 +126,7 @@ DESCRIPTION
 				case "eks":
 					fallthrough
 				case "gke":
-					CreateHCPCluster(clustername, platform)
+					CreateHCPCluster(platform, clustername)
 					return
 				default:
 					return
@@ -135,6 +136,45 @@ DESCRIPTION
 			}
 		}
 	},
+}
+
+func CheckHCPClusterListToJoin(platform string, clustername string) bool {
+	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		log.Println(err)
+	}
+	cluster_list, err := hcp_cluster.HcpV1alpha1().HCPClusters(platform).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		log.Println(err)
+	}
+
+	for _, cluster := range cluster_list.Items {
+		joinstatus := cluster.Spec.JoinStatus
+		if cluster.Spec.ClusterPlatform == platform && cluster.Name == clustername {
+			if joinstatus == "UNJOIN" {
+				joinstatus = "WAIT"
+				_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), &cluster, metav1.UpdateOptions{})
+				if err != nil {
+					fmt.Println(err)
+					return false
+				}
+				return true
+			} else if joinstatus == "WAIT" {
+				fmt.Println("ERROR: Cluster is already waiting to join")
+				return false
+			} else if joinstatus == "JOIN" {
+				fmt.Println("ERROR: This is an already joined cluster.")
+				return false
+			} else {
+				fmt.Println("ERROR: JOINSTATUS is wrong")
+				return false
+			}
+		}
+	}
+	fmt.Println("ERROR: no such Cluster")
+	fmt.Println("you must register yout cluster to join")
+	fmt.Println("ex) kubectl register <platform> <clustername>")
+	return false
 }
 
 // func CmdExec(cmdStr string) (string, error) {
@@ -159,21 +199,16 @@ DESCRIPTION
 // 	return string(output), err
 // }
 
-func CreateHCPCluster(clustername string, platform string) {
+func CreateHCPCluster(platform string, clustername string) {
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 	if err != nil {
 		log.Println(err)
 	}
-	// var config util.KubeConfig
 	data, err := ioutil.ReadFile("/root/.kube/kubeconfig")
 	if err != nil {
 		fmt.Println("File reading error", err)
 		return
 	}
-	// kubeconfig, err := json.Marshal(data)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
 	cluster := hcpclusterapis.HCPCluster{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HCPCluster",
@@ -197,7 +232,7 @@ func CreateHCPCluster(clustername string, platform string) {
 	}
 }
 
-func join(info mappingTable.ClusterInfo) {
+func Request(info mappingTable.ClusterInfo) {
 	httpPostUrl := "http://localhost:8080/join"
 	jsonData, _ := json.Marshal(&info)
 

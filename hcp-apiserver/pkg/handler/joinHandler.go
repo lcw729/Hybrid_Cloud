@@ -2,26 +2,18 @@ package handler
 
 import (
 	mappingTable "Hybrid_Cluster/hcp-apiserver/pkg/converter"
-	util "Hybrid_Cluster/hcp-apiserver/pkg/util"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 
 	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
 	// KubeFedCluster "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
-	clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+
 	"Hybrid_Cluster/util/clusterManager"
 	"context"
-	"flag"
 	"fmt"
 	"log"
-	"os/exec"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/eks"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	kubefed "sigs.k8s.io/kubefed/pkg/kubefedctl"
 
 	// clusterRegister "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
@@ -49,18 +41,7 @@ import (
 	// "k8s.io/client-go/tools/clientcmd"
 )
 
-// type joinFederation struct {
-// 	options.GlobalSubcommandOptions
-// 	options.CommonJoinOptions
-// 	joinFederationOptions
-// }
-
-// type joinFederationOptions struct {
-// 	secretName      string
-// 	scope           apiextv1.ResourceScope
-// 	errorOnExisting bool
-// }
-
+/*
 func Join(info mappingTable.ClusterInfo) bool {
 
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
@@ -154,6 +135,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 	fmt.Println("---joinHandler end---")
 	return true
 }
+*/
 
 func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.Clientset, APIEndPoint string) bool {
 
