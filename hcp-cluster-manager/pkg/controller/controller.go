@@ -275,6 +275,7 @@ func (c *Controller) syncHandler(key string) error {
 					klog.Info(err)
 					return err
 				}
+
 			}
 		}
 	}
