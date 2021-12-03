@@ -17,6 +17,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -27,6 +28,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 	kubefed "sigs.k8s.io/kubefed/pkg/client/generic"
 	// "sigs.k8s.io/kubefed/pkg/kubefedctl/options"
@@ -220,6 +222,8 @@ func (c *Controller) syncHandler(key string) error {
 	var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
+
+	// JOIN 대기
 	if joinstatus == "WAIT" {
 		klog.Info("[JOIN START]")
 		if err != nil {
@@ -239,26 +243,42 @@ func (c *Controller) syncHandler(key string) error {
 		} else {
 			klog.Info("fail to join %s", clustername)
 		}
-	} else if joinstatus == "JOIN" {
+	} else {
+		// JOIN/UNJOIN Cluster 상태 확인
+
 		cm := clusterManager.NewClusterManager()
-		// config, err := util.MarshalKubeConfig(hcpcluster.Spec.KubeconfigInfo)
 		if err != nil {
 			klog.Info(err)
 			return err
 		}
 		cluster_list := cm.Cluster_list
+		// kubefedclusterList 존재 여부 확인
 		for _, cluster := range cluster_list.Items {
 
-			// kubefedclusterList 존재 여부 확인
-			if join_cluster_config.Host == cluster.Spec.APIEndpoint {
-				klog.Infof("%s is in a kubefedclusterList", clustername)
-				// kubefedcluster 상태 확인
-				kubefed_Type := cluster.Status.Conditions[0].Type
-				if kubefed_Type == "Ready" {
-					klog.Infof("%s is in a stable state", clustername)
+			// check JOIN Cluster
+			if joinstatus == "JOIN" {
+				if clustername == cluster.Name {
+					klog.Infof("%s is in a kubefedclusterList", clustername)
+					// kubefedcluster 상태 확인
+					kubefed_Type := cluster.Status.Conditions[0].Type
+					if kubefed_Type == "Ready" {
+						// JOIN - STABLE
+						klog.Infof("%s is in a stable state", clustername)
+					} else {
+						// JOIN - UNSTABLE -- JOIN /kubefedcluster에 존재 / Ready 상태가 아닌 경우
+						klog.Infof("%s is in a unstable state", clustername)
+						klog.Info("Type: ", kubefed_Type)
+						hcpcluster.Spec.JoinStatus = "UNREADY"
+						_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+						if err != nil {
+							klog.Info(err)
+							return err
+						}
+					}
 				} else {
+					// JOIN - UNSTABLE -- JOIN / kubefedcluster에 존재하지 않는 경우
 					klog.Infof("%s is in a unstable state", clustername)
-					klog.Info("Type: ", kubefed_Type)
+					klog.Infof("Try to Join %s again", clustername)
 					hcpcluster.Spec.JoinStatus = "UNREADY"
 					_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
 					if err != nil {
@@ -266,16 +286,12 @@ func (c *Controller) syncHandler(key string) error {
 						return err
 					}
 				}
-			} else {
-				// klog.Infof("%s is in a unstable state", clustername)
-				// klog.Infof("Try to Join %s again", clustername)
-				// hcpcluster.Spec.JoinStatus = "WAIT"
-				// _, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
-				// if err != nil {
-				// 	klog.Info(err)
-				// 	return err
-				// }
-
+			} else if joinstatus == "UNJOIN" {
+				// UNJOIN -- UNJOIN / kubefedcluster에 존재하는 경우
+				if clustername == cluster.Name {
+					klog.Infof("ERROR: UNJOIN Cluster %s is in a kubefedclusterList", clustername)
+					// UNJOIN
+				}
 			}
 		}
 	}
@@ -445,7 +461,7 @@ func JoinCluster(platform string,
 		},
 		Spec: fedv1b1.KubeFedClusterSpec{
 			APIEndpoint: join_cluster_config.Host,
-			// CABundle:    join_cluster_secret.Data["ca.crt"],
+			CABundle:    join_cluster_secret.Data["ca.crt"],
 			SecretRef: fedv1b1.LocalSecretReference{
 				Name: cluster_secret.Name,
 			},
@@ -461,6 +477,105 @@ func JoinCluster(platform string,
 		return false
 	} else {
 		klog.Info("< Step 6 > Create KubefedCluster Resource [" + clustername + "] in hcp")
+	}
+
+	return true
+}
+
+func UnJoinCluster(clustername string,
+	master_config *rest.Config,
+	join_cluster_config *rest.Config) bool {
+
+	master_client2, err := client.New(master_config, client.Options{})
+	join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	ns := "kube-federation-system"
+	/*
+		// 1. DELETE namespace "kube-federation-system"
+		ns := "kube-federation-system"
+		err_ns := join_cluster_client.CoreV1().Namespaces().Delete(context.TODO(), ns, metav1.DeleteOptions{})
+
+		if err_ns != nil {
+			log.Println(err_ns)
+			return false
+		} else {
+			klog.Info("< Step 1 > Delete Namespace Resource [" + ns + "] in " + clustername)
+		}
+	*/
+
+	// 2. DELETE service account
+	sa := clustername + "-hcp"
+	err_sa := join_cluster_client.CoreV1().ServiceAccounts("kube-federation-system").Delete(context.TODO(), sa, metav1.DeleteOptions{})
+
+	if err_sa != nil {
+		log.Println(err_sa)
+		return false
+	} else {
+		klog.Info("< Step 2 > Delete Namespace Resource [" + sa + "] in " + clustername)
+	}
+
+	// 3. DELETE cluster role
+	cr := "kubefed-controller-manager:" + clustername
+	err_cr := join_cluster_client.RbacV1().ClusterRoles().Delete(context.TODO(), cr, metav1.DeleteOptions{})
+
+	if err_cr != nil {
+		log.Println(err_cr)
+		return false
+	} else {
+		klog.Info("< Step 3 > Delete ClusterRole Resource [" + cr + "] in " + clustername)
+	}
+
+	// 4. DELETE Cluster Role Binding
+	crb := "kubefed-controller-manager:" + sa
+	err_crb := join_cluster_client.RbacV1().ClusterRoleBindings().Delete(context.TODO(), "kubefed-controller-manager:"+sa, metav1.DeleteOptions{})
+
+	if err_crb != nil {
+		log.Println(err_crb)
+		return false
+	} else {
+		klog.Info("< Step 4 >  Delete ClusterRoleBinding Resource [" + crb + "] in " + clustername)
+	}
+
+	time.Sleep(1 * time.Second)
+
+	// 5. DELETE Kubefedcluster
+	kubefedcluster_instance := &fedv1b1.KubeFedCluster{}
+	err = master_client2.Get(context.TODO(), types.NamespacedName{Name: clustername, Namespace: ns}, kubefedcluster_instance)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	err = master_client2.Delete(context.TODO(), kubefedcluster_instance, &client.DeleteOptions{})
+
+	if err != nil {
+		log.Println(err)
+		return false
+	} else {
+		klog.Info("< Step 6 >  Delete KubefedCluster Resource [" + clustername + "] in hcp")
+	}
+
+	// 6. GET & DELETE secret (in hcp)
+
+	secret_instance := corev1.Secret{}
+	// master_client2.Get(context.TODO(), types.NamespacedName{Name: })
+	err = master_client2.Get(context.TODO(), types.NamespacedName{Name: kubefedcluster_instance.Spec.SecretRef.Name, Namespace: ns}, &secret_instance)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	err = master_client2.Delete(context.TODO(), &secret_instance, &client.DeleteOptions{})
+
+	if err != nil {
+		log.Println(err)
+		return false
+	} else {
+		klog.Info("< Step 7 >  Delete Secret Resource [" + secret_instance.Name + "] in " + "master")
 	}
 
 	return true
