@@ -6,15 +6,15 @@ import (
 	informer "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/informers/externalversions/hcpcluster/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
 	hcpclusterscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
-
 	"Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
 	"log"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -197,6 +197,7 @@ func (c *Controller) processNextWorkItem() bool {
 }
 
 func (c *Controller) syncHandler(key string) error {
+
 	// Convert the namespace/name string into a distinct namespace and name
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
@@ -224,14 +225,11 @@ func (c *Controller) syncHandler(key string) error {
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 
 	// JOIN 대기
-	if joinstatus == "WAIT" {
+	if joinstatus == "JOINING" {
 		klog.Info("[JOIN START]")
-		if err != nil {
-			klog.Info(err)
-			return err
-		}
 
 		if JoinCluster(platform, clustername, master_config, join_cluster_config, hcp_cluster) {
+
 			hcpcluster.Spec.JoinStatus = "JOIN"
 			_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
 			if err != nil {
@@ -240,8 +238,42 @@ func (c *Controller) syncHandler(key string) error {
 			} else {
 				klog.Info("success to join %s", clustername)
 			}
+
 		} else {
 			klog.Info("fail to join %s", clustername)
+		}
+
+	} else if joinstatus == "UNJOINING" {
+		klog.Info("[UNJOIN START]")
+		if err != nil {
+			klog.Info(err)
+			return err
+		}
+
+		if UnJoinCluster(clustername, master_config, join_cluster_config) {
+			hcpcluster.Spec.JoinStatus = "UNJOIN"
+			_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+			if err != nil {
+				klog.Info(err)
+				return err
+			} else {
+				klog.Info("success to unjoin %s", clustername)
+			}
+		} else {
+			klog.Info("fail to unjoin %s", clustername)
+		}
+	} else if joinstatus == "UNREADY" {
+		// UNREADY -- JOIN UNSTABLE
+		if UnJoinCluster(clustername, master_config, join_cluster_config) {
+			if JoinCluster(platform, clustername, master_config, join_cluster_config, hcp_cluster) {
+				hcpcluster.Spec.JoinStatus = "JOIN"
+				hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+				klog.Infof("success to join %s", clustername)
+			} else {
+				klog.Infof("fail to join %s", clustername)
+			}
+		} else {
+			klog.Infof("fail to unjoin %s", clustername)
 		}
 	} else {
 		// JOIN/UNJOIN Cluster 상태 확인
@@ -260,19 +292,21 @@ func (c *Controller) syncHandler(key string) error {
 				if clustername == cluster.Name {
 					klog.Infof("%s is in a kubefedclusterList", clustername)
 					// kubefedcluster 상태 확인
-					kubefed_Type := cluster.Status.Conditions[0].Type
-					if kubefed_Type == "Ready" {
-						// JOIN - STABLE
-						klog.Infof("%s is in a stable state", clustername)
-					} else {
-						// JOIN - UNSTABLE -- JOIN /kubefedcluster에 존재 / Ready 상태가 아닌 경우
-						klog.Infof("%s is in a unstable state", clustername)
-						klog.Info("Type: ", kubefed_Type)
-						hcpcluster.Spec.JoinStatus = "UNREADY"
-						_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
-						if err != nil {
-							klog.Info(err)
-							return err
+					if len(cluster.Status.Conditions) > 0 {
+						kubefed_Type := cluster.Status.Conditions[0].Type
+						if kubefed_Type == "Ready" {
+							// JOIN - STABLE
+							klog.Infof("%s is in a stable state", clustername)
+						} else {
+							// JOIN - UNSTABLE -- JOIN /kubefedcluster에 존재 / Ready 상태가 아닌 경우
+							klog.Infof("%s is in a unstable state", clustername)
+							klog.Info("Type: ", kubefed_Type)
+							hcpcluster.Spec.JoinStatus = "UNREADY"
+							_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+							if err != nil {
+								klog.Info(err)
+								return err
+							}
 						}
 					}
 				} else {
@@ -290,7 +324,7 @@ func (c *Controller) syncHandler(key string) error {
 				// UNJOIN -- UNJOIN / kubefedcluster에 존재하는 경우
 				if clustername == cluster.Name {
 					klog.Infof("ERROR: UNJOIN Cluster %s is in a kubefedclusterList", clustername)
-					// UNJOIN
+					UnJoinCluster(clustername, master_config, join_cluster_config)
 				}
 			}
 		}
@@ -330,7 +364,7 @@ func JoinCluster(platform string,
 		log.Println(err)
 		return false
 	}
-	if exist {
+	if !exist {
 		Namespace := corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Namespace",
@@ -341,13 +375,13 @@ func JoinCluster(platform string,
 			},
 		}
 
-		ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
+		nampespace, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
 
 		if err_ns != nil {
 			log.Println(err_ns)
 			return false
 		} else {
-			klog.Info("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + clustername)
+			klog.Info("< Step 1 > Create Namespace Resource [" + nampespace.Name + "] in " + clustername)
 		}
 	}
 
@@ -500,7 +534,6 @@ func JoinCluster(platform string,
 	} else {
 		klog.Info("< Step 6 > Create KubefedCluster Resource [" + clustername + "] in hcp")
 	}
-
 	return true
 }
 
@@ -565,14 +598,16 @@ func UnJoinCluster(clustername string,
 	time.Sleep(1 * time.Second)
 
 	// 5. DELETE Kubefedcluster
+	clientset := kubefed.NewForConfigOrDie(master_config)
 	kubefedcluster_instance := &fedv1b1.KubeFedCluster{}
-	err = master_client2.Get(context.TODO(), types.NamespacedName{Name: clustername, Namespace: ns}, kubefedcluster_instance)
+	err = clientset.Get(context.TODO(), kubefedcluster_instance, ns, clustername)
+	// err = master_client2.Get(context.TODO(), types.NamespacedName{Name: clustername, Namespace: ns}, kubefedcluster_instance)
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 
-	err = master_client2.Delete(context.TODO(), kubefedcluster_instance, &client.DeleteOptions{})
+	err = clientset.Delete(context.TODO(), kubefedcluster_instance, ns, clustername, &client.DeleteOptions{})
 
 	if err != nil {
 		log.Println(err)

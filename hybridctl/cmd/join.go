@@ -147,7 +147,7 @@ func CheckHCPClusterListToJoin(platform string, clustername string) bool {
 		joinstatus := cluster.Spec.JoinStatus
 		if cluster.Spec.ClusterPlatform == platform && cluster.Name == clustername {
 			if joinstatus == "UNJOIN" {
-				cluster.Spec.JoinStatus = "WAIT"
+				cluster.Spec.JoinStatus = "JOINING"
 				_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), &cluster, metav1.UpdateOptions{})
 				fmt.Println(cluster.Spec.JoinStatus)
 				if err != nil {
@@ -155,7 +155,7 @@ func CheckHCPClusterListToJoin(platform string, clustername string) bool {
 					return false
 				}
 				return true
-			} else if joinstatus == "WAIT" {
+			} else if joinstatus == "JOINING" {
 				fmt.Println("ERROR: Cluster is already waiting to join")
 				return false
 			} else if joinstatus == "JOIN" {
