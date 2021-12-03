@@ -300,6 +300,20 @@ func (c *Controller) syncHandler(key string) error {
 
 }
 
+func checkNamespaceExistence(config *rest.Config, ns string) (bool, error) {
+	client := kubernetes.NewForConfigOrDie(config)
+	nsList, err := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		klog.Info(err)
+		return false, err
+	}
+	for _, n := range nsList.Items {
+		if n.Name == ns {
+			return true, nil
+		}
+	}
+	return false, err
+}
 func JoinCluster(platform string,
 	clustername string,
 	master_config *rest.Config,
@@ -309,24 +323,32 @@ func JoinCluster(platform string,
 	master_client := kubernetes.NewForConfigOrDie(master_config)
 	join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
 
+	ns := "kube-federation-system"
 	// 1. CREATE namespace "kube-federation-system"
-	Namespace := corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "kube-federation-system",
-		},
-	}
-
-	ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
-
-	if err_ns != nil {
-		log.Println(err_ns)
+	exist, err := checkNamespaceExistence(join_cluster_config, ns)
+	if err != nil {
+		log.Println(err)
 		return false
-	} else {
-		klog.Info("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + clustername)
+	}
+	if exist {
+		Namespace := corev1.Namespace{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Namespace",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "kube-federation-system",
+			},
+		}
+
+		ns, err_ns := join_cluster_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
+
+		if err_ns != nil {
+			log.Println(err_ns)
+			return false
+		} else {
+			klog.Info("< Step 1 > Create Namespace Resource [" + ns.Name + "] in " + clustername)
+		}
 	}
 
 	// 2. CREATE service account
@@ -470,7 +492,7 @@ func JoinCluster(platform string,
 	}
 
 	clientset := kubefed.NewForConfigOrDie(master_config)
-	err := clientset.Create(context.TODO(), kubefedcluster)
+	err = clientset.Create(context.TODO(), kubefedcluster)
 
 	if err != nil {
 		log.Println(err)
