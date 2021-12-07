@@ -80,12 +80,15 @@ func ChangeConfigClusterName(platform string, clustername string) error {
 		return err
 	}
 
-	hcpconfig.Clusters[0].Name = clustername
-	hcpconfig.Contexts[0].Name = clustername
-	hcpconfig.Contexts[0].Context.Cluster = clustername
-	hcpconfig.Contexts[0].Context.User = clustername
-	hcpconfig.Users[0].Name = clustername
-
+	if len(hcpconfig.Clusters) > 0 && len(hcpconfig.Contexts) > 0 && len(hcpconfig.Users) > 0 {
+		hcpconfig.Clusters[0].Name = clustername
+		hcpconfig.Contexts[0].Name = clustername
+		hcpconfig.Contexts[0].Context.Cluster = clustername
+		hcpconfig.Contexts[0].Context.User = clustername
+		hcpconfig.Users[0].Name = clustername
+	} else {
+		return nil
+	}
 	data, err := yaml.Marshal(hcpconfig)
 	if err != nil {
 		return err
