@@ -14,7 +14,7 @@ fi
 cd ~/.kube
 touch kubeconfig
 cat /dev/null > kubeconfig
-export KUBECONFIG="~/.kube/kubeconfig"
+export KUBECONFIG=~/.kube/kubeconfig
 
 case "$1" in 
     "aks") 

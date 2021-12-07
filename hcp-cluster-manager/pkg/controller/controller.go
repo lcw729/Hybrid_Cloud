@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"log"
 	"time"
-
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	corev1 "k8s.io/api/core/v1"
@@ -309,17 +309,18 @@ func (c *Controller) syncHandler(key string) error {
 							}
 						}
 					}
-				} else {
-					// JOIN - UNSTABLE -- JOIN / kubefedcluster에 존재하지 않는 경우
-					klog.Infof("%s is in a unstable state", clustername)
-					klog.Infof("Try to Join %s again", clustername)
-					hcpcluster.Spec.JoinStatus = "UNREADY"
-					_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
-					if err != nil {
-						klog.Info(err)
-						return err
-					}
 				}
+				// else {
+				// 	// JOIN - UNSTABLE -- JOIN / kubefedcluster에 존재하지 않는 경우
+				// 	klog.Infof("%s is in a unstable state", clustername)
+				// 	klog.Infof("Try to Join %s again", clustername)
+				// 	hcpcluster.Spec.JoinStatus = "UNREADY"
+				// 	_, err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+				// 	if err != nil {
+				// 		klog.Info(err)
+				// 		return err
+				// 	}
+				// }
 			} else if joinstatus == "UNJOIN" {
 				// UNJOIN -- UNJOIN / kubefedcluster에 존재하는 경우
 				if clustername == cluster.Name {

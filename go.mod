@@ -23,7 +23,7 @@ require (
 	// google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.22.4
-	k8s.io/apiextensions-apiserver v0.22.4
+	k8s.io/apiextensions-apiserver v0.22.4 // indirect
 	k8s.io/apimachinery v0.22.4
 	k8s.io/autoscaler/vertical-pod-autoscaler v0.9.2
 	k8s.io/client-go v0.22.4
