@@ -135,6 +135,7 @@ DESCRIPTION
 			default:
 				fmt.Println("Run 'hybridctl join --help' to view all commands")
 			}
+			//
 		}
 	},
 }
