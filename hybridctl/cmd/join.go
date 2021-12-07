@@ -26,6 +26,7 @@ import (
 
 	hcpclusterapis "Hybrid_Cluster/pkg/apis/hcpcluster/v1alpha1"
 	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	u "Hybrid_Cluster/util"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -122,6 +123,10 @@ DESCRIPTION
 					fallthrough
 				case "gke":
 					CreateHCPCluster(platform, clustername)
+					err := u.ChangeConfigClusterName(platform, clustername)
+					if err != nil {
+						fmt.Println(err)
+					}
 					return
 				default:
 					return
