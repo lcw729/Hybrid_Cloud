@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	stopCh := signals.SetupSignalHandler()
-// 
+
 	cm := clusterManager.NewClusterManager()
 	hcpcluster_client, err := hcpclusterv1alpha1.NewForConfig(cm.Host_config)
 	if err != nil {
