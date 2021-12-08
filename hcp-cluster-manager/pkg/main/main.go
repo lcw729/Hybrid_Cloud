@@ -27,7 +27,7 @@ func main() {
 	}
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(cm.Host_kubeClient, time.Second*30)
 	hcpclusterInformerFactory := informers.NewSharedInformerFactory(hcpcluster_client, time.Second*30)
-
+// 
 	controller := controller.NewController(cm.Host_kubeClient, hcpcluster_client, hcpclusterInformerFactory.Hcp().V1alpha1().HCPClusters())
 	kubeInformerFactory.Start(stopCh)
 	hcpclusterInformerFactory.Start(stopCh)
