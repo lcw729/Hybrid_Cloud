@@ -150,5 +150,6 @@ func main() {
 	} else {
 		fmt.Printf("create %s Done\n", newhas.Name)
 	}
+	"--"
 
 }
