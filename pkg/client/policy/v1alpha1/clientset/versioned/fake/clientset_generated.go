@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "Hybrid_Cluster/pkg/client/clientset/versioned"
-	hcpv1alpha1 "Hybrid_Cluster/pkg/client/clientset/versioned/typed/clusterregister/v1alpha1"
-	fakehcpv1alpha1 "Hybrid_Cluster/pkg/client/clientset/versioned/typed/clusterregister/v1alpha1/fake"
+	clientset "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
+	hcpv1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned/typed/hcppolicy/v1alpha1"
+	fakehcpv1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned/typed/hcppolicy/v1alpha1/fake"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"

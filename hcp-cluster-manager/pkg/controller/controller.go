@@ -11,8 +11,9 @@ import (
 	"fmt"
 	"log"
 	"time"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	rbacv1 "k8s.io/api/rbac/v1"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -544,6 +545,7 @@ func UnJoinCluster(clustername string,
 
 	master_client2, err := client.New(master_config, client.Options{})
 	join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
+
 	if err != nil {
 		log.Println(err)
 		return false

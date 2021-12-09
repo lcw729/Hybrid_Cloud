@@ -24,13 +24,13 @@ import (
 	"flag"
 	"time"
 
-	v1alpha1hcppolicy "Hybrid_Cluster/pkg/client/clientset/hcppolicy/v1alpha1/clientset/versioned"
+	v1alpha1hcppolicy "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
 
 	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/klog/v2"
 
-	informers "Hybrid_Cluster/pkg/client/informers/externalversions"
+	informers "Hybrid_Cluster/pkg/client/policy/v1alpha1/informers/externalversions"
 
 	"k8s.io/sample-controller/pkg/signals"
 )

@@ -19,9 +19,9 @@ limitations under the License.
 package externalversions
 
 import (
-	versioned "Hybrid_Cluster/pkg/client/clientset/versioned"
-	hcppolicy "Hybrid_Cluster/pkg/client/informers/externalversions/hcppolicy"
-	internalinterfaces "Hybrid_Cluster/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
+	hcppolicy "Hybrid_Cluster/pkg/client/policy/v1alpha1/informers/externalversions/hcppolicy"
+	internalinterfaces "Hybrid_Cluster/pkg/client/policy/v1alpha1/informers/externalversions/internalinterfaces"
 	reflect "reflect"
 	sync "sync"
 	time "time"

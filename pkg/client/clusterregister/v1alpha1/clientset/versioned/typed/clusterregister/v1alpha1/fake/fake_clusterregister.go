@@ -64,7 +64,7 @@ func (c *FakeClusterRegisters) List(ctx context.Context, opts v1.ListOptions) (r
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.ClusterRegisterList{ListMeta: obj.(*v1alpha1.ClusterRegisterList).ListMeta}
+	list := &v1alpha1.ClusterRegisterList{TypeMeta: obj.(*v1alpha1.ClusterRegisterList).TypeMeta}
 	for _, item := range obj.(*v1alpha1.ClusterRegisterList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)

@@ -1,7 +1,7 @@
 package clusterManager
 
 import (
-	// clientV1alpha1 "Hybrid_Cluster/clientset/v1alpha1"
+	// clientV1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset"
 
 	"context"
 	"fmt"
