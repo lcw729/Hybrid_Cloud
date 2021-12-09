@@ -1,33 +1,54 @@
 package main
 
 import (
-	// "Hybrid_Cluster/analytic-engine/analyticEngine"
-
 	"Hybrid_Cluster/hcp-scheduler/pkg/policy"
-	scheduler "Hybrid_Cluster/hcp-scheduler/pkg/scheduler"
-	algopb "Hybrid_Cluster/protos/v1/algo"
-
-	grpc "google.golang.org/grpc"
-
 	"context"
 	"fmt"
 	"log"
 	"time"
+
+	// "Hybrid_Cluster/analytic-engine/analyticEngine"
+	// "Hybrid_Cluster/hcp-scheduler/pkg/policy"
+	"Hybrid_Cluster/hcp-scheduler/pkg/resource"
+	scheduler "Hybrid_Cluster/hcp-scheduler/pkg/scheduler"
+	algopb "Hybrid_Cluster/protos/v1/algo"
+	// // grpc "google.golang.org/grpc"
+	// "context"
+	// "fmt"
+	// "log"
+	// "time"
+	// v1 "k8s.io/api/apps/v1"
+	// "k8s.io/client-go/kubernetes"
 )
 
 func main() {
 
-	conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure(), grpc.WithBlock())
+	p, err := resource.GetPod("kube-master", "nginx-deployment-69f8d49b75-28mdm", "default")
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		fmt.Println(err)
 	}
-	defer conn.Close()
-	c := algopb.NewAlgoClient(conn)
+	d, err := resource.GetDeployment("kube-master", p)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		resource.UpdateDeployment(d, 5)
+	}
+	err = resource.CreateDeployment("aks-master", "aks-agentpool-21474300-vmss000003", d)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// createDeployment("kube-master")
+	// conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure(), grpc.WithBlock())
+	// if err != nil {
+	// 	log.Fatalf("did not connect: %v", err)
+	// }
+	// defer conn.Close()
+	// c := algopb.NewAlgoClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	// defer cancel()
 
-	optimalArrangement(c, ctx)
+	// optimalArrangement(c, ctx)
 	// ResourceExtensionSchedule(c, ctx)
 	// ResourceConfigurationSchedule(c, ctx)
 
