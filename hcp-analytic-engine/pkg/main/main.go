@@ -2,13 +2,16 @@ package main
 
 import (
 	// algopb "Hybrid_Cluster/protos/v1/algo"
+	resource "Hybrid_Cluster/hcp-scheduler/pkg/resource"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	cm "Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
 
+	autoscaling "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	vpav1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 
 	hpav1 "k8s.io/api/autoscaling/v1"
 )
@@ -106,6 +109,67 @@ func main() {
 			log.Fatalf("failed to serve: %s", err)
 		}
 	*/
+	cm := cm.NewClusterManager()
+	master_config := cm.Host_config
+	// client := kubernetes.NewForConfigOrDie(master_config)
+	cluster := "kube-master"
+	pod := "nginx-deployment-69f8d49b75-hc7pd"
+	ns := "default"
+	p, err := resource.GetPod(cluster, pod, ns)
+	if err != nil {
+		fmt.Println(err)
+	}
+	d, err := resource.GetDeployment(cluster, p)
+	if err != nil {
+		fmt.Println(err)
+	}
+	deploymentName := "nginx-deployment"
+	updateMode := vpav1.UpdateModeAuto
+	vpa := vpav1.VerticalPodAutoscaler{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "autoscaling.k8s.io/v1",
+			Kind:       "VerticalPodAutoscaler",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: deploymentName,
+		},
+		Spec: vpav1.VerticalPodAutoscalerSpec{
+			TargetRef: &autoscaling.CrossVersionObjectReference{
+				APIVersion: d.APIVersion,
+				Kind:       d.Kind,
+				Name:       d.Name,
+			},
+			UpdatePolicy: &vpav1.PodUpdatePolicy{
+				UpdateMode: &updateMode,
+			},
+		},
+	}
+	instance := &resourcev1alpha1.HCPHybridAutoScaler{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "nginx-deployment" + "-vpa",
+		},
+		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
+			WarningCount: 3,
+			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			ScalingOptions: resourcev1alpha1.ScalingOptions{
+				VpaTemplate: vpa,
+			},
+		},
+	}
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		fmt.Println(err)
+	}
+	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("create %s Done\n", newhas.Name)
+	}
+
+}
+
+func hpatest() {
 	cm := cm.NewClusterManager()
 	master_config := cm.Host_config
 	// client := kubernetes.NewForConfigOrDie(master_config)
