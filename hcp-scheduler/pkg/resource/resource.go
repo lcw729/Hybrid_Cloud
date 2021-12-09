@@ -22,7 +22,7 @@ func GetPod(cluster string, pod string, pod_namespace string) (*corev1.Pod, erro
 	if err != nil {
 		return p, err
 	} else {
-		fmt.Printf("success to get pod %s [cluster %s, node %s]\n", p.Name, p.ClusterName, p.Spec.NodeName)
+		fmt.Printf("success to get pod %s [cluster %s, node %s]\n", p.Name, cluster, p.Spec.NodeName)
 		return p, err
 	}
 }
@@ -44,7 +44,7 @@ func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
 	if err != nil {
 		return d, err
 	} else {
-		fmt.Printf("success to get deployment %s in cluster %s [replicas : %d]\n", d.Name, d.ClusterName, *d.Spec.Replicas)
+		fmt.Printf("success to get deployment %s in cluster %s [replicas : %d]\n", d.Name, cluster, *d.Spec.Replicas)
 	}
 	return d, err
 }
@@ -99,22 +99,26 @@ func CreateDeployment(cluster string, node string, deployment *v1.Deployment) er
 	if err != nil {
 		return err
 	} else {
-		fmt.Printf("success to create %s in cluster %s [replicas : %d]\n", new_dep.Name, new_dep.ClusterName, *deployment.Spec.Replicas)
+		fmt.Printf("success to create %s in cluster %s [replicas : %d]\n", new_dep.Name, cluster, *deployment.Spec.Replicas)
 	}
 	return nil
 }
 
-func UpdateDeployment(deployment *v1.Deployment, replicas int32) error {
-	config, _ := cobrautil.BuildConfigFromFlags(deployment.ClusterName, "/root/.kube/config")
+func UpdateDeployment(cluster string, deployment *v1.Deployment, replicas int32) error {
+	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
 
-	deployment.Spec.Replicas = &replicas
-	new_dep, err := cluster_client.AppsV1().Deployments("default").Update(context.TODO(), deployment, metav1.UpdateOptions{})
-
-	if err != nil {
-		return err
+	if deployment.Status.Replicas == deployment.Status.ReadyReplicas && deployment.Status.Replicas == deployment.Status.AvailableReplicas {
+		fmt.Println("deployment status is OK")
+		deployment.Spec.Replicas = &replicas
+		new_dep, err := cluster_client.AppsV1().Deployments("default").Update(context.TODO(), deployment, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		} else {
+			fmt.Printf("success to update %s in cluster %s [replicas : %d]\n", new_dep.Name, cluster, *deployment.Spec.Replicas)
+		}
 	} else {
-		fmt.Printf("success to update %s in cluster %s [replicas : %d]\n", new_dep.Name, new_dep.ClusterName, &deployment.Spec.Replicas)
+		fmt.Println("deployment status is not stable")
 	}
 	return nil
 }

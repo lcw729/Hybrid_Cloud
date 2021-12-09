@@ -12,6 +12,11 @@ import (
 	"Hybrid_Cluster/hcp-scheduler/pkg/resource"
 	scheduler "Hybrid_Cluster/hcp-scheduler/pkg/scheduler"
 	algopb "Hybrid_Cluster/protos/v1/algo"
+
+	"google.golang.org/grpc"
+	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	// // grpc "google.golang.org/grpc"
 	// "context"
 	// "fmt"
@@ -22,8 +27,51 @@ import (
 )
 
 func main() {
+	replicas := int32(3)
 
-	p, err := resource.GetPod("kube-master", "nginx-deployment-69f8d49b75-28mdm", "default")
+	deployment := v1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: "apps/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "nginx-deployment",
+			Namespace: "default",
+			Labels:    map[string]string{"app": "nginx"},
+		},
+		Spec: v1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "nginx",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{"app": "nginx"},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "nginx",
+							Image: "nginx:1.14.2",
+							Ports: []corev1.ContainerPort{
+								{
+									ContainerPort: 80,
+								},
+							},
+						},
+					},
+					// NodeName: "cluster2-worker2",
+				},
+			},
+		},
+	}
+	err := resource.CreateDeployment("kube-master", "cluster2-worker2", &deployment)
+	if err != nil {
+		fmt.Println(err)
+	}
+	p, err := resource.GetPod("kube-master", "nginx-deployment-69f8d49b75-qhrtd", "default")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -31,24 +79,24 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		resource.UpdateDeployment(d, 5)
+		resource.UpdateDeployment("kube-master", d, 4)
 	}
 	err = resource.CreateDeployment("aks-master", "aks-agentpool-21474300-vmss000003", d)
 	if err != nil {
 		fmt.Println(err)
 	}
 	// createDeployment("kube-master")
-	// conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure(), grpc.WithBlock())
-	// if err != nil {
-	// 	log.Fatalf("did not connect: %v", err)
-	// }
-	// defer conn.Close()
-	// c := algopb.NewAlgoClient(conn)
+	conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := algopb.NewAlgoClient(conn)
 
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	defer cancel()
 
-	// optimalArrangement(c, ctx)
+	optimalArrangement(c, ctx)
 	// ResourceExtensionSchedule(c, ctx)
 	// ResourceConfigurationSchedule(c, ctx)
 
