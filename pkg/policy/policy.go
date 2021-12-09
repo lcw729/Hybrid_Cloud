@@ -1,10 +1,12 @@
 package policy
 
 import (
-	"Hybrid_Cluster/clientset/v1alpha1"
+	"context"
 	"fmt"
 	"log"
 	"strconv"
+
+	v1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -14,7 +16,7 @@ import (
 func GetCycle() float64 {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	clientset, err := v1alpha1.NewForConfig(master_config)
-	hcppolicy, err := clientset.HCPPolicy("hcp").Get("weight-calculation-cycle", metav1.GetOptions{})
+	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "weight-calculation-cycle", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
