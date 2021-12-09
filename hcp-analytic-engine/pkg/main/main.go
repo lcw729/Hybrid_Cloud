@@ -118,19 +118,19 @@ func main() {
 			APIVersion: "autoscaling/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "hpa1",
+			Name: "nginx-deployment",
 		},
 		Spec: hpav1.HorizontalPodAutoscalerSpec{
 			MinReplicas: min,
-			MaxReplicas: 5,
+			MaxReplicas: 10,
 		},
 	}
 	hpa.Spec.ScaleTargetRef.APIVersion = "apps/v1"
 	hpa.Spec.ScaleTargetRef.Kind = "Deployment"
-	hpa.Spec.ScaleTargetRef.Name = "php-apache"
+	hpa.Spec.ScaleTargetRef.Name = "nginx-deployment"
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "has1",
+			Name: hpa.Spec.ScaleTargetRef.Name,
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			WarningCount: 1,

@@ -15,6 +15,7 @@ import (
 	hpav1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -276,6 +277,7 @@ func (c *Controller) syncHandler(key string) error {
 			// err = clusterClient.Create(context.TODO(), subInstance)
 			if err == nil {
 				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 			} else {
 				klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)
 				return err

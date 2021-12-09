@@ -79,7 +79,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		resource.UpdateDeployment("kube-master", d, 4)
+		resource.UpdateDeployment("kube-master", d, 5)
 	}
 	err = resource.CreateDeployment("aks-master", "aks-agentpool-21474300-vmss000003", d)
 	if err != nil {
