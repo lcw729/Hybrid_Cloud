@@ -15,6 +15,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -227,6 +228,7 @@ func (c *Controller) syncHandler(key string) error {
 				// hcphas 변경
 				hcphas.Status.LastSpec = hcphas.Spec
 				hcphas.Spec.CurrentStep = "Sync"
+				c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
 			}
 		}
 	} else if hcphas.Spec.WarningCount == 2 {
