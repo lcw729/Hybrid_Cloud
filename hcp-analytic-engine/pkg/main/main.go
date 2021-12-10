@@ -2,7 +2,7 @@ package main
 
 import (
 	// algopb "Hybrid_Cluster/protos/v1/algo"
-	resource "Hybrid_Cluster/hcp-scheduler/pkg/resource"
+	resource "Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	cm "Hybrid_Cluster/util/clusterManager"
@@ -10,10 +10,10 @@ import (
 	"fmt"
 
 	autoscaling "k8s.io/api/autoscaling/v1"
+	hpav2beta1 "k8s.io/api/autoscaling/v2beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpav1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
-
-	hpav1 "k8s.io/api/autoscaling/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 /*
@@ -83,7 +83,7 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 */
 
 func main() {
-
+	hpatest()
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
 		if err != nil {
@@ -109,9 +109,155 @@ func main() {
 			log.Fatalf("failed to serve: %s", err)
 		}
 	*/
+
+}
+
+func hpatest() {
 	cm := cm.NewClusterManager()
 	master_config := cm.Host_config
-	// client := kubernetes.NewForConfigOrDie(master_config)
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 1. Pod 정보 -> Deployment 정보 얻기
+	cluster := "kube-master"
+	pod := "nginx-deployment-69f8d49b75-65pzf"
+	ns := "default"
+	p, err := resource.GetPod(cluster, pod, ns)
+	if err != nil {
+		fmt.Println(err)
+	}
+	d, err := resource.GetDeployment(cluster, p)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(d.Name)
+
+	// 2. hapTemplate 생성
+	var num int32 = 1
+	var min = &num
+	hpa := hpav2beta1.HorizontalPodAutoscaler{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "HorizontalPodAutoscaler",
+			APIVersion: "autoscaling/v2beta1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      d.Name,
+			Namespace: d.Namespace,
+		},
+		Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
+			MinReplicas: min,
+			MaxReplicas: 10,
+			ScaleTargetRef: hpav2beta1.CrossVersionObjectReference{
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
+				Name:       d.Name,
+			},
+		},
+	}
+
+	// 3. hpaTemplate -> HCPHybridAutoScaler 생성
+	instance := &resourcev1alpha1.HCPHybridAutoScaler{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa",
+		},
+		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
+			WarningCount: 1,
+			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			ScalingOptions: resourcev1alpha1.ScalingOptions{
+				HpaTemplate: hpa,
+			},
+		},
+	}
+
+	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("create %s Done\n", newhas.Name)
+	}
+
+}
+
+func hpatest2() {
+	cm := cm.NewClusterManager()
+	master_config := cm.Host_config
+
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// 1. Pod 정보 -> Deployment 정보 얻기
+	cluster := "kube-master"
+	pod := "php-apache-79544c9bd9-854h4"
+	ns := "default"
+	p, err := resource.GetPod(cluster, pod, ns)
+	if err != nil {
+		fmt.Println(err)
+	}
+	d, err := resource.GetDeployment(cluster, p)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 2. hapTemplate (warningCount 1) 정보 얻기
+	client, err := kubernetes.NewForConfig(master_config)
+	hpa, err := client.AutoscalingV2beta1().HorizontalPodAutoscalers(d.Namespace).Get(context.TODO(), d.Name, metav1.GetOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// 2-1. hpa max값 설정
+	maxReplicas := hpa.Spec.MaxReplicas
+	maxReplicas = maxReplicas * 2
+	nhpa := hpav2beta1.HorizontalPodAutoscaler{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "HorizontalPodAutoscaler",
+			APIVersion: "autoscaling/v2beta1",
+		},
+		ObjectMeta: hpa.ObjectMeta,
+		Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
+			MinReplicas:    hpa.Spec.MinReplicas,
+			MaxReplicas:    maxReplicas,
+			ScaleTargetRef: hpa.Spec.ScaleTargetRef,
+		},
+	}
+
+	instance := &resourcev1alpha1.HCPHybridAutoScaler{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa2",
+		},
+		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
+			WarningCount: 2,
+			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			ScalingOptions: resourcev1alpha1.ScalingOptions{
+				HpaTemplate: nhpa,
+			},
+		},
+	}
+	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("create %s Done\n", newhas.Name)
+	}
+
+}
+
+func vpatest() {
+	cm := cm.NewClusterManager()
+	master_config := cm.Host_config
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// 1. Pod 정보 -> Deployment 정보 얻기
 	cluster := "kube-master"
 	pod := "nginx-deployment-69f8d49b75-hc7pd"
 	ns := "default"
@@ -123,7 +269,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	deploymentName := "nginx-deployment"
+
+	// 2. vpaTemplate 생성
 	updateMode := vpav1beta2.UpdateModeAuto
 	vpa := vpav1beta2.VerticalPodAutoscaler{
 		TypeMeta: metav1.TypeMeta{
@@ -131,7 +278,8 @@ func main() {
 			Kind:       "VerticalPodAutoscaler",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: deploymentName,
+			Name:      d.Name,
+			Namespace: d.Namespace,
 		},
 		Spec: vpav1beta2.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscaling.CrossVersionObjectReference{
@@ -144,9 +292,11 @@ func main() {
 			},
 		},
 	}
+
+	// 3. vpaTemplate -> HCPHybridAutoScaler 생성
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "nginx-deployment" + "-vpa",
+			Name: vpa.Name + "-vpa",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			WarningCount: 3,
@@ -156,63 +306,10 @@ func main() {
 			},
 		},
 	}
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
-	if err != nil {
-		fmt.Println(err)
-	}
 	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Printf("create %s Done\n", newhas.Name)
 	}
-
-}
-
-func hpatest() {
-	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-	// client := kubernetes.NewForConfigOrDie(master_config)
-
-	var num int32 = 1
-	var min = &num
-	hpa := hpav1.HorizontalPodAutoscaler{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "HorizontalPodAutoscaler",
-			APIVersion: "autoscaling/v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "nginx-deployment",
-		},
-		Spec: hpav1.HorizontalPodAutoscalerSpec{
-			MinReplicas: min,
-			MaxReplicas: 10,
-		},
-	}
-	hpa.Spec.ScaleTargetRef.APIVersion = "apps/v1"
-	hpa.Spec.ScaleTargetRef.Kind = "Deployment"
-	hpa.Spec.ScaleTargetRef.Name = "nginx-deployment"
-	instance := &resourcev1alpha1.HCPHybridAutoScaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: hpa.Spec.ScaleTargetRef.Name,
-		},
-		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 1,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
-			ScalingOptions: resourcev1alpha1.ScalingOptions{
-				HpaTemplate: hpa,
-			},
-		},
-	}
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
-	if err != nil {
-		fmt.Println(err)
-	}
-	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Printf("create %s Done\n", newhas.Name)
-	}
-
 }

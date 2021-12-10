@@ -16,7 +16,7 @@ import (
 
 	vpav1beta2 "Hybrid_Cluster/pkg/apis/vpa/v1beta2"
 
-	hpav1 "k8s.io/api/autoscaling/v1"
+	hpav2beta1 "k8s.io/api/autoscaling/v2beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -263,17 +263,31 @@ func (c *Controller) syncHandler(key string) error {
 	// 	}
 
 	// } else
+	klog.Info(command)
+	klog.Info(obj.GetKind())
 	if obj.GetKind() == "HorizontalPodAutoscaler" {
-		subInstance := &hpav1.HorizontalPodAutoscaler{}
+		subInstance := &hpav2beta1.HorizontalPodAutoscaler{}
 		if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
 			fmt.Println(err)
 			return err
 		}
 		if command == "create" {
-			subInstance.Namespace = "hcp"
+			// subInstance.Namespace = "hcp"
+
 			err := clientset.Create(context.TODO(), subInstance)
 			if err == nil {
 				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+			} else {
+				klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)
+				return err
+			}
+		} else if command == "update" {
+			// subInstance.Namespace = "hcp"
+			klog.Info("----")
+			err := clientset.Update(context.TODO(), subInstance)
+			if err == nil {
+				klog.Info("Updated Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
 				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 			} else {
 				klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)

@@ -29,6 +29,9 @@ import (
 func main() {
 	replicas := int32(3)
 
+	resourceList := make(corev1.ResourceList)
+	resourceList.Cpu().Set(2)
+	resourceList.Memory().Set(2)
 	deployment := v1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -60,6 +63,10 @@ func main() {
 									ContainerPort: 80,
 								},
 							},
+							Resources: corev1.ResourceRequirements{
+								Limits:   resourceList,
+								Requests: resourceList,
+							},
 						},
 					},
 					// NodeName: "cluster2-worker2",
@@ -67,24 +74,25 @@ func main() {
 			},
 		},
 	}
+	// resource.UpdateDeployment("kube-master", &deployment, replicas)
 	err := resource.CreateDeployment("kube-master", "cluster2-worker2", &deployment)
-	if err != nil {
-		fmt.Println(err)
-	}
-	p, err := resource.GetPod("kube-master", "nginx-deployment-69f8d49b75-qhrtd", "default")
-	if err != nil {
-		fmt.Println(err)
-	}
-	d, err := resource.GetDeployment("kube-master", p)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		resource.UpdateDeployment("kube-master", d, 5)
-	}
-	err = resource.CreateDeployment("aks-master", "aks-agentpool-21474300-vmss000003", d)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// p, err := resource.GetPod("kube-master", "nginx-deployment-69f8d49b75-qhrtd", "default")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// d, err := resource.GetDeployment("kube-master", p)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// } else {
+	// 	resource.UpdateDeployment("kube-master", d, 5)
+	// }
+	// err = resource.CreateDeployment("aks-master", "aks-agentpool-21474300-vmss000003", d)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 	// createDeployment("kube-master")
 	conn, err := grpc.Dial("localhost:9000", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {

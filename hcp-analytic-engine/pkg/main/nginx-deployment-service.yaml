@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-deployment
+  labels:
+    run: nginx-deployment
+spec: 
+  ports:
+  - port: 80
+  selector:
+    run: nginx-deployment
