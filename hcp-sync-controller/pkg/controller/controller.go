@@ -12,6 +12,10 @@ import (
 	"fmt"
 	"time"
 
+	vpa "Hybrid_Cluster/pkg/client/vpa/v1beta2/clientset/versioned"
+
+	vpav1beta2 "Hybrid_Cluster/pkg/apis/vpa/v1beta2"
+
 	hpav1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -20,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
-	vpav1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -221,12 +224,7 @@ func (c *Controller) syncHandler(key string) error {
 		fmt.Println(err)
 		return err
 	}
-	// cm := clusterManager.NewClusterManager()
 	obj, clusterName, command := c.resourceForSync(s)
-	// clusterClient := cm.Cluster_genClients[clusterName]
-
-	// master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	// master_client := kubernetes.NewForConfigOrDie(master_config)
 
 	jsonbody, err := json.Marshal(obj)
 	if err != nil {
@@ -268,14 +266,12 @@ func (c *Controller) syncHandler(key string) error {
 	if obj.GetKind() == "HorizontalPodAutoscaler" {
 		subInstance := &hpav1.HorizontalPodAutoscaler{}
 		if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
-			// do error check
 			fmt.Println(err)
 			return err
 		}
 		if command == "create" {
 			subInstance.Namespace = "hcp"
 			err := clientset.Create(context.TODO(), subInstance)
-			// err = clusterClient.Create(context.TODO(), subInstance)
 			if err == nil {
 				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
 				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
@@ -285,18 +281,18 @@ func (c *Controller) syncHandler(key string) error {
 			}
 		}
 	} else if obj.GetKind() == "VerticalPodAutoscaler" {
-		subInstance := &vpav1.VerticalPodAutoscaler{}
-		if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
+		subInstance := &vpav1beta2.VerticalPodAutoscaler{}
+		if err := json.Unmarshal(jsonbody, subInstance); err != nil {
 			// do error check
 			fmt.Println(err)
 			return err
 		}
 		if command == "create" {
 			subInstance.Namespace = "hcp"
-			err := clientset.Create(context.TODO(), subInstance)
-			// err = clusterClient.Create(context.TODO(), subInstance)
+			vpa_clientset, err := vpa.NewForConfig(config)
+			vpa, err := vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(subInstance.Namespace).Create(context.TODO(), subInstance, metav1.CreateOptions{})
 			if err == nil {
-				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + vpa.Namespace + "', in Cluster'" + vpa.ClusterName + "'")
 				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 			} else {
 				klog.Info("[Error] Cannot Create VerticalPodAutoscaler : ", err)
@@ -304,7 +300,6 @@ func (c *Controller) syncHandler(key string) error {
 			}
 		}
 	}
-	// if s.Spec.Template.
 	return nil
 
 }

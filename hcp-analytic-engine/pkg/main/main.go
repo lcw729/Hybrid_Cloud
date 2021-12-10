@@ -11,7 +11,7 @@ import (
 
 	autoscaling "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	vpav1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
+	vpav1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 
 	hpav1 "k8s.io/api/autoscaling/v1"
 )
@@ -124,8 +124,8 @@ func main() {
 		fmt.Println(err)
 	}
 	deploymentName := "nginx-deployment"
-	updateMode := vpav1.UpdateModeAuto
-	vpa := vpav1.VerticalPodAutoscaler{
+	updateMode := vpav1beta2.UpdateModeAuto
+	vpa := vpav1beta2.VerticalPodAutoscaler{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "autoscaling.k8s.io/v1",
 			Kind:       "VerticalPodAutoscaler",
@@ -133,13 +133,13 @@ func main() {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: deploymentName,
 		},
-		Spec: vpav1.VerticalPodAutoscalerSpec{
+		Spec: vpav1beta2.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscaling.CrossVersionObjectReference{
 				APIVersion: d.APIVersion,
 				Kind:       d.Kind,
 				Name:       d.Name,
 			},
-			UpdatePolicy: &vpav1.PodUpdatePolicy{
+			UpdatePolicy: &vpav1beta2.PodUpdatePolicy{
 				UpdateMode: &updateMode,
 			},
 		},
