@@ -211,11 +211,13 @@ func (c *Controller) syncHandler(key string) error {
 
 		return err
 	}
+	klog.Info("------")
 
 	options := hcphas.Spec.ScalingOptions
 	hpa_template := hcphas.Spec.ScalingOptions.HpaTemplate
 	if hcphas.Spec.WarningCount == 1 {
 		if hcphas.Spec.CurrentStep == "HAS" {
+			klog.Info("------")
 			// Sync 생성
 			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
 			command := "create"
@@ -232,9 +234,11 @@ func (c *Controller) syncHandler(key string) error {
 			}
 		}
 	} else if hcphas.Spec.WarningCount == 2 {
-		if hcphas.Spec.CurrentStep == "HAS" && hpa_template.Spec.MaxReplicas > hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas {
+		if hcphas.Spec.CurrentStep == "HAS" && hpa_template.Spec.MaxReplicas >= hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas {
 			// Sync 생성
 			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
+			// last_maxReplicas := options.HpaTemplate.Spec.MaxReplicas
+			// options.HpaTemplate.Spec.MaxReplicas = last_maxReplicas * 2
 			command := "update"
 			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
 			if err != nil {
@@ -245,14 +249,15 @@ func (c *Controller) syncHandler(key string) error {
 				// hcphas 변경
 				hcphas.Status.LastSpec = hcphas.Spec
 				hcphas.Spec.CurrentStep = "Sync"
+				c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
 			}
 		}
 	} else if hcphas.Spec.WarningCount == 3 {
-		if hcphas.Spec.CurrentStep == "VPA" {
+		if hcphas.Spec.CurrentStep == "HAS" {
 			// Sync 생성
-			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
-			command := "update"
-			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
+			target_cluster := hcphas.Spec.ScalingOptions.VpaTemplate.Spec.TargetRef.Name
+			command := "create"
+			h, err := sendSyncVPA(target_cluster, command, options.VpaTemplate)
 			if err != nil {
 				utilruntime.HandleError(fmt.Errorf(err.Error()))
 				return err
@@ -261,6 +266,7 @@ func (c *Controller) syncHandler(key string) error {
 				// hcphas 변경
 				hcphas.Status.LastSpec = hcphas.Spec
 				hcphas.Spec.CurrentStep = "Sync"
+				c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
 			}
 		}
 	} else {
@@ -287,6 +293,7 @@ func sendSyncHPA(clusterName string, command string, template interface{}) (stri
 			ClusterName: clusterName,
 			Command:     command,
 			Template:    template,
+			Status:      true,
 		},
 	}
 	s, err := clientset.HcpV1alpha1().Syncs("hcp").Create(context.TODO(), newSync, v1.CreateOptions{})
@@ -297,6 +304,30 @@ func sendSyncHPA(clusterName string, command string, template interface{}) (stri
 	return s.Name, err
 }
 
-// func sendSyncVPA() {
-
-// }
+func sendSyncVPA(clusterName string, command string, template interface{}) (string, error) {
+	syncIndex += 1
+	cm := cm.NewClusterManager()
+	master_config := cm.Host_config
+	clientset, err := syncv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		klog.V(4).Info(err.Error())
+	}
+	newSync := &sync.Sync{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      "hcp-hybridautoscaler-vpa-sync-" + strconv.Itoa(syncIndex),
+			Namespace: "hcp",
+		},
+		Spec: sync.SyncSpec{
+			ClusterName: clusterName,
+			Command:     command,
+			Template:    template,
+			Status:      true,
+		},
+	}
+	s, err := clientset.HcpV1alpha1().Syncs("hcp").Create(context.TODO(), newSync, v1.CreateOptions{})
+	if err != nil {
+		klog.V(4).Info(err.Error())
+	}
+	klog.V(4).Info("create %s in Namespace %s", s.Name, s.Namespace)
+	return s.Name, err
+}
