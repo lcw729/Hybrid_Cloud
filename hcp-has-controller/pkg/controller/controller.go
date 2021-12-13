@@ -293,6 +293,7 @@ func sendSyncHPA(clusterName string, command string, template interface{}) (stri
 			ClusterName: clusterName,
 			Command:     command,
 			Template:    template,
+			Status:      true,
 		},
 	}
 	s, err := clientset.HcpV1alpha1().Syncs("hcp").Create(context.TODO(), newSync, v1.CreateOptions{})
@@ -320,6 +321,7 @@ func sendSyncVPA(clusterName string, command string, template interface{}) (stri
 			ClusterName: clusterName,
 			Command:     command,
 			Template:    template,
+			Status:      true,
 		},
 	}
 	s, err := clientset.HcpV1alpha1().Syncs("hcp").Create(context.TODO(), newSync, v1.CreateOptions{})

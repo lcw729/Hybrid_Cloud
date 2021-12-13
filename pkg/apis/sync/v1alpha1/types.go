@@ -25,13 +25,13 @@ type SyncSpec struct {
 	ClusterName string      `json:"clustername" protobuf:"varint,1,opt,name=clustername"`
 	Command     string      `json:"command" protobuf:"varint,1,opt,name=command"`
 	Template    interface{} `json:"template" protobuf:"bytes,3,opt,name=template"`
+	Status      bool
 }
 
 type SyncStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

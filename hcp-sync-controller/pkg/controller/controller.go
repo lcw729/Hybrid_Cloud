@@ -224,93 +224,62 @@ func (c *Controller) syncHandler(key string) error {
 		fmt.Println(err)
 		return err
 	}
-	obj, clusterName, command := c.resourceForSync(s)
 
-	jsonbody, err := json.Marshal(obj)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+	if s.Spec.Status {
+		obj, clusterName, command := c.resourceForSync(s)
 
-	// if obj.GetKind() == "Deployment" {
-	// 	subInstance := &appsv1.Deployment{}
-	// 	if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
-	// 		// do error check
-	// 		fmt.Println(err)
-	// 		return err
-	// 	}
-	// 	if command == "create" {
-	// 		err = clientset.Create(context.TODO(), subInstance)
-	// 		if err == nil {
-	// 			klog.V(2).Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
-	// 		} else {
-	// 			klog.V(0).Info("[Error] Cannot Create Deployment : ", err)
-	// 		}
-	// 	} else if command == "delete" {
-	// 		err = clientset.Delete(context.TODO(), subInstance, subInstance.Namespace, subInstance.Name)
-	// 		if err == nil {
-	// 			klog.V(2).Info("Deleted Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
-	// 		} else {
-	// 			klog.V(0).Info("[Error] Cannot Delete Deployment : ", err)
-	// 		}
-	// 	} else if command == "update" {
-	// 		err = clientset.Update(context.TODO(), subInstance)
-	// 		if err == nil {
-	// 			klog.V(2).Info("Updated Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
-	// 		} else {
-	// 			klog.V(0).Info("[Error] Cannot Update Deployment : ", err)
-	// 		}
-	// 	}
-
-	// } else
-	klog.Info(command)
-	klog.Info(obj.GetKind())
-	if obj.GetKind() == "HorizontalPodAutoscaler" {
-		subInstance := &hpav2beta1.HorizontalPodAutoscaler{}
-		if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
+		jsonbody, err := json.Marshal(obj)
+		if err != nil {
 			fmt.Println(err)
 			return err
 		}
-		if command == "create" {
-			// subInstance.Namespace = "hcp"
 
-			err := clientset.Create(context.TODO(), subInstance)
-			if err == nil {
-				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
-				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-			} else {
-				klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)
+		if obj.GetKind() == "HorizontalPodAutoscaler" {
+			subInstance := &hpav2beta1.HorizontalPodAutoscaler{}
+			if err := json.Unmarshal(jsonbody, &subInstance); err != nil {
+				fmt.Println(err)
 				return err
 			}
-		} else if command == "update" {
-			// subInstance.Namespace = "hcp"
-			klog.Info("----")
-			err := clientset.Update(context.TODO(), subInstance)
-			if err == nil {
-				klog.Info("Updated Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
-				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-			} else {
-				klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)
+			if command == "create" {
+				err := clientset.Create(context.TODO(), subInstance)
+				if err == nil {
+					klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+					s.Spec.Status = false
+					c.syncclientset.HcpV1alpha1().Syncs(namespace).Update(context.TODO(), s, metav1.UpdateOptions{})
+				} else {
+					klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)
+					return err
+				}
+			} else if command == "update" {
+				klog.Info("----")
+				err := clientset.Update(context.TODO(), subInstance)
+				if err == nil {
+					klog.Info("Updated Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + obj.GetNamespace() + "', in Cluster'" + clusterName + "'")
+					s.Spec.Status = false
+					c.syncclientset.HcpV1alpha1().Syncs(namespace).Update(context.TODO(), s, metav1.UpdateOptions{})
+				} else {
+					klog.Info("[Error] Cannot Create HorizontalPodAutoscaler : ", err)
+					return err
+				}
+			}
+		} else if obj.GetKind() == "VerticalPodAutoscaler" {
+			subInstance := &vpav1beta2.VerticalPodAutoscaler{}
+			if err := json.Unmarshal(jsonbody, subInstance); err != nil {
+				// do error check
+				fmt.Println(err)
 				return err
 			}
-		}
-	} else if obj.GetKind() == "VerticalPodAutoscaler" {
-		subInstance := &vpav1beta2.VerticalPodAutoscaler{}
-		if err := json.Unmarshal(jsonbody, subInstance); err != nil {
-			// do error check
-			fmt.Println(err)
-			return err
-		}
-		if command == "create" {
-			// subInstance.Namespace = "hcp"
-			vpa_clientset, err := vpa.NewForConfig(config)
-			vpa, err := vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(subInstance.Namespace).Create(context.TODO(), subInstance, metav1.CreateOptions{})
-			if err == nil {
-				klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + vpa.Namespace + "', in Cluster'" + vpa.ClusterName + "'")
-				c.syncclientset.HcpV1alpha1().Syncs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-			} else {
-				klog.Info("[Error] Cannot Create VerticalPodAutoscaler : ", err)
-				return err
+			if command == "create" {
+				vpa_clientset, err := vpa.NewForConfig(config)
+				vpa, err := vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(subInstance.Namespace).Create(context.TODO(), subInstance, metav1.CreateOptions{})
+				if err == nil {
+					klog.Info("Created Resource '" + obj.GetKind() + "', Name : '" + obj.GetName() + "',  Namespace : '" + vpa.Namespace + "', in Cluster'" + vpa.ClusterName + "'")
+					s.Spec.Status = false
+					c.syncclientset.HcpV1alpha1().Syncs(namespace).Update(context.TODO(), s, metav1.UpdateOptions{})
+				} else {
+					klog.Info("[Error] Cannot Create VerticalPodAutoscaler : ", err)
+					return err
+				}
 			}
 		}
 	}
