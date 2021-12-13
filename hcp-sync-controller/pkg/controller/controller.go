@@ -302,7 +302,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 		if command == "create" {
-			subInstance.Namespace = "hcp"
+			// subInstance.Namespace = "hcp"
 			vpa_clientset, err := vpa.NewForConfig(config)
 			vpa, err := vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(subInstance.Namespace).Create(context.TODO(), subInstance, metav1.CreateOptions{})
 			if err == nil {

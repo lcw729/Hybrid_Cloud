@@ -16,6 +16,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+var cluster string = "kube-master"
+var pod string = "nginx-deployment-69f8d49b75-548vz"
+var ns string = "default"
+
 /*
 const portNumber = "9000"
 
@@ -83,7 +87,7 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 */
 
 func main() {
-	hpatest()
+	vpatest()
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
 		if err != nil {
@@ -121,9 +125,6 @@ func hpatest() {
 	}
 
 	// 1. Pod 정보 -> Deployment 정보 얻기
-	cluster := "kube-master"
-	pod := "nginx-deployment-69f8d49b75-65pzf"
-	ns := "default"
 	p, err := resource.GetPod(cluster, pod, ns)
 	if err != nil {
 		fmt.Println(err)
@@ -192,9 +193,6 @@ func hpatest2() {
 	}
 
 	// 1. Pod 정보 -> Deployment 정보 얻기
-	cluster := "kube-master"
-	pod := "php-apache-79544c9bd9-854h4"
-	ns := "default"
 	p, err := resource.GetPod(cluster, pod, ns)
 	if err != nil {
 		fmt.Println(err)
@@ -258,9 +256,6 @@ func vpatest() {
 	}
 
 	// 1. Pod 정보 -> Deployment 정보 얻기
-	cluster := "kube-master"
-	pod := "nginx-deployment-69f8d49b75-hc7pd"
-	ns := "default"
 	p, err := resource.GetPod(cluster, pod, ns)
 	if err != nil {
 		fmt.Println(err)
@@ -283,8 +278,8 @@ func vpatest() {
 		},
 		Spec: vpav1beta2.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscaling.CrossVersionObjectReference{
-				APIVersion: d.APIVersion,
-				Kind:       d.Kind,
+				APIVersion: "apps/v1",
+				Kind:       "Deployment",
 				Name:       d.Name,
 			},
 			UpdatePolicy: &vpav1beta2.PodUpdatePolicy{
