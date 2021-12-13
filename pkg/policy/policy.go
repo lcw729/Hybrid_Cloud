@@ -1,9 +1,11 @@
 package Policy
 
 import (
-	"Hybrid_Cluster/clientset/v1alpha1"
 	"Hybrid_Cluster/hcp-analytic-engine/util"
+	"context"
 	"log"
+
+	v1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -33,7 +35,7 @@ import (
 func GetWatchingLevel() util.WatchingLevel {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	clientset, err := v1alpha1.NewForConfig(master_config)
-	hcppolicy, err := clientset.HCPPolicy("hcp").Get("watching-level", metav1.GetOptions{})
+	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "watching-level", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
@@ -54,7 +56,7 @@ func GetWatchingLevel() util.WatchingLevel {
 func GetWarningLevel() util.Level {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	clientset, err := v1alpha1.NewForConfig(master_config)
-	hcppolicy, err := clientset.HCPPolicy("hcp").Get("warning-level", metav1.GetOptions{})
+	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "warning-level", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}
@@ -78,7 +80,7 @@ func GetWarningLevel() util.Level {
 func GetAlgorithm() string {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	clientset, err := v1alpha1.NewForConfig(master_config)
-	hcppolicy, err := clientset.HCPPolicy("hcp").Get("optimal-arrangement-algorithm", metav1.GetOptions{})
+	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "optimal-arrangement-algorithm", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
 	}

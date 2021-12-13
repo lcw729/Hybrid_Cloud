@@ -1,32 +1,24 @@
 package main
 
 import (
-	// algopb "Hybrid_Cluster/protos/v1/algo"
-	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
-	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
-	cm "Hybrid_Cluster/util/clusterManager"
-	"context"
-	"fmt"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	hpav1 "k8s.io/api/autoscaling/v1"
+	resource "Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
+	algopb "Hybrid_Cluster/protos/v1/algo"
+	"time"
 )
 
-/*
 const portNumber = "9000"
 
 type algoServer struct {
 	algopb.AlgoServer
 }
 
-
+/*
 // 리소스 확장 기술 -- 가중치 계산 [가중치 계산 결과 넘겨줌]
 // scheduler -> analytic Engine
 func (a *algoServer) ClusterWeightCalculator(ctx context.Context, in *algopb.ClusterWeightCalculatorRequest) (*algopb.ClusterWeightCalculatorResponse, error) {
 	fmt.Println("---------------------------------------------------------------")
 	fmt.Println("[step 2] Get MultiMetric")
-	monitoringEngine.MetricCollector()
+	// monitoringEngine.MetricCollector()
 	fmt.Println("---------------------------------------------------------------")
 	fmt.Println("[step 3] Calculate resource weight")
 	fmt.Println("---------------------------------------------------------------")
@@ -78,8 +70,19 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 	}, nil
 }
 */
-
 func main() {
+
+	// HPA/VPA 함수 사용 예시
+	cluster := "kube-master"
+	pod := "nginx-deployment-69f8d49b75-548vz"
+	ns := "default"
+	var min int32 = 1
+	minReplicas := &min
+	var maxReplicas int32 = 5
+	resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
+	time.Sleep(20)
+	resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
+	resource.CreateVPA(cluster, pod, ns, "Auto")
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
@@ -106,52 +109,4 @@ func main() {
 			log.Fatalf("failed to serve: %s", err)
 		}
 	*/
-	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-	// client := kubernetes.NewForConfigOrDie(master_config)
-
-	var num int32 = 1
-	var min = &num
-	hpa := hpav1.HorizontalPodAutoscaler{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "HorizontalPodAutoscaler",
-			APIVersion: "autoscaling/v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "hpa1",
-		},
-		Spec: hpav1.HorizontalPodAutoscalerSpec{
-			MinReplicas: min,
-			MaxReplicas: 5,
-		},
-	}
-	hpa.Spec.ScaleTargetRef.APIVersion = "apps/v1"
-	hpa.Spec.ScaleTargetRef.Kind = "Deployment"
-	hpa.Spec.ScaleTargetRef.Name = "php-apache"
-	instance := &resourcev1alpha1.HCPHybridAutoScaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "has1",
-		},
-		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 1,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
-			ScalingOptions: resourcev1alpha1.ScalingOptions{
-				HpaTemplate: hpa,
-			},
-		},
-		// Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
-		// 	CurrentStep: "HAS", // HAS -> Sync -> Done
-		// },
-	}
-	// hpa := &hpav1.HorizontalPodAutoscaler{}
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
-	if err != nil {
-		fmt.Println(err)
-	}
-	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("create %s Done", newhas.Name)
-
 }
