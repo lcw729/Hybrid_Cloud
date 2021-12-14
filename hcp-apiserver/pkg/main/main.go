@@ -18,33 +18,7 @@ func CheckErr(err error) {
 	}
 }
 
-// func join(w http.ResponseWriter, req *http.Request) {
-
-// 	fmt.Println("---ok---")
-// 	clusterInfo := converter.ClusterInfo{}
-// 	util.Parser(w, req, &clusterInfo)
-// 	var info = converter.ClusterInfo{
-// 		PlatformName: clusterInfo.PlatformName,
-// 		ClusterName:  clusterInfo.ClusterName,
-// 	}
-// 	handler.Join(info)
-// 	w.Header().Set("Content-Type", "application/json")
-// }
-
-// func unjoin(w http.ResponseWriter, req *http.Request) {
-// 	clusterInfo := converter.ClusterInfo{}
-// 	util.Parser(w, req, &clusterInfo)
-// 	var info = converter.ClusterInfo{
-// 		PlatformName: clusterInfo.PlatformName,
-// 		ClusterName:  clusterInfo.ClusterName,
-// 	}
-// 	handler.Unjoin(info)
-// 	w.Header().Set("Content-Type", "application/json")
-// }
-
 func main() {
-	// http.HandleFunc("/join", join)
-	// http.HandleFunc("/unjoin", unjoin)
 	http.HandleFunc("/createAddon", eksFunc.CreateAddon)
 	http.HandleFunc("/listAddon", eksFunc.ListAddon)
 	http.HandleFunc("/deleteAddon", eksFunc.DeleteAddon)
