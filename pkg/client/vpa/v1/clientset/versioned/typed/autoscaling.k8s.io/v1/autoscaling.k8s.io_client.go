@@ -19,7 +19,7 @@ limitations under the License.
 package v1
 
 import (
-	v1 "Hybrid_Cluster/pkg/apis/autoscaling.k8s.io/v1"
+	v1 "Hybrid_Cluster/pkg/apis/vpa/v1"
 	"Hybrid_Cluster/pkg/client/vpa/v1/clientset/versioned/scheme"
 
 	rest "k8s.io/client-go/rest"

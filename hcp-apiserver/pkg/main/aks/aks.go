@@ -200,11 +200,11 @@ func AddonUpdate(w http.ResponseWriter, req *http.Request) {
 func PodIdentityAdd(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSPodIdentity
 	util.Parser(w, req, &input)
-	args := []string{"az", "aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--identity-resource-id", input.IdentityResourceID, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName}
+	args := []string{"aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--identity-resource-id", input.IdentityResourceID, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName}
 	if input.Name != "" {
 		args = append(args, "--name", input.Name)
 	}
-	cmd := exec.Command("podIdentityAdd", args...)
+	cmd := exec.Command("az", args...)
 	errb, outb := CombinedOutput2(cmd)
 	if string(errb) != "" {
 		w.Write(errb)
@@ -224,6 +224,7 @@ func PodIdentityDelete(w http.ResponseWriter, req *http.Request) {
 		w.Write(outb)
 	}
 }
+
 func PodIdentityList(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSPodIdentity
 	util.Parser(w, req, &input)
@@ -235,6 +236,7 @@ func PodIdentityList(w http.ResponseWriter, req *http.Request) {
 		w.Write(outb)
 	}
 }
+
 func PodIdentityExceptionAdd(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSPodIdentity
 	util.Parser(w, req, &input)
@@ -268,6 +270,7 @@ func PodIdentityExceptionList(w http.ResponseWriter, req *http.Request) {
 		w.Write(outb)
 	}
 }
+
 func PodIdentityExceptionUpdate(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSPodIdentity
 	util.Parser(w, req, &input)
@@ -478,8 +481,12 @@ func ConnectedList(w http.ResponseWriter, req *http.Request) {
 	util.Parser(w, req, input)
 	args := []string{"connectedk8s", "list", "-g", input.ResourceGroup}
 	cmd := exec.Command("az", args...)
-	output, _ := cmd.Output()
-	w.Write(output)
+	errb, outb := CombinedOutput2(cmd)
+	if string(errb) != "" {
+		w.Write(errb)
+	} else {
+		w.Write(outb)
+	}
 }
 
 func ConfigurationCreate(w http.ResponseWriter, req *http.Request) {
@@ -487,17 +494,46 @@ func ConfigurationCreate(w http.ResponseWriter, req *http.Request) {
 	util.Parser(w, req, input)
 	args := []string{"k8sconfiguration", "create", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.ClusterType, "-n", input.Name, "-u", input.RepositoryURL, "--scope", input.Scope}
 	cmd := exec.Command("az", args...)
-	output, _ := cmd.CombinedOutput()
-	w.Write(output)
+	errb, outb := CombinedOutput2(cmd)
+	if string(errb) != "" {
+		w.Write(errb)
+	} else {
+		w.Write(outb)
+	}
 }
 
 func ConfigurationDelete(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSk8sConfiguration
 	util.Parser(w, req, input)
-	fmt.Println(input.ClusterType)
-	// args := []string{"k8sconfiguration", "delete", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", "managedClusters", "-n", input.Name}
-	// cmd := exec.Command("az", args...)
 	cmd := exec.Command("az", "k8sconfiguration", "delete", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.ClusterType, "-n", input.Name)
-	output, _ := cmd.Output()
-	w.Write(output)
+	errb, outb := CombinedOutput2(cmd)
+	if string(errb) != "" {
+		w.Write(errb)
+	} else {
+		w.Write(outb)
+	}
+}
+func ConfigurationShow(w http.ResponseWriter, req *http.Request) {
+	var input util.AKSk8sConfiguration
+	util.Parser(w, req, input)
+	cmd := exec.Command("az", "k8sconfiguration", "show", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.ClusterType)
+	errb, outb := CombinedOutput2(cmd)
+	if string(errb) != "" {
+		w.Write(errb)
+	} else {
+		w.Write(outb)
+	}
+}
+
+func ConfigurationList(w http.ResponseWriter, req *http.Request) {
+	var input util.AKSk8sConfiguration
+	util.Parser(w, req, input)
+	fmt.Println(input.ClusterType)
+	cmd := exec.Command("az", "k8s-configuration", "flux", "list", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", "connectedClusters")
+	errb, outb := CombinedOutput2(cmd)
+	if string(errb) != "" {
+		w.Write(errb)
+	} else {
+		w.Write(outb)
+	}
 }

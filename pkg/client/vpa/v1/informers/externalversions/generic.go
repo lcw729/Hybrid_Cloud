@@ -19,7 +19,7 @@ limitations under the License.
 package externalversions
 
 import (
-	v1 "Hybrid_Cluster/pkg/apis/autoscaling.k8s.io/v1"
+	v1 "Hybrid_Cluster/pkg/apis/vpa/v1"
 	"fmt"
 
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

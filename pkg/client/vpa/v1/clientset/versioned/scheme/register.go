@@ -19,7 +19,7 @@ limitations under the License.
 package scheme
 
 import (
-	autoscalingv1 "Hybrid_Cluster/pkg/apis/autoscaling.k8s.io/v1"
+	autoscalingv1 "Hybrid_Cluster/pkg/apis/vpa/v1"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"

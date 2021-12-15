@@ -79,6 +79,8 @@ func main() {
 	// http.HandleFunc("/connectedUpgrade", connectedUpgrade)
 	http.HandleFunc("/configurationCreate", aksFunc.ConfigurationCreate)
 	http.HandleFunc("/configurationDelete", aksFunc.ConfigurationDelete)
+	http.HandleFunc("/configurationList", aksFunc.ConfigurationList)
+	http.HandleFunc("/configurationShow", aksFunc.ConfigurationShow)
 	// http.HandleFunc("/configurationCreate", configurationList)
 	// http.HandleFunc("/configurationCreate", configurationShow)
 	http.ListenAndServe(":8080", nil)

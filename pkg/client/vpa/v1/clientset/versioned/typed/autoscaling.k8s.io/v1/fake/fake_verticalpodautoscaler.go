@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	autoscalingk8siov1 "Hybrid_Cluster/pkg/apis/autoscaling.k8s.io/v1"
+	autoscalingk8siov1 "Hybrid_Cluster/pkg/apis/vpa/v1"
 	"context"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
