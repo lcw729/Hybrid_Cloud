@@ -21,5 +21,5 @@ type WatchingLevel struct {
 
 type Level struct {
 	Type  string
-	Value []string
+	Value string
 }

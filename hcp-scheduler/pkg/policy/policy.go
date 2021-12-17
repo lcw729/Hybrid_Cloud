@@ -22,7 +22,7 @@ func GetCycle() float64 {
 	}
 	for _, policy := range hcppolicy.Spec.Template.Spec.Policies {
 		if policy.Type == "cycle" && len(policy.Value) == 1 {
-			cycle, err := strconv.ParseFloat(policy.Value[0], 64)
+			cycle, err := strconv.ParseFloat(policy.Value, 64)
 			if err == nil && cycle > 0 {
 				fmt.Println("Policy Type : ", "cycle")
 				fmt.Println("Policy Value [cycle] : ", cycle)

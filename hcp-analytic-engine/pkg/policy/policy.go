@@ -2,35 +2,60 @@ package Policy
 
 import (
 	"Hybrid_Cluster/hcp-analytic-engine/util"
-	"context"
-	"log"
-
+	hcppolicyapis "Hybrid_Cluster/pkg/apis/hcppolicy/v1alpha1"
+	hcppolicyv1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
 	v1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
+	"Hybrid_Cluster/util/clusterManager"
+	"context"
+	"fmt"
+	"log"
+	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 )
 
-// func GetCycle() float64 {
-// 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-// 	clientset, err := v1alpha1.NewForConfig(master_config)
-// 	hcppolicy, err := clientset.HCPPolicy("hcp").Get("weight-calculation-cycle", metav1.GetOptions{})
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	policies := hcppolicy.Spec.Template.Spec.Policies
-// 	if len(policies) == 1 {
-// 		policy := policies[0]
-// 		if policy.Type == "cycle" {
-// 			cycle, _ := strconv.ParseFloat(policy.Value[0], 64)
-// 			if cycle > 0 {
-// 				return cycle
-// 			}
-// 		}
-// 	}
-// 	return -1
-// }
+func GetInitialSettingValue(typ string) (int, string) {
+	policy := GetPolicy("initial-setting")
+	policies := policy.Spec.Template.Spec.Policies
+	for _, p := range policies {
+		println(p.Type)
+		if typ == "default_node_option" && p.Type == "default_node_option" {
+			var value string
+			value = p.Value
+			if value == "" {
+				fmt.Printf("ERROR: No %s Value\n", typ)
+			} else {
+				return -1, value
+			}
+		} else if p.Type == typ {
+			var value int
+			value, err := strconv.Atoi(p.Value)
+			if err != nil {
+				fmt.Printf("ERROR: No %s Value\n", typ)
+			}
+			return value, ""
+		}
+	}
+	fmt.Printf("ERROR: No Such Type %s\n", typ)
+	return -1, ""
+}
+
+func GetPolicy(policy_name string) *hcppolicyapis.HCPPolicy {
+	cm := clusterManager.NewClusterManager()
+
+	c, err := hcppolicyv1alpha1.NewForConfig(cm.Host_config)
+	if err != nil {
+		klog.Info(err)
+	}
+	policy, err := c.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), policy_name, metav1.GetOptions{})
+	if err != nil {
+		klog.Info(err)
+	}
+	return policy
+}
 
 func GetWatchingLevel() util.WatchingLevel {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
@@ -88,7 +113,7 @@ func GetAlgorithm() string {
 	if len(policies) == 1 {
 		policy := policies[0]
 		if policy.Type == "Algorithm" && len(policy.Value) == 1 {
-			algorithm := policy.Value[0]
+			algorithm := policy.Value
 			for _, algo := range util.AlgorithmList {
 				if algo == algorithm {
 					return algorithm

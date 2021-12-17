@@ -61,3 +61,20 @@ func (in *Influx) GetNodeData(clusterName string) []client.Result {
 	return nil
 
 }
+
+func (in *Influx) GetClusterMetricsData(clusterName string) []client.Result {
+	// omcplog.V(4).Info("Func GetClusterMetricsData Called")
+	q := client.NewQuery("SELECT * FROM Nodes WHERE cluster = '"+clusterName+"' GROUP BY * ORDER BY DESC LIMIT 5", "Metrics", "")
+
+	response, err := in.inClient.Query(q)
+
+	if err == nil && response.Error() == nil {
+		return response.Results
+	} else {
+		fmt.Println(err)
+		fmt.Println(response.Error())
+	}
+
+	return nil
+
+}
