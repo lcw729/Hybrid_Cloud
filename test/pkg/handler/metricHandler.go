@@ -4,7 +4,7 @@ import (
 	// "Hybrid_Cluster/hcp-analytic-engine/influx"
 	// "Hybrid_Cluster/omcplog"
 
-	"Hybrid_Cluster/total-resource-table/influx"
+	"Hybrid_Cluster/test/influx"
 	"bytes"
 	"encoding/json"
 	"os"
