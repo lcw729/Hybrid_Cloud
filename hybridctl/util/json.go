@@ -18,7 +18,7 @@ func OpenAndReadJsonFile(jsonFileName string) []byte {
 	// }
 	defer jsonFile.Close()
 
-	//unmarshalling Json
+	//unmarshal Json
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	return byteValue
 }
@@ -27,10 +27,10 @@ func PrintOutput(bytes []byte) error {
 	var output util.Output
 	err := json.Unmarshal(bytes, &output)
 	if output.Stderr != nil {
-		fmt.Println(string(output.Stderr))
+		fmt.Print(string(output.Stderr))
 	}
 	if output.Stdout != nil {
-		fmt.Println(string(output.Stdout))
+		fmt.Print(string(output.Stdout))
 	}
 	return err
 }

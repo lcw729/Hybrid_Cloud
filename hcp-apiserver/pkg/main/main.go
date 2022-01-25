@@ -50,12 +50,16 @@ func main() {
 	http.HandleFunc("/maintenanceconfigurationDelete", aksFunc.MaintenanceconfigurationDelete)
 	http.HandleFunc("/maintenanceconfigurationList", aksFunc.MaintenanceconfigurationList)
 	http.HandleFunc("/maintenanceconfigurationShow", aksFunc.MaintenanceconfigurationShow)
+
+	// addon
 	http.HandleFunc("/addonDisable", aksFunc.AddonDisable)
 	http.HandleFunc("/addonEnable", aksFunc.AddonEnable)
 	http.HandleFunc("/addonList", aksFunc.AddonList)
 	http.HandleFunc("/addonListAvailable", aksFunc.AddonListAvailable)
 	http.HandleFunc("/addonShow", aksFunc.AddonShow)
 	http.HandleFunc("/addonUpdate", aksFunc.AddonUpdate)
+
+	// pod-identity
 	http.HandleFunc("/podIdentityAdd", aksFunc.PodIdentityAdd)
 	http.HandleFunc("/podIdentityDelete", aksFunc.PodIdentityDelete)
 	http.HandleFunc("/podIdentityList", aksFunc.PodIdentityList)

@@ -106,9 +106,9 @@ func MaintenanceconfigurationShow(w http.ResponseWriter, req *http.Request) {
 }
 
 func AddonDisable(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "addon", "disable", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon)
+	cmd := exec.Command("az", "aks", "addon", "disable", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -118,9 +118,9 @@ func AddonDisable(w http.ResponseWriter, req *http.Request) {
 }
 
 func AddonEnable(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "addon", "enable", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon)
+	cmd := exec.Command("az", "aks", "addon", "enable", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -130,7 +130,7 @@ func AddonEnable(w http.ResponseWriter, req *http.Request) {
 }
 
 func AddonList(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
 	cmd := exec.Command("az", "aks", "addon", "list", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
@@ -142,7 +142,7 @@ func AddonList(w http.ResponseWriter, req *http.Request) {
 }
 
 func AddonListAvailable(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
 	cmd := exec.Command("az", "aks", "addon", "list-available")
 	data, err := util.GetOutput(cmd)
@@ -154,9 +154,9 @@ func AddonListAvailable(w http.ResponseWriter, req *http.Request) {
 }
 
 func AddonShow(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "addon", "show", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon)
+	cmd := exec.Command("az", "aks", "addon", "show", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -166,9 +166,9 @@ func AddonShow(w http.ResponseWriter, req *http.Request) {
 }
 
 func AddonUpdate(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSAddon
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "addon", "update", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon)
+	cmd := exec.Command("az", "aks", "addon", "update", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -177,12 +177,17 @@ func AddonUpdate(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// pod-identity
 func PodIdentityAdd(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	args := []string{"aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--identity-resource-id", input.IdentityResourceID, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName}
-	if input.Name != "" {
-		args = append(args, "--name", input.Name)
+	args := []string{"aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--identity-resource-id", input.PodIdentity.IdentityResourceID, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName}
+	if input.PodIdentity.Name != "" {
+		args = append(args, "--name", input.PodIdentity.Name)
+	}
+
+	if input.PodIdentity.BindingSelector != "" {
+		args = append(args, "--binding-selector", input.PodIdentity.BindingSelector)
 	}
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
@@ -194,9 +199,9 @@ func PodIdentityAdd(w http.ResponseWriter, req *http.Request) {
 }
 
 func PodIdentityDelete(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "pod-identity", "delete", "--cluster-name", input.ClusterName, "--name", input.Name, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName)
+	cmd := exec.Command("az", "aks", "pod-identity", "delete", "--cluster-name", input.ClusterName, "--name", input.PodIdentity.Name, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -206,7 +211,7 @@ func PodIdentityDelete(w http.ResponseWriter, req *http.Request) {
 }
 
 func PodIdentityList(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
 	cmd := exec.Command("az", "aks", "pod-identity", "list", "--cluster-name", input.ClusterName, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
@@ -218,9 +223,13 @@ func PodIdentityList(w http.ResponseWriter, req *http.Request) {
 }
 
 func PodIdentityExceptionAdd(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--pod-labels", input.PodLabels, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName)
+	args := []string{"aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--pod-labels", input.PodIdentity.PodLabels, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName}
+	if input.PodIdentity.Name != "" {
+		args = append(args, "--name", input.PodIdentity.Name)
+	}
+	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -229,9 +238,9 @@ func PodIdentityExceptionAdd(w http.ResponseWriter, req *http.Request) {
 	}
 }
 func PodIdentityExceptionDelete(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "pod-identity", "exception", "delete", "--cluster-name", input.ClusterName, "--name", input.Name, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName)
+	cmd := exec.Command("az", "aks", "pod-identity", "exception", "delete", "--cluster-name", input.ClusterName, "--name", input.PodIdentity.Name, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -240,7 +249,7 @@ func PodIdentityExceptionDelete(w http.ResponseWriter, req *http.Request) {
 	}
 }
 func PodIdentityExceptionList(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
 	cmd := exec.Command("az", "aks", "pod-identity", "exception", "list", "--cluster-name", input.ClusterName, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
@@ -252,9 +261,9 @@ func PodIdentityExceptionList(w http.ResponseWriter, req *http.Request) {
 }
 
 func PodIdentityExceptionUpdate(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSPodIdentity
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--pod-labels", input.PodLabels, "--name", input.Name, "--namespace", input.Namespace, "--resource-group", input.ResourceGroupName)
+	cmd := exec.Command("az", "aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--pod-labels", input.PodIdentity.PodLabels, "--name", input.PodIdentity.Name, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -458,8 +467,11 @@ func ConnectedDisableFeatures(w http.ResponseWriter, req *http.Request) {
 
 func ConnectedList(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAPIParameter
-	util.Parser(w, req, input)
-	args := []string{"connectedk8s", "list", "-g", input.ResourceGroup}
+	util.Parser(w, req, &input)
+	args := []string{"connectedk8s", "list"}
+	if input.ResourceGroup != "" {
+		args = append(args, "-g", input.ResourceGroup)
+	}
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
@@ -470,9 +482,9 @@ func ConnectedList(w http.ResponseWriter, req *http.Request) {
 }
 
 func ConfigurationCreate(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSk8sConfiguration
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	args := []string{"k8sconfiguration", "create", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.ClusterType, "-n", input.Name, "-u", input.RepositoryURL, "--scope", input.Scope}
+	args := []string{"k8sconfiguration", "create", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.K8sConfiguration.ClusterType, "-n", input.Name, "-u", input.K8sConfiguration.RepositoryURL, "--scope", input.K8sConfiguration.Scope}
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
@@ -483,9 +495,9 @@ func ConfigurationCreate(w http.ResponseWriter, req *http.Request) {
 }
 
 func ConfigurationDelete(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSk8sConfiguration
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "k8sconfiguration", "delete", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.ClusterType, "-n", input.Name, "--yes")
+	cmd := exec.Command("az", "k8sconfiguration", "delete", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.K8sConfiguration.ClusterType, "-n", input.Name, "--yes")
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -494,9 +506,9 @@ func ConfigurationDelete(w http.ResponseWriter, req *http.Request) {
 	}
 }
 func ConfigurationShow(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSk8sConfiguration
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "k8sconfiguration", "show", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.ClusterType, "-n", input.Name)
+	cmd := exec.Command("az", "k8sconfiguration", "show", "-g", input.ResourceGroup, "-c", input.ClusterName, "--cluster-type", input.K8sConfiguration.ClusterType, "-n", input.Name)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
@@ -506,9 +518,9 @@ func ConfigurationShow(w http.ResponseWriter, req *http.Request) {
 }
 
 func ConfigurationList(w http.ResponseWriter, req *http.Request) {
-	var input util.AKSk8sConfiguration
+	var input util.AKSAPIParameter
 	util.Parser(w, req, &input)
-	cmd := exec.Command("az", "k8s-configuration", "flux", "list", "-g", input.ResourceGroup, "-c", input.ClusterName, "-t", input.ClusterType)
+	cmd := exec.Command("az", "k8s-configuration", "flux", "list", "-g", input.ResourceGroup, "-c", input.ClusterName, "-t", input.K8sConfiguration.ClusterType)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
 		log.Println(err)
