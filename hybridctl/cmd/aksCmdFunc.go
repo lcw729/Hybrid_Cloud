@@ -295,5 +295,5 @@ func HTTPPostRequestConfig(p util.AKSk8sConfiguration, cmd string) {
 	httpPostUrl := "http://localhost:8080/" + cmd
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
-	fmt.Println(string(bytes))
+	util.PrintOutput(bytes)
 }

@@ -4,6 +4,7 @@ import (
 
 	// "Hybrid_Cluster/hybridctl/util"
 
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,8 @@ func CheckErr(err error) {
 }
 
 func main() {
+
+	fmt.Println("start server")
 	http.HandleFunc("/createAddon", eksFunc.CreateAddon)
 	http.HandleFunc("/listAddon", eksFunc.ListAddon)
 	http.HandleFunc("/deleteAddon", eksFunc.DeleteAddon)

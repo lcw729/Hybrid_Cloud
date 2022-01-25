@@ -224,10 +224,10 @@ func aksFlags() {
 	AKSConnectedListCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
 	AKSConnectedListCmd.MarkFlagRequired("resource-group")
 
-	AKSk8sConfiguration.Flags().StringP("resource-group", "g", "", "Name of resource group.")
-	AKSk8sConfiguration.Flags().StringP("name", "n", "", "The name of the Kubernetes configuration.")
-	AKSk8sConfiguration.Flags().StringP("cluster-name", "c", "", "Name of the managed cluster.")
-	AKSk8sConfiguration.Flags().StringP("cluster-type", "", "", "Specifies an Arc cluster or AKS-managed cluster.")
+	AKSConfigurationCreate.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	AKSConfigurationCreate.Flags().StringP("name", "n", "", "The name of the Kubernetes configuration.")
+	AKSConfigurationCreate.Flags().StringP("cluster-name", "c", "", "Name of the managed cluster.")
+	AKSConfigurationCreate.Flags().StringP("cluster-type", "", "", "Specifies an Arc cluster or AKS-managed cluster.")
 	AKSConfigurationCreate.Flags().StringP("repository-url", "u", "", "The URL of the source control repository.")
 	AKSConfigurationCreate.Flags().String("scope", "", "Scope the operator to either 'namespace' or 'cluster'. Allowed values: cluster, namespace")
 

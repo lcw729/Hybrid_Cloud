@@ -16,9 +16,11 @@ import (
 type PodMetricList struct {
 	Items []PodMetric `json:"podmetrics"`
 }
+
 type NodeMetricList struct {
 	Items []NodeMetric `json:"nodemetrics"`
 }
+
 type PodMetric struct {
 	Time      string        `json:"time"`
 	Cluster   string        `json:"cluster"`
@@ -30,6 +32,7 @@ type PodMetric struct {
 	Fs        FsMetric      `json:"fs"`
 	Network   NetworkMetric `json:"network"`
 }
+
 type NodeMetric struct {
 	Time    string        `json:"time"`
 	Cluster string        `json:"cluster"`

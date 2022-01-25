@@ -912,7 +912,6 @@ var AKSConfigurationList = &cobra.Command{
 			fmt.Println("Allowed values: connectedClusters, managedClusters")
 			return
 		}
-		fmt.Println(clusterType)
 		AKSAPIParameter := util.AKSk8sConfiguration{
 			ResourceGroup: resourceGroupName,
 			ClusterName:   clusterName,
