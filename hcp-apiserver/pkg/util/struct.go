@@ -30,7 +30,6 @@ type EKSAPIParameter struct {
 
 type AKSAPIParameter struct {
 	ResourceGroupName string
-	ResourceName      string
 	ClusterName       string
 	ConfigName        string
 	ConfigFile        Config
@@ -41,8 +40,6 @@ type AKSAPIParameter struct {
 	Port              string
 	BindingSelector   string
 	Repository        string
-	Name              string
-	ResourceGroup     string
 	DisableBrowser    bool
 	ListenAddress     string
 	ListenPort        string

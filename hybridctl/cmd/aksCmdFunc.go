@@ -64,6 +64,111 @@ func podIdentityExceptionUpdate(p util.AKSPodIdentity) {
 	fmt.Println(string(bytes))
 }
 
+// func aksRotateCerts(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/aksRotateCerts"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	var errmsg util.Error
+// 	json.Unmarshal(bytes, &errmsg)
+// 	if errmsg.Error.Message == "" {
+// 		fmt.Println(string(bytes))
+// 	} else {
+// 		fmt.Println(errmsg.Error.Message)
+// 	}
+// }
+
+// func aksGetOSoptions(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/aksGetOSoptions"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	var errmsg util.Error
+// 	json.Unmarshal(bytes, &errmsg)
+// 	if errmsg.Error.Message == "" {
+// 		fmt.Println(string(bytes))
+// 	} else {
+// 		fmt.Println(errmsg.Error.Message)
+// 	}
+// }
+
+// func appUp(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/appUp"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	var errmsg util.Error
+// 	json.Unmarshal(bytes, &errmsg)
+// 	if errmsg.Error.Message == "" {
+// 		fmt.Println(string(bytes))
+// 	} else {
+// 		fmt.Println(errmsg.Error.Message)
+// 	}
+// }
+
+// func browse(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/browse"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	var errmsg util.Error
+// 	json.Unmarshal(bytes, &errmsg)
+// 	if errmsg.Error.Message == "" {
+// 		fmt.Println(string(bytes))
+// 	} else {
+// 		fmt.Println(errmsg.Error.Message)
+// 	}
+// }
+
+// func checkAcr(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/checkAcr"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	var errmsg util.Error
+// 	json.Unmarshal(bytes, &errmsg)
+// 	if errmsg.Error.Message == "" {
+// 		fmt.Printf(string(bytes))
+// 	} else {
+// 		fmt.Printf(errmsg.Error.Message)
+// 	}
+// }
+
+// func getUpgrades(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/getUpgrades"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	var errmsg util.Error
+// 	json.Unmarshal(bytes, &errmsg)
+// 	if errmsg.Error.Message == "" {
+// 		fmt.Println(string(bytes))
+// 	} else {
+// 		fmt.Println(errmsg.Error.Message)
+// 	}
+// }
+
+// func getVersions(p util.AKSAPIParameter) {
+// 	httpPostUrl := "http://localhost:8080/getUpgrades"
+// 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+// 	checkErr(err)
+// 	fmt.Println(string(bytes))
+// }
+
+func HTTPPostRequest(p util.AKSAPIParameter, cmd string) {
+	httpPostUrl := "http://localhost:8080/" + cmd
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	util.PrintOutput(bytes)
+}
+
+func HTTPPostRequestAPI(p util.AKSAPIParameter, cmd string) {
+	httpPostUrl := "http://localhost:8080/" + cmd
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	var errmsg util.Error
+	json.Unmarshal(bytes, &errmsg)
+	if errmsg.Error.Message == "" {
+		fmt.Println(string(bytes))
+	} else {
+		fmt.Println(errmsg.Error.Message)
+	}
+}
+
 func aksStart(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/aksStart"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
@@ -94,175 +199,9 @@ func aksStop(p util.AKSAPIParameter) {
 	}
 }
 
-func aksRotateCerts(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/aksRotateCerts"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func aksGetOSoptions(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/aksGetOSoptions"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func maintenanceconfigurationCreateOrUpdate(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/maintenanceconfigurationCreateOrUpdate"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func maintenanceconfigurationList(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/maintenanceconfigurationList"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func maintenanceconfigurationDelete(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/maintenanceconfigurationDelete"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	// var errmsg util.Error
-	// json.Unmarshal(bytes, &errmsg)
-	// if string(bytes) == "" {
-	// 	fmt.Println("Succeeded to delete", p.ClusterName, "in", p.ResourceGroupName)
-	// } else if errmsg.Error.Message == "" {
-	fmt.Println(string(bytes))
-	// } else {
-	// 	fmt.Println(errmsg.Error.Message)
-	// }
-}
-
-func maintenanceconfigurationShow(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/maintenanceconfigurationShow"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func appUp(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/appUp"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func browse(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/browse"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func checkAcr(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/checkAcr"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Printf(string(bytes))
-	} else {
-		fmt.Printf(errmsg.Error.Message)
-	}
-}
-
-func getUpgrades(p util.AKSAPIParameter) {
-	httpPostUrl := "http://localhost:8080/getUpgrades"
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-// func getVersions(p util.AKSAPIParameter) {
-// 	httpPostUrl := "http://localhost:8080/getUpgrades"
+// func HTTPPostRequestCLI(p util.AKSInstallCLI, cmd string) {
+// 	httpPostUrl := "http://localhost:8080/" + cmd
 // 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 // 	checkErr(err)
-// 	fmt.Println(string(bytes))
+// 	util.PrintOutput(bytes)
 // }
-
-func HTTPPostRequest(p util.AKSAPIParameter, cmd string) {
-	httpPostUrl := "http://localhost:8080/" + cmd
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	util.PrintOutput(bytes)
-}
-
-func HTTPPostRequestAPI(p util.AKSAPIParameter, cmd string) {
-	httpPostUrl := "http://localhost:8080/" + cmd
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	var errmsg util.Error
-	json.Unmarshal(bytes, &errmsg)
-	if errmsg.Error.Message == "" {
-		fmt.Println(string(bytes))
-	} else {
-		fmt.Println(errmsg.Error.Message)
-	}
-}
-
-func HTTPPostRequestCLI(p util.AKSInstallCLI, cmd string) {
-	httpPostUrl := "http://localhost:8080/" + cmd
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	util.PrintOutput(bytes)
-}
-
-func HTTPPostRequestConfig(p util.AKSk8sConfiguration, cmd string) {
-	httpPostUrl := "http://localhost:8080/" + cmd
-	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
-	checkErr(err)
-	util.PrintOutput(bytes)
-}

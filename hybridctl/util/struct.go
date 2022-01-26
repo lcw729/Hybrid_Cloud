@@ -32,7 +32,6 @@ type EKSAPIParameter struct {
 
 type AKSAPIParameter struct {
 	ResourceGroupName string
-	ResourceName      string
 	ClusterName       string
 	ConfigName        string
 	ConfigFile        Config
@@ -43,8 +42,6 @@ type AKSAPIParameter struct {
 	Port              string
 	BindingSelector   string
 	Repository        string
-	Name              string
-	ResourceGroup     string
 	DisableBrowser    bool
 	ListenAddress     string
 	ListenPort        string
@@ -59,8 +56,6 @@ type AKSAPIParameter struct {
 }
 
 type AKSAddon struct {
-	ResourceGroupName          string
-	ClusterName                string
 	Addon                      string
 	AppgwID                    string
 	AppgwName                  string
@@ -76,8 +71,6 @@ type AKSAddon struct {
 }
 
 type AKSPodIdentity struct {
-	ResourceGroupName  string
-	ClusterName        string
 	Namespace          string
 	IdentityResourceID string
 	Name               string
@@ -96,10 +89,8 @@ type AKSInstallCLI struct {
 }
 
 type AKSk8sConfiguration struct {
-	ClusterName   string
 	ClusterType   string
 	Name          string
 	RepositoryURL string
-	ResourceGroup string
 	Scope         string
 }
