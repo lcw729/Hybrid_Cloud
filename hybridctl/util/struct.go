@@ -32,7 +32,10 @@ type EKSAPIParameter struct {
 
 type AKSAPIParameter struct {
 	ResourceGroupName string
+	ResourceName      string
 	ClusterName       string
+	ConfigName        string
+	ConfigFile        Config
 	Acr               string
 	AksCluster        string
 	BranchName        string

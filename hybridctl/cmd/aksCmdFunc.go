@@ -64,14 +64,14 @@ func podIdentityExceptionUpdate(p util.AKSPodIdentity) {
 	fmt.Println(string(bytes))
 }
 
-func aksStart(p util.EKSAPIParameter) {
+func aksStart(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/aksStart"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
 	var errmsg util.Error
 	json.Unmarshal(bytes, &errmsg)
 	if string(bytes) == "" {
-		fmt.Println("Succeeded to start", p.ResourceName, "in", p.ResourceGroupName)
+		fmt.Println("Succeeded to start", p.ClusterName, "in", p.ResourceGroupName)
 	} else if errmsg.Error.Message == "" {
 		fmt.Println(string(bytes))
 	} else {
@@ -79,14 +79,14 @@ func aksStart(p util.EKSAPIParameter) {
 	}
 }
 
-func aksStop(p util.EKSAPIParameter) {
+func aksStop(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/aksStop"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
 	var errmsg util.Error
 	json.Unmarshal(bytes, &errmsg)
 	if string(bytes) == "" {
-		fmt.Println("Succeeded to stop", p.ResourceName, "in", p.ResourceGroupName)
+		fmt.Println("Succeeded to stop", p.ClusterName, "in", p.ResourceGroupName)
 	} else if errmsg.Error.Message == "" {
 		fmt.Println(string(bytes))
 	} else {
@@ -94,7 +94,7 @@ func aksStop(p util.EKSAPIParameter) {
 	}
 }
 
-func aksRotateCerts(p util.EKSAPIParameter) {
+func aksRotateCerts(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/aksRotateCerts"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
@@ -107,7 +107,7 @@ func aksRotateCerts(p util.EKSAPIParameter) {
 	}
 }
 
-func aksGetOSoptions(p util.EKSAPIParameter) {
+func aksGetOSoptions(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/aksGetOSoptions"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
@@ -120,7 +120,7 @@ func aksGetOSoptions(p util.EKSAPIParameter) {
 	}
 }
 
-func maintenanceconfigurationCreateOrUpdate(p util.EKSAPIParameter) {
+func maintenanceconfigurationCreateOrUpdate(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationCreateOrUpdate"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
@@ -133,7 +133,7 @@ func maintenanceconfigurationCreateOrUpdate(p util.EKSAPIParameter) {
 	}
 }
 
-func maintenanceconfigurationList(p util.EKSAPIParameter) {
+func maintenanceconfigurationList(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationList"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
@@ -146,14 +146,14 @@ func maintenanceconfigurationList(p util.EKSAPIParameter) {
 	}
 }
 
-func maintenanceconfigurationDelete(p util.EKSAPIParameter) {
+func maintenanceconfigurationDelete(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationDelete"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
 	// var errmsg util.Error
 	// json.Unmarshal(bytes, &errmsg)
 	// if string(bytes) == "" {
-	// 	fmt.Println("Succeeded to delete", p.ResourceName, "in", p.ResourceGroupName)
+	// 	fmt.Println("Succeeded to delete", p.ClusterName, "in", p.ResourceGroupName)
 	// } else if errmsg.Error.Message == "" {
 	fmt.Println(string(bytes))
 	// } else {
@@ -161,7 +161,7 @@ func maintenanceconfigurationDelete(p util.EKSAPIParameter) {
 	// }
 }
 
-func maintenanceconfigurationShow(p util.EKSAPIParameter) {
+func maintenanceconfigurationShow(p util.AKSAPIParameter) {
 	httpPostUrl := "http://localhost:8080/maintenanceconfigurationShow"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
@@ -238,6 +238,19 @@ func HTTPPostRequest(p util.AKSAPIParameter, cmd string) {
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
 	checkErr(err)
 	util.PrintOutput(bytes)
+}
+
+func HTTPPostRequestAPI(p util.AKSAPIParameter, cmd string) {
+	httpPostUrl := "http://localhost:8080/" + cmd
+	bytes, err := util.GetResponseBody("POST", httpPostUrl, p)
+	checkErr(err)
+	var errmsg util.Error
+	json.Unmarshal(bytes, &errmsg)
+	if errmsg.Error.Message == "" {
+		fmt.Println(string(bytes))
+	} else {
+		fmt.Println(errmsg.Error.Message)
+	}
 }
 
 func HTTPPostRequestCLI(p util.AKSInstallCLI, cmd string) {

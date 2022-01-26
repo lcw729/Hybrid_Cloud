@@ -48,7 +48,7 @@ func aksFlags() {
 	AKSPIAddCmd.MarkFlagRequired("resource-group")
 	AKSPIAddCmd.MarkFlagRequired("cluster-name")
 	AKSPIAddCmd.MarkFlagRequired("namespace")
-	AKSPIAddCmd.MarkFlagRequired("name")
+	AKSPIAddCmd.MarkFlagRequired("identity-resource-id")
 
 	AKSPIDeleteCmd.Flags().StringP("resource-group", "g", "", "Name of resource group. ")
 	AKSPIDeleteCmd.Flags().StringP("cluster-name", "", "", "The cluster name.")
@@ -101,6 +101,45 @@ func aksFlags() {
 	AKSPIExceptionUpdateCmd.MarkFlagRequired("resource-group")
 	AKSPIExceptionUpdateCmd.MarkFlagRequired("pod-labels")
 
+	// maintenanceconfiguration
+
+	MCAddCmd.Flags().StringP("cluster-name", "", "", "The cluster name.")
+	MCAddCmd.Flags().StringP("name", "n", "", "The config name.")
+	MCAddCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	MCAddCmd.Flags().StringP("config-file", "", "", "The maintenance configuration json file.")
+	MCAddCmd.MarkFlagRequired("cluster-name")
+	MCAddCmd.MarkFlagRequired("name")
+	MCAddCmd.MarkFlagRequired("resource-group")
+
+	MCDeleteCmd.Flags().StringP("cluster-name", "", "", "The cluster name.")
+	MCDeleteCmd.Flags().StringP("name", "n", "", "The config name.")
+	MCDeleteCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	MCDeleteCmd.MarkFlagRequired("cluster-name")
+	MCDeleteCmd.MarkFlagRequired("name")
+	MCDeleteCmd.MarkFlagRequired("resource-group")
+
+	MCUpdateCmd.Flags().StringP("cluster-name", "", "", "")
+	MCUpdateCmd.Flags().StringP("name", "n", "", "")
+	MCUpdateCmd.Flags().StringP("resource-group", "g", "", "")
+	MCUpdateCmd.Flags().StringP("config-file", "", "", "configfile")
+	MCUpdateCmd.MarkFlagRequired("cluster-name")
+	MCUpdateCmd.MarkFlagRequired("name")
+	MCUpdateCmd.MarkFlagRequired("resource-group")
+
+	MCListCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	MCListCmd.Flags().StringP("cluster-name", "", "", "The cluster name.")
+	MCListCmd.MarkFlagRequired("resource-group")
+	MCListCmd.MarkFlagRequired("cluster-name")
+
+	MCShowCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	MCShowCmd.Flags().StringP("cluster-name", "", "", "The cluster name.")
+	MCShowCmd.Flags().StringP("name", "", "", "The config name.")
+	MCShowCmd.MarkFlagRequired("cluster-name")
+	MCShowCmd.MarkFlagRequired("resource-group")
+	MCShowCmd.MarkFlagRequired("name")
+
+	// etc
+
 	StartCmd.Flags().StringP("resource-group", "g", "", "")
 	StartCmd.Flags().StringP("name", "n", "", "")
 	StartCmd.MarkFlagRequired("resource-group")
@@ -118,45 +157,6 @@ func aksFlags() {
 
 	GetOSoptionsCmd.Flags().StringP("location", "l", "", "location")
 	GetOSoptionsCmd.MarkFlagRequired("location")
-
-	MaintenanceconfigurationCmd.MarkFlagRequired("resource-group")
-	MaintenanceconfigurationCmd.MarkFlagRequired("name")
-
-	MCAddCmd.Flags().StringP("cluster-name", "", "", "")
-	MCAddCmd.Flags().StringP("name", "", "", "")
-	MCAddCmd.Flags().StringP("resource-group", "g", "", "")
-	MCAddCmd.Flags().StringP("config-file", "", "", "configfile")
-	MCAddCmd.MarkFlagRequired("cluster-name")
-	// MCAddCmd.MarkFlagRequired("name")
-	MCAddCmd.MarkFlagRequired("resource-group")
-
-	MCDeleteCmd.Flags().StringP("cluster-name", "", "", "")
-	MCDeleteCmd.Flags().StringP("name", "", "", "")
-	MCDeleteCmd.Flags().StringP("resource-group", "g", "", "")
-	MCDeleteCmd.MarkFlagRequired("cluster-name")
-	MCDeleteCmd.MarkFlagRequired("name")
-	MCDeleteCmd.MarkFlagRequired("resource-group")
-
-	MCUpdateCmd.Flags().StringP("cluster-name", "", "", "")
-	MCUpdateCmd.Flags().StringP("name", "", "", "")
-	MCUpdateCmd.Flags().StringP("resource-group", "g", "", "")
-	MCUpdateCmd.Flags().StringP("config-file", "", "", "configfile")
-	MCUpdateCmd.MarkFlagRequired("cluster-name")
-	MCUpdateCmd.MarkFlagRequired("name")
-	MCUpdateCmd.MarkFlagRequired("resource-group")
-
-	MCListCmd.Flags().StringP("resource-group", "g", "", "")
-	MCListCmd.Flags().StringP("cluster-name", "c", "", "")
-	// MCListCmd.Flags().StringP("config-name", "", "", "configname")
-	MCListCmd.MarkFlagRequired("resource-group")
-	MCListCmd.MarkFlagRequired("cluster-name")
-
-	MCShowCmd.Flags().StringP("resource-group", "g", "", "")
-	MCShowCmd.Flags().StringP("cluster-name", "c", "", "")
-	MCShowCmd.Flags().StringP("config-name", "", "", "configname")
-	MCShowCmd.MarkFlagRequired("cluster-name")
-	MCShowCmd.MarkFlagRequired("resource-group")
-	MCShowCmd.MarkFlagRequired("config-name")
 
 	AKSAppUpCmd.Flags().String("acr", "", "The Azure Container Registry name used to push the image.")
 	AKSAppUpCmd.Flags().String("aks-cluster", "", "The name of the cluster to select for deployment.")
