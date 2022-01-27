@@ -865,7 +865,7 @@ var AKSGetUpgradesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
-		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		clusterName, _ := cmd.Flags().GetString("name")
 		AKSAPIParameter := util.AKSAPIParameter{
 			ClusterName:       clusterName,
 			ResourceGroupName: resourceGroupName,
@@ -909,6 +909,24 @@ var AKSKanalyzeCmd = &cobra.Command{
 			ResourceGroupName: resourceGroupName,
 		}
 		HTTPPostRequest(AKSAPIParameter, "kanalyze")
+	},
+}
+
+var AKSKollectCmd = &cobra.Command{
+	Use:   "kollect",
+	Short: "Collecting diagnostic information for the Kubernetes cluster.",
+	Long:  `hybridctl aks kollect`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+		clusterName, _ := cmd.Flags().GetString("name")
+		storageAccount, _ := cmd.Flags().GetString("storage-account")
+		AKSAPIParameter := util.AKSAPIParameter{
+			ClusterName:       clusterName,
+			ResourceGroupName: resourceGroupName,
+			StorageAccount:    storageAccount,
+		}
+		HTTPPostRequest(AKSAPIParameter, "kollect")
 	},
 }
 

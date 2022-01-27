@@ -64,6 +64,7 @@ func init() {
 	aksCmd.AddCommand(AKSGetUpgradesCmd)
 	aksCmd.AddCommand(AKSGetVersionsCmd)
 	aksCmd.AddCommand(AKSKanalyzeCmd)
+	aksCmd.AddCommand(AKSKollectCmd)
 	aksCmd.AddCommand(Nodepool)
 	Nodepool.AddCommand(AKSNodepoolGetUpgradesCmd)
 	aksCmd.AddCommand(AKSInstallCLICmd)

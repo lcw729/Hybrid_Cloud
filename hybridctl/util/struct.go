@@ -48,6 +48,7 @@ type AKSAPIParameter struct {
 	Subscription      string
 	Location          string
 	NodepoolName      string
+	StorageAccount    string
 	Features          []string
 	Addon             AKSAddon            `json:"addon"`
 	PodIdentity       AKSPodIdentity      `json:"podIdentity"`

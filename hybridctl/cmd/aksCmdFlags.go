@@ -264,19 +264,18 @@ func aksFlags() {
 	AKSCheckAcrCmd.MarkFlagRequired("name")
 	AKSCheckAcrCmd.MarkFlagRequired("resource-group")
 
-	AKSGetUpgradesCmd.Flags().StringP("resource-group", "", "g", "")
-	AKSGetUpgradesCmd.Flags().String("cluster-name", "", "The cluster name.")
+	AKSGetUpgradesCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	AKSGetUpgradesCmd.Flags().StringP("name", "n", "", "The cluster name.")
 	AKSGetUpgradesCmd.Flags().String("subscription", "", "The name or ID of the subscription. ")
 	AKSGetUpgradesCmd.MarkFlagRequired("resource-group")
-	AKSGetUpgradesCmd.MarkFlagRequired("cluster-name")
+	AKSGetUpgradesCmd.MarkFlagRequired("name")
 
-	AKSGetVersionsCmd.Flags().String("location", "l", "Location")
+	AKSGetVersionsCmd.Flags().StringP("location", "l", "", "Location")
 	AKSGetVersionsCmd.Flags().String("subscription", "", "The name or ID of the subscription. ")
 	AKSGetVersionsCmd.MarkFlagRequired("location")
-	AKSGetVersionsCmd.MarkFlagRequired("subscription")
 
 	AKSNodepoolGetUpgradesCmd.Flags().String("nodepool-name", "", "The name of the node pool.")
-	AKSNodepoolGetUpgradesCmd.Flags().StringP("resource-group", "", "g", "")
+	AKSNodepoolGetUpgradesCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
 	AKSNodepoolGetUpgradesCmd.Flags().String("subscription", "", "The name or ID of the subscription. ")
 	AKSNodepoolGetUpgradesCmd.Flags().String("cluster-name", "", "The cluster name.")
 	AKSNodepoolGetUpgradesCmd.MarkFlagRequired("nodepool-name")
@@ -291,8 +290,14 @@ func aksFlags() {
 	AKSInstallCLICmd.Flags().String("kubelogin-version", "", "The version of kubelogin to install. Default: latest")
 	AKSInstallCLICmd.Flags().String("subscription", "", "The name or ID of the subscription.")
 
-	AKSKanalyzeCmd.Flags().StringP("resource-group", "g", "", "")
-	AKSKanalyzeCmd.Flags().StringP("name", "n", "", "")
+	AKSKanalyzeCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	AKSKanalyzeCmd.Flags().StringP("name", "n", "", "Name of the managed cluster.")
 	AKSKanalyzeCmd.MarkFlagRequired("resource-group")
 	AKSKanalyzeCmd.MarkFlagRequired("name")
+
+	AKSKollectCmd.Flags().StringP("resource-group", "g", "", "Name of resource group.")
+	AKSKollectCmd.Flags().StringP("name", "n", "", "Name of the managed cluster.")
+	AKSKollectCmd.Flags().String("storage-account", "", "Name or ID of the storage account to save the diagnostic information.")
+	AKSKollectCmd.MarkFlagRequired("resource-group")
+	AKSKollectCmd.MarkFlagRequired("name")
 }
