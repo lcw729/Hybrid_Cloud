@@ -52,7 +52,7 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=hcp.k8s.io, Version=v1alpha1
+	// Group=hcp.crd.com, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("hcpclusters"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hcp().V1alpha1().HCPClusters().Informer()}, nil
 

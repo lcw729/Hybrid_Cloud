@@ -44,9 +44,11 @@ func ListKubeFedClusters(genClient genericclient.Client, namespace string) *fedv
 		fmt.Printf("Error retrieving list of federated clusters: %+v\n", err)
 	}
 
-	if len(tempClusterList.Items) == 0 {
-		fmt.Println("No federated clusters found")
-	}
+	/*
+		if len(tempClusterList.Items) == 0 {
+			fmt.Println("No federated clusters found")
+		}
+	*/
 
 	// Status Check
 	for _, cluster := range tempClusterList.Items {

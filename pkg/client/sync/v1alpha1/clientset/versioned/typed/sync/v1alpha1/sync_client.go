@@ -30,7 +30,7 @@ type HcpV1alpha1Interface interface {
 	SyncsGetter
 }
 
-// HcpV1alpha1Client is used to interact with features provided by the hcp.k8s.io group.
+// HcpV1alpha1Client is used to interact with features provided by the hcp.crd.com group.
 type HcpV1alpha1Client struct {
 	restClient rest.Interface
 }

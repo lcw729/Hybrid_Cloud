@@ -36,9 +36,9 @@ type FakeHCPHybridAutoScalers struct {
 	ns   string
 }
 
-var hcphybridautoscalersResource = schema.GroupVersionResource{Group: "hcp.k8s.io", Version: "v1alpha1", Resource: "hcphybridautoscalers"}
+var hcphybridautoscalersResource = schema.GroupVersionResource{Group: "hcp.crd.com", Version: "v1alpha1", Resource: "hcphybridautoscalers"}
 
-var hcphybridautoscalersKind = schema.GroupVersionKind{Group: "hcp.k8s.io", Version: "v1alpha1", Kind: "HCPHybridAutoScaler"}
+var hcphybridautoscalersKind = schema.GroupVersionKind{Group: "hcp.crd.com", Version: "v1alpha1", Kind: "HCPHybridAutoScaler"}
 
 // Get takes name of the hCPHybridAutoScaler, and returns the corresponding hCPHybridAutoScaler object, and an error if there is any.
 func (c *FakeHCPHybridAutoScalers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.HCPHybridAutoScaler, err error) {

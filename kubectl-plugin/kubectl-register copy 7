@@ -35,6 +35,9 @@ case "$1" in
         exit 0
         ;;
 esac
+if [ "$?" -ne 0 ]; then
+    exit 1; 
+fi
 export KUBECONFIG=~/.kube/config
 cd ~/Go/src/Hybrid_Cluster/hybridctl/pkg/hybridctl
 go build

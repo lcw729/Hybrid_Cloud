@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	GroupName    = "hcp.k8s.io"
+	GroupName    = "hcp.crd.com"
 	GroupVersion = "v1alpha1"
 	// SchemeGroupVersion is group version used to register these objects
 	SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: GroupVersion}

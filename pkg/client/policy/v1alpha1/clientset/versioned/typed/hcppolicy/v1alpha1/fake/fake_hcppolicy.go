@@ -36,9 +36,9 @@ type FakeHCPPolicies struct {
 	ns   string
 }
 
-var hcppoliciesResource = schema.GroupVersionResource{Group: "hcp.k8s.io", Version: "v1alpha1", Resource: "hcppolicies"}
+var hcppoliciesResource = schema.GroupVersionResource{Group: "hcp.crd.com", Version: "v1alpha1", Resource: "hcppolicies"}
 
-var hcppoliciesKind = schema.GroupVersionKind{Group: "hcp.k8s.io", Version: "v1alpha1", Kind: "HCPPolicy"}
+var hcppoliciesKind = schema.GroupVersionKind{Group: "hcp.crd.com", Version: "v1alpha1", Kind: "HCPPolicy"}
 
 // Get takes name of the hCPPolicy, and returns the corresponding hCPPolicy object, and an error if there is any.
 func (c *FakeHCPPolicies) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.HCPPolicy, err error) {

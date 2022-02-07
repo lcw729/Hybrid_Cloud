@@ -135,7 +135,6 @@ DESCRIPTION
 			default:
 				fmt.Println("Run 'hybridctl join --help' to view all commands")
 			}
-			//
 		}
 	},
 }
@@ -152,6 +151,7 @@ func CheckHCPClusterListToJoin(platform string, clustername string) bool {
 
 	for _, cluster := range cluster_list.Items {
 		joinstatus := cluster.Spec.JoinStatus
+		fmt.Println(joinstatus)
 		if cluster.Spec.ClusterPlatform == platform && cluster.Name == clustername {
 			if joinstatus == "UNJOIN" {
 				cluster.Spec.JoinStatus = "JOINING"
@@ -191,10 +191,14 @@ func CreateHCPCluster(platform string, clustername string) bool {
 		fmt.Println("File reading error", err)
 		return false
 	}
+	if data == nil {
+		fmt.Printf("fail to get config about %s\n", clustername)
+		return false
+	}
 	cluster := hcpclusterapis.HCPCluster{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HCPCluster",
-			APIVersion: "hcp.k8s.io/v1alpha1",
+			APIVersion: "hcp.crd.com",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      clustername,
@@ -207,6 +211,7 @@ func CreateHCPCluster(platform string, clustername string) bool {
 		},
 	}
 	newhcpcluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(platform).Create(context.TODO(), &cluster, metav1.CreateOptions{})
+	// err = hcp_cluster.HcpV1alpha1().HCPClusters(platform).Delete(context.TODO(), clustername, metav1.DeleteOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return false

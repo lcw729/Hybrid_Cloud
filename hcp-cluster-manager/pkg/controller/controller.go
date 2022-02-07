@@ -7,6 +7,7 @@ import (
 	lister "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
 	hcpclusterscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 	"Hybrid_Cluster/util/clusterManager"
+	cm "Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
 	"log"
@@ -508,10 +509,16 @@ func JoinCluster(platform string,
 		klog.Info("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
+	cm := cm.NewClusterManager()
+	var disabledTLSValidations []fedv1b1.TLSValidation
+
+	if cm.Host_config.TLSClientConfig.Insecure {
+		disabledTLSValidations = append(disabledTLSValidations, fedv1b1.TLSAll)
+	}
 	kubefedcluster := &fedv1b1.KubeFedCluster{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "kubefedcluster",
-			APIVersion: "core.kubefed.io/v1beta1",
+			APIVersion: "core.kubefed.io",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      clustername,
@@ -523,7 +530,7 @@ func JoinCluster(platform string,
 			SecretRef: fedv1b1.LocalSecretReference{
 				Name: cluster_secret.Name,
 			},
-			// DisabledTLSValidations: disabledTLSValidations,
+			DisabledTLSValidations: disabledTLSValidations,
 		},
 	}
 

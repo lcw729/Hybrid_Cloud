@@ -36,9 +36,9 @@ type FakeHCPClusters struct {
 	ns   string
 }
 
-var hcpclustersResource = schema.GroupVersionResource{Group: "hcp.k8s.io", Version: "v1alpha1", Resource: "hcpclusters"}
+var hcpclustersResource = schema.GroupVersionResource{Group: "hcp.crd.com", Version: "v1alpha1", Resource: "hcpclusters"}
 
-var hcpclustersKind = schema.GroupVersionKind{Group: "hcp.k8s.io", Version: "v1alpha1", Kind: "HCPCluster"}
+var hcpclustersKind = schema.GroupVersionKind{Group: "hcp.crd.com", Version: "v1alpha1", Kind: "HCPCluster"}
 
 // Get takes name of the hCPCluster, and returns the corresponding hCPCluster object, and an error if there is any.
 func (c *FakeHCPClusters) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.HCPCluster, err error) {

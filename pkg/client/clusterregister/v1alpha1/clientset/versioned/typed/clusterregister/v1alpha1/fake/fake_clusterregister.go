@@ -36,9 +36,9 @@ type FakeClusterRegisters struct {
 	ns   string
 }
 
-var clusterregistersResource = schema.GroupVersionResource{Group: "hcp.k8s.io", Version: "v1alpha1", Resource: "clusterregisters"}
+var clusterregistersResource = schema.GroupVersionResource{Group: "hcp.crd.com", Version: "v1alpha1", Resource: "clusterregisters"}
 
-var clusterregistersKind = schema.GroupVersionKind{Group: "hcp.k8s.io", Version: "v1alpha1", Kind: "ClusterRegister"}
+var clusterregistersKind = schema.GroupVersionKind{Group: "hcp.crd.com", Version: "v1alpha1", Kind: "ClusterRegister"}
 
 // Get takes name of the clusterRegister, and returns the corresponding clusterRegister object, and an error if there is any.
 func (c *FakeClusterRegisters) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ClusterRegister, err error) {

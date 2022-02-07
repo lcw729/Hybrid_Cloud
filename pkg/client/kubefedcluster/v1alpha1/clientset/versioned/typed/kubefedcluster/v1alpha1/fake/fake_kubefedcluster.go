@@ -36,9 +36,9 @@ type FakeKubeFedClusters struct {
 	ns   string
 }
 
-var kubefedclustersResource = schema.GroupVersionResource{Group: "hcp.k8s.io", Version: "v1alpha1", Resource: "kubefedclusters"}
+var kubefedclustersResource = schema.GroupVersionResource{Group: "hcp.crd.com", Version: "v1alpha1", Resource: "kubefedclusters"}
 
-var kubefedclustersKind = schema.GroupVersionKind{Group: "hcp.k8s.io", Version: "v1alpha1", Kind: "KubeFedCluster"}
+var kubefedclustersKind = schema.GroupVersionKind{Group: "hcp.crd.com", Version: "v1alpha1", Kind: "KubeFedCluster"}
 
 // Get takes name of the kubeFedCluster, and returns the corresponding kubeFedCluster object, and an error if there is any.
 func (c *FakeKubeFedClusters) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.KubeFedCluster, err error) {
