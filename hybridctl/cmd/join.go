@@ -151,7 +151,8 @@ func CheckHCPClusterListToJoin(platform string, clustername string) bool {
 
 	for _, cluster := range cluster_list.Items {
 		joinstatus := cluster.Spec.JoinStatus
-		fmt.Println(joinstatus)
+		fmt.Println(cluster.Spec.ClusterPlatform)
+		fmt.Println(cluster.Name)
 		if cluster.Spec.ClusterPlatform == platform && cluster.Name == clustername {
 			if joinstatus == "UNJOIN" {
 				cluster.Spec.JoinStatus = "JOINING"
@@ -173,6 +174,7 @@ func CheckHCPClusterListToJoin(platform string, clustername string) bool {
 				return false
 			}
 		}
+		fmt.Println("?")
 	}
 	fmt.Println("ERROR: no such Cluster")
 	fmt.Println("you must register yout cluster to join")
