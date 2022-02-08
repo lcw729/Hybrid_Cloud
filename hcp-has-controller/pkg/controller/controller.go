@@ -1,22 +1,18 @@
 package controller
 
 import (
-	sync "Hybrid_Cluster/pkg/apis/sync/v1alpha1"
+	cobrautil "Hybrid_Cluster/hybridctl/util"
 	v1alpha1hcphas "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
-	syncv1alpha1 "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned"
 	hcphasscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
-	cm "Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -29,8 +25,6 @@ import (
 )
 
 const controllerAgentName = "hcp-has-controller"
-
-var syncIndex = 0
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Foo is synced
@@ -211,63 +205,77 @@ func (c *Controller) syncHandler(key string) error {
 
 		return err
 	}
-	klog.Info("------")
 
+	warning_count := hcphas.Spec.WarningCount
 	options := hcphas.Spec.ScalingOptions
-	hpa_template := hcphas.Spec.ScalingOptions.HpaTemplate
-	if hcphas.Spec.WarningCount == 1 {
-		if hcphas.Spec.CurrentStep == "HAS" {
-			klog.Info("------")
-			// Sync 생성
-			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
-			command := "create"
-			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
+	resource_status := hcphas.Status.ResourceStatus
+	target_cluster := hcphas.Spec.TargetCluster
+
+	// hpa
+	hpa_template := options.HpaTemplate
+	hpa_namespace := hpa_template.ObjectMeta.Namespace
+	fmt.Println(warning_count)
+
+	config, err := cobrautil.BuildConfigFromFlags(target_cluster, "/root/.kube/config")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if resource_status == "WAITING" {
+		if warning_count == 1 {
+			// deployment에 대한 k8s has 생성
+			_, err = clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(hpa_namespace).Create(context.TODO(), &hpa_template, metav1.CreateOptions{})
 			if err != nil {
 				utilruntime.HandleError(fmt.Errorf(err.Error()))
 				return err
 			} else {
-				klog.Info("Success to Create Sync resource : ", h)
-				// hcphas 변경
+				klog.Info("Success to Create HorizontalPodAutoscalers resource : ", hcphas.ObjectMeta.Name)
+				// update status
+				hcphas.Status.ResourceStatus = "DONE"
 				hcphas.Status.LastSpec = hcphas.Spec
-				hcphas.Spec.CurrentStep = "Sync"
 				c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
 			}
-		}
-	} else if hcphas.Spec.WarningCount == 2 {
-		if hcphas.Spec.CurrentStep == "HAS" && hpa_template.Spec.MaxReplicas >= hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas {
-			// Sync 생성
-			target_cluster := hcphas.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
-			// last_maxReplicas := options.HpaTemplate.Spec.MaxReplicas
-			// options.HpaTemplate.Spec.MaxReplicas = last_maxReplicas * 2
-			command := "update"
-			h, err := sendSyncHPA(target_cluster, command, options.HpaTemplate)
-			if err != nil {
-				utilruntime.HandleError(fmt.Errorf(err.Error()))
-				return err
+		} else if warning_count == 2 {
+			if hpa_template.Spec.MaxReplicas >= hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas {
+				_, err = clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(hpa_namespace).Update(context.TODO(), &hpa_template, metav1.UpdateOptions{})
+				if err != nil {
+					utilruntime.HandleError(fmt.Errorf(err.Error()))
+					return err
+				} else {
+					klog.Info("Success to Create HorizontalPodAutoscalers resource : ", hcphas.ObjectMeta.Name)
+					// update status
+					hcphas.Status.ResourceStatus = "DONE"
+					hcphas.Status.LastSpec = hcphas.Spec
+					c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
+				}
 			} else {
-				klog.Info("Success to Create Sync resource : ", h)
-				// hcphas 변경
-				hcphas.Status.LastSpec = hcphas.Spec
-				hcphas.Spec.CurrentStep = "Sync"
-				c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
+				klog.Info("Set a value greater than the current number of replicas")
 			}
-		}
-	} else if hcphas.Spec.WarningCount == 3 {
-		if hcphas.Spec.CurrentStep == "HAS" {
-			// Sync 생성
-			target_cluster := hcphas.Spec.ScalingOptions.VpaTemplate.Spec.TargetRef.Name
-			command := "create"
-			h, err := sendSyncVPA(target_cluster, command, options.VpaTemplate)
-			if err != nil {
-				utilruntime.HandleError(fmt.Errorf(err.Error()))
-				return err
-			} else {
-				klog.Info("Success to Create Sync resource : ", h)
-				// hcphas 변경
-				hcphas.Status.LastSpec = hcphas.Spec
-				hcphas.Spec.CurrentStep = "Sync"
-				c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
-			}
+		} else if warning_count == 3 {
+			/*
+				if hcphas.Spec.CurrentStep == "HAS" {
+					// Sync 생성
+					target_cluster := hcphas.Spec.ScalingOptions.VpaTemplate.Spec.TargetRef.Name
+					command := "create"
+					h, err := sendSyncVPA(target_cluster, command, options.VpaTemplate)
+					if err != nil {
+						utilruntime.HandleError(fmt.Errorf(err.Error()))
+						return err
+					} else {
+						klog.Info("Success to Create Sync resource : ", h)
+						// hcphas 변경
+						hcphas.Status.LastSpec = hcphas.Spec
+						hcphas.Spec.CurrentStep = "Sync"
+						c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
+					}
+				}
+			*/
 		}
 	} else {
 		utilruntime.HandleError(fmt.Errorf("warning count is out of range"))
@@ -276,6 +284,7 @@ func (c *Controller) syncHandler(key string) error {
 
 }
 
+/*
 func sendSyncHPA(clusterName string, command string, template interface{}) (string, error) {
 	syncIndex += 1
 	cm := cm.NewClusterManager()
@@ -331,3 +340,4 @@ func sendSyncVPA(clusterName string, command string, template interface{}) (stri
 	klog.V(4).Info("create %s in Namespace %s", s.Name, s.Namespace)
 	return s.Name, err
 }
+*/

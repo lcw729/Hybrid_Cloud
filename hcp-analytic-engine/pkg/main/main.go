@@ -1,9 +1,9 @@
 package main
 
 import (
-	policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
+	// policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
+	"Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
 	algopb "Hybrid_Cluster/protos/v1/algo"
-	"fmt"
 )
 
 const portNumber = "9000"
@@ -72,28 +72,28 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 */
 func main() {
 
-	cpu, _ := policy.GetInitialSettingValue("max_cpu")
-	mem, _ := policy.GetInitialSettingValue("max_memory")
-	extra, _ := policy.GetInitialSettingValue("extra")
-
-	fmt.Println(extra)
-	cpu = cpu * (100 - extra) / 100
-	mem = mem * (100 - extra) / 100
-	fmt.Println(cpu, mem)
-
 	/*
-		// HPA/VPA 함수 사용 예시
-		cluster := "kube-master"
-		pod := "nginx-deployment-69f8d49b75-548vz"
-		ns := "default"
-		var min int32 = 1
-		minReplicas := &min
-		var maxReplicas int32 = 5
-		resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
-		time.Sleep(20)
-		resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
-		resource.CreateVPA(cluster, pod, ns, "Auto")
+		cpu, _ := policy.GetInitialSettingValue("max_cpu")
+		mem, _ := policy.GetInitialSettingValue("max_memory")
+		extra, _ := policy.GetInitialSettingValue("extra")
+
+		fmt.Println(extra)
+		cpu = cpu * (100 - extra) / 100
+		mem = mem * (100 - extra) / 100
+		fmt.Println(cpu, mem)
 	*/
+
+	// HPA/VPA 함수 사용 예시
+	cluster := "kube-master"
+	pod := "nginx-deploy-79f85fd859-hhmm2"
+	ns := "default"
+	var min int32 = 1
+	minReplicas := &min
+	var maxReplicas int32 = 5
+	// resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
+	// time.Sleep(20)
+	resource.CreateHPA2(cluster, pod, ns, minReplicas, 8)
+	// resource.CreateVPA(cluster, pod, ns, "Auto")
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)

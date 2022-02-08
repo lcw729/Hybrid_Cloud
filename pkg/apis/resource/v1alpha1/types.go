@@ -17,21 +17,24 @@ type HCPHybridAutoScaler struct {
 }
 
 type HCPHybridAutoScalerSpec struct {
-	WarningCount   int32
-	CurrentStep    string         `json:"step"`
+	TargetCluster  string         `json:"targetCluster"`
+	WarningCount   int32          `json:"warningCount"`
+	CurrentStep    string         `json:"currentStep"`
 	ScalingOptions ScalingOptions `json:"scalingOptions,omitempty" protobuf:"bytes,2,opt,name=scalingoptions"`
 }
 
 type ScalingOptions struct {
 	// CpaTemplate CpaTemplate                        `json:"cpaTemplate,omitempty" protobuf:"bytes,1,opt,name=cpatemplate"`
 	HpaTemplate hpav2beta1.HorizontalPodAutoscaler `json:"hpaTemplate,omitempty" protobuf:"bytes,2,opt,name=hpatemplate"`
-	VpaTemplate vpav1beta2.VerticalPodAutoscaler   `json:"vpaTemplate,omitempty" protobuf:"bytes,3,opt,name=vpatemplate"`
+	VpaTemplate vpav1beta2.VerticalPodAutoscaler   `json:"vpaTemplate,omitempty" protobuf:"bytes,3,opt,name=hpatemplate"`
 }
 
 type HCPHybridAutoScalerStatus struct {
-	LastSpec HCPHybridAutoScalerSpec `json:"lastSpec"`
+	ResourceStatus string                  `json:"resourceStatus"`
+	LastSpec       HCPHybridAutoScalerSpec `json:"lastSpec"`
 }
 
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type HCPHybridAutoScalerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

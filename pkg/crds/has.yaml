@@ -4,37 +4,49 @@ metadata:
   name: hcphybridautoscalers.hcp.crd.com
 spec:
   group: hcp.crd.com
-  version: v1alpha1
-  names:
-    kind: HCPHybridAutoScaler
-    listKind: HCPHybridAutoScalerList
-    plural: hcphybridautoscalers
-    singular: hcphybridautoscalers
-  scope: Namespaced
-  #scope: Cluster
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          type: object
-        status:
-          type: object
-  version: v1alpha1
   versions:
   - name: v1alpha1
     served: true
     storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              targetCluster:
+                type: string
+              warningCount:
+                type: integer
+              scalingOptions:
+                type: object
+                properties:
+                  hpaTemplate:
+                    x-kubernetes-preserve-unknown-fields: true
+                    type: object
+                  vpaTemplate:
+                    x-kubernetes-preserve-unknown-fields: true
+                    type: object
+          status:
+            type: object
+            properties:
+              resourceStatus:
+                type: string
+                enum:
+                - WAITING
+                - DOING
+                - DONE
+              lastSpec:
+                x-kubernetes-preserve-unknown-fields: true
+                type: object
+  scope: Namespaced 
+  names:
+    kind: HCPHybridAutoScaler
+    listKind: HCPHybridAutoScalerList
+    plural: hcphybridautoscalers
+    singular: hcphybridautoscaler
+    shortNames:
+    - hcphas
+    
+

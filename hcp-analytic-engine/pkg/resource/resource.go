@@ -109,9 +109,9 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 		fmt.Println(err)
 		return err
 	}
-
+	fmt.Println(d.Namespace)
 	// 2. hapTemplate 생성
-	hpa := hpav2beta1.HorizontalPodAutoscaler{
+	hpa := &hpav2beta1.HorizontalPodAutoscaler{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HorizontalPodAutoscaler",
 			APIVersion: "autoscaling/v2beta1",
@@ -137,11 +137,14 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 1,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			TargetCluster: cluster,
+			WarningCount:  1,
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
-				HpaTemplate: hpa,
+				HpaTemplate: *hpa,
 			},
+		},
+		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+			ResourceStatus: "WAITING",
 		},
 	}
 
@@ -204,11 +207,14 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa2",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 2,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			TargetCluster: cluster,
+			WarningCount:  2,
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
 				HpaTemplate: nhpa,
 			},
+		},
+		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+			ResourceStatus: "WAITING",
 		},
 	}
 	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
