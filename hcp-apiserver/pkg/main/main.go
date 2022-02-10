@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	aksFunc "Hybrid_Cluster/hcp-apiserver/pkg/main/aks"
 	eksFunc "Hybrid_Cluster/hcp-apiserver/pkg/main/eks"
@@ -112,11 +111,4 @@ func main() {
 	http.HandleFunc("/installCLI", aksFunc.InstallCLI)
 	// -----------------------------------------------------------------------------
 	http.ListenAndServe(":8080", nil)
-}
-
-func init() {
-	os.Setenv("ClientId", "5a7002e5-86e6-42c8-a844-976f4b95760d")
-	os.Setenv("ClientSecret", "I.E76p.jvKWFJxf3Ufqf1H_c66--ww53J2")
-	os.Setenv("SubscriptionId", "ccfc0c6c-d3c6-4de2-9a6c-c09ca498ff73")
-	os.Setenv("TenantId", "c8ea91b5-6aac-4c5c-ae34-9717a872159f")
 }
