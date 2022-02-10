@@ -91,8 +91,8 @@ func UpdateDeployment(cluster string, deployment *v1.Deployment, replicas int32)
 
 func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	config := cm.Cluster_configs[cluster]
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -160,9 +160,8 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 
 func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	config := cm.Cluster_configs[cluster]
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -181,7 +180,7 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 	}
 
 	// 2. hapTemplate (warningCount 1) 정보 얻기
-	client, err := kubernetes.NewForConfig(master_config)
+	client, err := kubernetes.NewForConfig(config)
 	hpa, err := client.AutoscalingV2beta1().HorizontalPodAutoscalers(d.Namespace).Get(context.TODO(), d.Name, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
@@ -229,8 +228,8 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 
 func CreateVPA(cluster string, pod string, namespace string, updateMode string) error {
 	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	config := cm.Cluster_configs[cluster]
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -277,11 +276,14 @@ func CreateVPA(cluster string, pod string, namespace string, updateMode string) 
 			Name: vpa.Name + "-vpa",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 3,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			TargetCluster: cluster,
+			WarningCount:  3,
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
 				VpaTemplate: vpa,
 			},
+		},
+		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+			ResourceStatus: "WAITING",
 		},
 	}
 	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})

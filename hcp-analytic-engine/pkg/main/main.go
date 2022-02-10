@@ -84,15 +84,15 @@ func main() {
 	*/
 
 	// HPA/VPA 함수 사용 예시
-	cluster := "kube-master"
-	pod := "nginx-deploy-79f85fd859-hhmm2"
+	cluster := "aks-master"
+	pod := "nginx-deploy-79f85fd859-ndl2r"
 	ns := "default"
 	var min int32 = 1
 	minReplicas := &min
 	var maxReplicas int32 = 5
-	// resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
+	resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
 	// time.Sleep(20)
-	resource.CreateHPA2(cluster, pod, ns, minReplicas, 8)
+	// resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
 	// resource.CreateVPA(cluster, pod, ns, "Auto")
 
 	/*
