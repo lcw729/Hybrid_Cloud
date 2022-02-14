@@ -222,8 +222,8 @@ func (c *Controller) syncHandler(key string) error {
 	joinstatus := hcpcluster.Spec.JoinStatus
 	platform := hcpcluster.Spec.ClusterPlatform
 	clustername := hcpcluster.Name
-	var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
+	var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/.kube/config")
+	join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/.kube/config")
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 
 	// JOIN 대기

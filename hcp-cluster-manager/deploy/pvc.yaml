@@ -1,4 +1,4 @@
-apiVersion: v1alpha1
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: pvc-kubeconfig
@@ -7,8 +7,8 @@ spec:
   accessModes:
   - ReadWriteMany
   resources:
-    request:
-      storgae: 2Gi
+    requests:
+      storage: 2Gi
   storageClassName: cluster-manager
   selector:
     matchLabels:
