@@ -6,6 +6,7 @@ import (
 	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
 	hcphasscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+
 	"context"
 	"fmt"
 	"time"
@@ -209,6 +210,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	// get HCP hybridautoscalers Info
+
 	warning_count := hcphas.Spec.WarningCount
 	options := hcphas.Spec.ScalingOptions
 	resource_status := hcphas.Status.ResourceStatus

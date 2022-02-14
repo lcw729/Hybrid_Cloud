@@ -87,6 +87,7 @@ func main() {
 	cluster := "aks-master"
 	pod := "nginx-deploy-79f85fd859-ndl2r"
 	ns := "default"
+<<<<<<< HEAD
 	// var min int32 = 1
 	// minReplicas := &min
 	// var maxReplicas int32 = 5
@@ -94,6 +95,15 @@ func main() {
 	// time.Sleep(20)
 	// resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
 	resource.CreateVPA(cluster, pod, ns, "Auto")
+=======
+	var min int32 = 1
+	minReplicas := &min
+	var maxReplicas int32 = 5
+	resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
+	// time.Sleep(20)
+	// resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
+	// resource.CreateVPA(cluster, pod, ns, "Auto")
+>>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
