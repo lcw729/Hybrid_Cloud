@@ -29,6 +29,10 @@ type FakeHcpV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeHcpV1alpha1) HCPDeployments(namespace string) v1alpha1.HCPDeploymentInterface {
+	return &FakeHCPDeployments{c, namespace}
+}
+
 func (c *FakeHcpV1alpha1) HCPHybridAutoScalers(namespace string) v1alpha1.HCPHybridAutoScalerInterface {
 	return &FakeHCPHybridAutoScalers{c, namespace}
 }

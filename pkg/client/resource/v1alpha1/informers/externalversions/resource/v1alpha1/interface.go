@@ -24,6 +24,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// HCPDeployments returns a HCPDeploymentInformer.
+	HCPDeployments() HCPDeploymentInformer
 	// HCPHybridAutoScalers returns a HCPHybridAutoScalerInformer.
 	HCPHybridAutoScalers() HCPHybridAutoScalerInformer
 }
@@ -37,6 +39,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// HCPDeployments returns a HCPDeploymentInformer.
+func (v *version) HCPDeployments() HCPDeploymentInformer {
+	return &hCPDeploymentInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // HCPHybridAutoScalers returns a HCPHybridAutoScalerInformer.

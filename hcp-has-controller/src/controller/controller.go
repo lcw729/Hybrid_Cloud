@@ -2,7 +2,7 @@ package controller
 
 import (
 	cobrautil "Hybrid_Cluster/hybridctl/util"
-	v1alpha1hcphas "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
+	hcphasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
 	hcphasscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"time"
 
-	vpa_clientset "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/client/clientset/versioned"
+	vpaclientset "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/client/clientset/versioned"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -46,7 +46,7 @@ const (
 
 type Controller struct {
 	kubeclientset   kubernetes.Interface
-	hcphasclientset v1alpha1hcphas.Interface
+	hcphasclientset hcphasv1alpha1.Interface
 	hcphasLister    lister.HCPHybridAutoScalerLister
 	hcphasSynced    cache.InformerSynced
 	workqueue       workqueue.RateLimitingInterface
@@ -55,7 +55,7 @@ type Controller struct {
 
 func NewController(
 	kubeclientset kubernetes.Interface,
-	hcphasclientset v1alpha1hcphas.Interface,
+	hcphasclientset hcphasv1alpha1.Interface,
 	hcphasinformer informer.HCPHybridAutoScalerInformer) *Controller {
 	utilruntime.Must(hcphasscheme.AddToScheme(scheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
@@ -238,7 +238,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	// create vpa_clientset
-	vpa_clientset, _ := vpa_clientset.NewForConfig(config)
+	vpa_clientset, _ := vpaclientset.NewForConfig(config)
 
 	// check resource_status [ WAITING | DOING | DONE ]
 	if resource_status == "WAITING" {

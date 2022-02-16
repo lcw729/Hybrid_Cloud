@@ -27,12 +27,17 @@ import (
 
 type HcpV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	HCPDeploymentsGetter
 	HCPHybridAutoScalersGetter
 }
 
 // HcpV1alpha1Client is used to interact with features provided by the hcp.crd.com group.
 type HcpV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *HcpV1alpha1Client) HCPDeployments(namespace string) HCPDeploymentInterface {
+	return newHCPDeployments(c, namespace)
 }
 
 func (c *HcpV1alpha1Client) HCPHybridAutoScalers(namespace string) HCPHybridAutoScalerInterface {

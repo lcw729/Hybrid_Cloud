@@ -102,10 +102,6 @@ func KubeFedClusterKubeClients(clusterList *fedv1b1.KubeFedClusterList, cluster_
 }
 
 func GetNodeList(c *kubernetes.Clientset) (*corev1.NodeList, error) {
-<<<<<<< HEAD
-=======
-	nodeList := &corev1.NodeList{}
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	nodeList, err := c.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		fmt.Printf("Error retrieving list of Node: %+v\n", err)

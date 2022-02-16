@@ -18,6 +18,14 @@ limitations under the License.
 
 package v1alpha1
 
+// HCPDeploymentListerExpansion allows custom methods to be added to
+// HCPDeploymentLister.
+type HCPDeploymentListerExpansion interface{}
+
+// HCPDeploymentNamespaceListerExpansion allows custom methods to be added to
+// HCPDeploymentNamespaceLister.
+type HCPDeploymentNamespaceListerExpansion interface{}
+
 // HCPHybridAutoScalerListerExpansion allows custom methods to be added to
 // HCPHybridAutoScalerLister.
 type HCPHybridAutoScalerListerExpansion interface{}

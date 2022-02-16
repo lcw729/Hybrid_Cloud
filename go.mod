@@ -3,11 +3,6 @@ module Hybrid_Cluster
 go 1.16
 
 require (
-<<<<<<< HEAD
-	admiralty.io/multicluster-controller v0.0.0-00010101000000-000000000000
-	admiralty.io/multicluster-service-account v0.6.1
-=======
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.40.29
 	github.com/go-logr/logr v0.4.0

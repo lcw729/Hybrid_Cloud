@@ -15,14 +15,13 @@
 package cmd
 
 import (
+	cobrautil "Hybrid_Cluster/hybridctl/util"
 	"fmt"
 	"io/ioutil"
 	"log"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
-
-	"Hybrid_Cluster/hybridctl/util"
 
 	hcpclusterapis "Hybrid_Cluster/pkg/apis/hcpcluster/v1alpha1"
 	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
@@ -32,15 +31,6 @@ import (
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-var checkAKS, checkEKS, checkGKE = false, false, false
-var master_config, _ = util.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-var master_client = kubernetes.NewForConfigOrDie(master_config)
-
-type Cli struct {
-	PlatformName string
-	ClusterName  string
-}
 
 // joinCmd represents the join command
 var joinCmd = &cobra.Command{
@@ -115,7 +105,9 @@ DESCRIPTION
 				if clustername == "" {
 					fmt.Println("ERROR: Input Clustername")
 				}
-				createPlatformNamespace()
+				CheckAndCreateNamespace("kube-master", "aks")
+				CheckAndCreateNamespace("kube-master", "eks")
+				CheckAndCreateNamespace("kube-master", "gke")
 				switch platform {
 				case "aks":
 					fallthrough
@@ -223,44 +215,52 @@ func CreateHCPCluster(platform string, clustername string) bool {
 	}
 }
 
-func createPlatformNamespace() {
+func FileNamespaceList(cluster string, namespace string) bool {
 
-	namespaceList, _ := master_client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	config, err := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	namespaceList, _ := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	for i := range namespaceList.Items {
-		if checkAKS && checkEKS && checkGKE {
-			break
-		}
-		switch namespaceList.Items[i].Name {
-		case "aks":
-			checkAKS = true
-			continue
-		case "eks":
-			checkEKS = true
-			continue
-		case "gke":
-			checkGKE = true
-			continue
-		default:
-			continue
+
+		if namespaceList.Items[i].Name == namespace {
+			return true
 		}
 	}
-	checkAndCreateNamespace(checkAKS, "aks")
-	checkAndCreateNamespace(checkEKS, "eks")
-	checkAndCreateNamespace(checkGKE, "gke")
+	return false
 }
 
-func checkAndCreateNamespace(PlatformCheck bool, platformName string) {
-	if !PlatformCheck {
+func CheckAndCreateNamespace(cluster string, namespace string) {
+	config, err := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if FileNamespaceList(cluster, namespace) {
 		Namespace := corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Namespace",
 				APIVersion: "v1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: platformName,
+				Name: namespace,
 			},
 		}
-		master_client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
+		_, err = client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 

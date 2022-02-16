@@ -23,10 +23,6 @@ import (
 func GetPod(cluster string, pod string, pod_namespace string) (*corev1.Pod, error) {
 	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
-<<<<<<< HEAD
-=======
-	p := &corev1.Pod{}
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	p, err := cluster_client.CoreV1().Pods(pod_namespace).Get(context.TODO(), pod, metav1.GetOptions{})
 	if err != nil {
 		return p, err
@@ -47,10 +43,6 @@ func GetDeploymentName(pod *corev1.Pod) string {
 func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
 	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
-<<<<<<< HEAD
-=======
-	d := &v1.Deployment{}
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	deploymentName := GetDeploymentName(pod)
 	d, err := cluster_client.AppsV1().Deployments(pod.Namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
@@ -97,11 +89,7 @@ func UpdateDeployment(cluster string, deployment *v1.Deployment, replicas int32)
 
 func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()
-<<<<<<< HEAD
 	config := cm.Host_config
-=======
-	config := cm.Cluster_configs[cluster]
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
@@ -119,11 +107,6 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 		fmt.Println(err)
 		return err
 	}
-<<<<<<< HEAD
-
-=======
-	fmt.Println(d.Namespace)
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	// 2. hapTemplate 생성
 	hpa := &hpav2beta1.HorizontalPodAutoscaler{
 		TypeMeta: metav1.TypeMeta{
@@ -148,11 +131,7 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 	// 3. hpaTemplate -> HCPHybridAutoScaler 생성
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-<<<<<<< HEAD
 			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa",
-=======
-			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa",
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			TargetCluster: cluster,
@@ -178,11 +157,7 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 
 func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()
-<<<<<<< HEAD
 	config := cm.Host_config
-=======
-	config := cm.Cluster_configs[cluster]
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
@@ -202,7 +177,6 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 	}
 
 	// 2. hapTemplate (warningCount 1) 정보 얻기
-<<<<<<< HEAD
 	target_cluster := cm.Cluster_configs[cluster]
 	target_clientset, err := kubernetes.NewForConfig(target_cluster)
 	if err != nil {
@@ -211,10 +185,6 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 	}
 
 	hpa, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(d.Namespace).Get(context.TODO(), d.Name, metav1.GetOptions{})
-=======
-	client, err := kubernetes.NewForConfig(config)
-	hpa, err := client.AutoscalingV2beta1().HorizontalPodAutoscalers(d.Namespace).Get(context.TODO(), d.Name, metav1.GetOptions{})
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -236,11 +206,7 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-<<<<<<< HEAD
 			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa2",
-=======
-			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa2",
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			TargetCluster: cluster,
@@ -265,11 +231,7 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 
 func CreateVPA(cluster string, pod string, namespace string, updateMode string) error {
 	cm := cm.NewClusterManager()
-<<<<<<< HEAD
 	config := cm.Host_config
-=======
-	config := cm.Cluster_configs[cluster]
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
@@ -314,11 +276,7 @@ func CreateVPA(cluster string, pod string, namespace string, updateMode string) 
 	// 3. vpaTemplate -> HCPHybridAutoScaler 생성
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-<<<<<<< HEAD
 			Name: cluster + "-" + vpa.Name + "-vpa",
-=======
-			Name: vpa.Name + "-vpa",
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			TargetCluster: cluster,

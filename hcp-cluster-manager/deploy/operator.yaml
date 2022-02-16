@@ -38,7 +38,6 @@ spec:
             mountPath: /mnt
       volumes:
       - name: kubeconfig
-<<<<<<< HEAD
         persistentVolumeClaim: 
           claimName: pvc-kubeconfig
       tolerations:
@@ -52,8 +51,5 @@ spec:
       dnsConfig:
         nameservers:
           - 8.8.8.8
-=======
-        PersistentVolumeClaim: 
-          claimName: pv-kubeconfig
->>>>>>> cef7bf61f6eda7a0ce90718c3536e415868e58d0
+
       
