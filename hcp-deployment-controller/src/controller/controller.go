@@ -1,20 +1,17 @@
 package controller
 
 import (
-	cobrautil "Hybrid_Cluster/hybridctl/util"
-	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	resourcev1alpha1scheme "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
 	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
-	"context"
+	resource "Hybrid_Cluster/resource"
 	"fmt"
 	"time"
 
 	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -225,68 +222,21 @@ func (c *Controller) syncHandler(key string) error {
 		deployment.ObjectMeta = hcpdeployment.ObjectMeta
 
 		deployment.Spec.Replicas = r
-		fmt.Println(FindHCPClusterList("aks-master", "aks"))
+		fmt.Println(resource.FindHCPClusterList("aks-master", "aks"))
 		fmt.Println("00000000")
-		CreateDeployment("aks-master", "agentpool", deployment)
+		resource.CreateDeployment("aks-master", "agentpool", deployment)
 
-		fmt.Println(FindHCPClusterList("hcp-cluster", "gke"))
+		fmt.Println(resource.FindHCPClusterList("hcp-cluster", "gke"))
 		deployment.Spec.Replicas = r
-		CreateDeployment("hcp-cluster", "agentpool", deployment)
+		resource.CreateDeployment("hcp-cluster", "agentpool", deployment)
 	} else {
-		FindHCPClusterList(target_cluster, "aks")
+		resource.FindHCPClusterList(target_cluster, "aks")
 		deployment.Spec.Replicas = hcpdeployment.Spec.Replicas
 		deployment.Spec.Selector = hcpdeployment.Spec.Selector
 		deployment.Spec.Template = hcpdeployment.Spec.Template
 		deployment.ObjectMeta = hcpdeployment.ObjectMeta
-		CreateDeployment(target_cluster, "pool-1", deployment)
+		resource.CreateDeployment(target_cluster, "pool-1", deployment)
 	}
 
-	return nil
-}
-
-func FindHCPClusterList(cluster string, platform string) bool {
-	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	if err != nil {
-		fmt.Println("this error")
-	}
-	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(config)
-
-	cluster_list, err := cluster_client.HcpV1alpha1().HCPClusters(platform).List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		for _, c := range cluster_list.Items {
-			fmt.Println(c.ObjectMeta.Name)
-			if c.ObjectMeta.Name == cluster {
-				fmt.Printf("find %s in HCPClusterList\n", cluster)
-				return true
-			}
-		}
-	}
-	fmt.Printf("fail to find %s in HCPClusterList\n", cluster)
-	fmt.Println("you should register your cluster to HCP")
-	return false
-}
-
-func CreateDeployment(cluster string, node string, deployment *v1.Deployment) error {
-	fmt.Println("111111")
-	config, err := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
-	fmt.Println("22222")
-	if err != nil {
-		fmt.Println("this error")
-		return err
-	}
-	cluster_client := kubernetes.NewForConfigOrDie(config)
-	deployment.Spec.Template.Spec.NodeName = node
-	deployment.ResourceVersion = ""
-	fmt.Println("111111")
-	new_dep, err := cluster_client.AppsV1().Deployments(deployment.ObjectMeta.Namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
-
-	if err != nil {
-		fmt.Println(err)
-		return err
-	} else {
-		fmt.Printf("success to create %s in cluster %s [replicas : %d]\n", new_dep.Name, cluster, *deployment.Spec.Replicas)
-	}
 	return nil
 }

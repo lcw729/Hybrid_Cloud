@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"Hybrid_Cluster/hybridctl/util"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	resourcev1alpha1clientset "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
@@ -16,6 +17,11 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
+type Resource struct {
+	TargetCluster string
+	RealResource  interface{}
+}
+
 // CreateCmd represents the Create command
 var CreateCmd = &cobra.Command{
 	Use:   "create",
@@ -29,6 +35,7 @@ var CreateCmd = &cobra.Command{
 
 func CreateResource() {
 
+	fmt.Println("1")
 	yaml, err := ReadFile()
 	if err != nil {
 		println(err)
@@ -40,10 +47,11 @@ func CreateResource() {
 		return
 	}
 
-	CreateHCPResource(obj, gvk)
+	RequestCreateResource(obj, gvk)
 }
 
 func ReadFile() ([]byte, error) {
+	fmt.Println("2")
 	file_name := cobrautil.Option_file
 
 	if file_name == "" {
@@ -61,6 +69,7 @@ func ReadFile() ([]byte, error) {
 }
 
 func GetObject(yaml []byte) (runtime.Object, *schema.GroupVersionKind, error) {
+	fmt.Println("3")
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	obj, gvk, err := decode([]byte(yaml), nil, nil)
@@ -72,13 +81,39 @@ func GetObject(yaml []byte) (runtime.Object, *schema.GroupVersionKind, error) {
 	return obj, gvk, err
 }
 
-func CreateHCPResource(obj runtime.Object, gvk *schema.GroupVersionKind) {
+func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]byte, error) {
+	fmt.Println("4")
+	LINK := "http://10.0.5.86:8080/resources"
+
+	// check context flag
+	flag_context := cobrautil.Option_context
+	var target_cluster string
+	var resource Resource
+
+	if flag_context == "" {
+		target_cluster = "undefined"
+	} else {
+		target_cluster = flag_context
+	}
+
 	// match obj kind
 	switch gvk.Kind {
 	case "Deployment":
-		resource := obj.(*appsv1.Deployment)
-		CreateHCPDeployment(resource)
+		LINK += "/deployment"
+		real_resource := obj.(*appsv1.Deployment)
+		fmt.Println(real_resource)
+		resource.TargetCluster = target_cluster
+		resource.RealResource = real_resource
 	}
+
+	fmt.Println(resource)
+	fmt.Println(LINK)
+	bytes, err := util.GetResponseBody("POST", LINK, &resource)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return bytes, err
 }
 
 func CreateHCPDeployment(resource *appsv1.Deployment) {

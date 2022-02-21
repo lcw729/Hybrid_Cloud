@@ -4,12 +4,12 @@ import (
 
 	// "Hybrid_Cluster/hybridctl/util"
 
+	"Hybrid_Cluster/hcp-apiserver/pkg/handler"
+	aksFunc "Hybrid_Cluster/hcp-apiserver/pkg/main/aks"
+	eksFunc "Hybrid_Cluster/hcp-apiserver/pkg/main/eks"
 	"fmt"
 	"log"
 	"net/http"
-
-	aksFunc "Hybrid_Cluster/hcp-apiserver/pkg/main/aks"
-	eksFunc "Hybrid_Cluster/hcp-apiserver/pkg/main/eks"
 )
 
 func CheckErr(err error) {
@@ -18,41 +18,7 @@ func CheckErr(err error) {
 	}
 }
 
-func main() {
-
-	fmt.Println("start server")
-	// -----------------------------------------------------------------------------
-	// eks
-
-	// addon
-	http.HandleFunc("/createAddon", eksFunc.CreateAddon)
-	http.HandleFunc("/listAddon", eksFunc.ListAddon)
-	http.HandleFunc("/deleteAddon", eksFunc.DeleteAddon)
-	http.HandleFunc("/describeAddon", eksFunc.DescribeAddon)
-	http.HandleFunc("/updateAddon", eksFunc.UpdateAddon)
-	http.HandleFunc("/describeAddonVersions", eksFunc.DescribeAddonVersions)
-
-	// identity-provider
-	http.HandleFunc("/associateIdentityProviderConfig", eksFunc.AssociateIdentityProviderConfig)
-	http.HandleFunc("/disassociateIdentityProviderConfig", eksFunc.DisassociateIdentityProviderConfig)
-	http.HandleFunc("/describeIdentityProviderConfig", eksFunc.DescribeIdentityProviderConfig)
-	http.HandleFunc("/listIdentityProviderConfigs", eksFunc.ListIdentityProviderConfigs)
-
-	// tag
-	http.HandleFunc("/tagResource", eksFunc.TagResource)
-	http.HandleFunc("/untagResource", eksFunc.UntagResource)
-	http.HandleFunc("/listTagsForResource", eksFunc.ListTagsForResource)
-
-	// update
-	http.HandleFunc("/updateNodegroupConfig", eksFunc.UpdateNodegroupConfig)
-	http.HandleFunc("/updateClusterConfig", eksFunc.UpdateClusterConfig)
-
-	// etc
-	http.HandleFunc("/listUpdate", eksFunc.ListUpdate)
-	http.HandleFunc("/describeUpdate", eksFunc.DescribeUpdate)
-	http.HandleFunc("/associateEncryptionConfig", eksFunc.AssociateEncryptionConfig)
-
-	// -----------------------------------------------------------------------------
+func AKSHandler() {
 	// aks
 
 	// addon
@@ -109,6 +75,45 @@ func main() {
 	http.HandleFunc("/kollect", aksFunc.Kollect)
 	http.HandleFunc("/nodepoolGetUpgrades", aksFunc.NodepoolGetUpgrades)
 	http.HandleFunc("/installCLI", aksFunc.InstallCLI)
-	// -----------------------------------------------------------------------------
+}
+
+func EKSHandler() {
+	// eks
+
+	// addon
+	http.HandleFunc("/createAddon", eksFunc.CreateAddon)
+	http.HandleFunc("/listAddon", eksFunc.ListAddon)
+	http.HandleFunc("/deleteAddon", eksFunc.DeleteAddon)
+	http.HandleFunc("/describeAddon", eksFunc.DescribeAddon)
+	http.HandleFunc("/updateAddon", eksFunc.UpdateAddon)
+	http.HandleFunc("/describeAddonVersions", eksFunc.DescribeAddonVersions)
+
+	// identity-provider
+	http.HandleFunc("/associateIdentityProviderConfig", eksFunc.AssociateIdentityProviderConfig)
+	http.HandleFunc("/disassociateIdentityProviderConfig", eksFunc.DisassociateIdentityProviderConfig)
+	http.HandleFunc("/describeIdentityProviderConfig", eksFunc.DescribeIdentityProviderConfig)
+	http.HandleFunc("/listIdentityProviderConfigs", eksFunc.ListIdentityProviderConfigs)
+
+	// tag
+	http.HandleFunc("/tagResource", eksFunc.TagResource)
+	http.HandleFunc("/untagResource", eksFunc.UntagResource)
+	http.HandleFunc("/listTagsForResource", eksFunc.ListTagsForResource)
+
+	// update
+	http.HandleFunc("/updateNodegroupConfig", eksFunc.UpdateNodegroupConfig)
+	http.HandleFunc("/updateClusterConfig", eksFunc.UpdateClusterConfig)
+
+	// etc
+	http.HandleFunc("/listUpdate", eksFunc.ListUpdate)
+	http.HandleFunc("/describeUpdate", eksFunc.DescribeUpdate)
+	http.HandleFunc("/associateEncryptionConfig", eksFunc.AssociateEncryptionConfig)
+}
+
+func main() {
+
+	fmt.Println("start server")
+	AKSHandler()
+	EKSHandler()
+	http.HandleFunc("/resources/deployment", handler.CreateDeploymentHandler)
 	http.ListenAndServe(":8080", nil)
 }
