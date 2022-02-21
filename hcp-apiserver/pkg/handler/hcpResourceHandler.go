@@ -61,3 +61,25 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
+	vals := r.URL.Query()
+	target_cluster := vals.Get("cluster")
+	namespace := vals.Get("namespace")
+	name := vals.Get("name")
+	config, err := cobrautil.BuildConfigFromFlags(target_cluster, "/root/.kube/config")
+	if err != nil {
+		fmt.Println(err)
+	}
+	clientset, _ := kubernetes.NewForConfig(config)
+
+	// create resource
+	err = clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	} else {
+		fmt.Printf("success to delete deployment %s \n", name)
+	}
+}
