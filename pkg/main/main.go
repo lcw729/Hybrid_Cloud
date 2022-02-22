@@ -1,16 +1,18 @@
 package main
 
-import (
-	resource "Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
-	algopb "Hybrid_Cluster/protos/v1/algo"
-	"time"
-)
+import "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
 
+// policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
+//"Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
+//algopb "Hybrid_Cluster/protos/v1/algo"
+
+/*
 const portNumber = "9000"
 
 type algoServer struct {
 	algopb.AlgoServer
 }
+*/
 
 /*
 // 리소스 확장 기술 -- 가중치 계산 [가중치 계산 결과 넘겨줌]
@@ -72,17 +74,32 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 */
 func main() {
 
+	algorithm.Affinity()
+	/*
+		cpu, _ := policy.GetInitialSettingValue("max_cpu")
+		mem, _ := policy.GetInitialSettingValue("max_memory")
+		extra, _ := policy.GetInitialSettingValue("extra")
+
+		fmt.Println(extra)
+		cpu = cpu * (100 - extra) / 100
+		mem = mem * (100 - extra) / 100
+		fmt.Println(cpu, mem)
+	*/
+
 	// HPA/VPA 함수 사용 예시
-	cluster := "kube-master"
-	pod := "nginx-deployment-69f8d49b75-548vz"
-	ns := "default"
-	var min int32 = 1
-	minReplicas := &min
-	var maxReplicas int32 = 5
-	resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
-	time.Sleep(20)
-	resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
-	resource.CreateVPA(cluster, pod, ns, "Auto")
+	/*
+		cluster := "aks-master"
+		pod := "nginx-deploy-79f85fd859-ndl2r"
+		ns := "default"
+
+		var min int32 = 1
+		minReplicas := &min
+		var maxReplicas int32 = 5
+		resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
+		time.Sleep(20)
+		resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
+		resource.CreateVPA(cluster, pod, ns, "Auto")
+	*/
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)

@@ -9,6 +9,7 @@ var AlgorithmList = []string{
 // var WatchingLevel = policy.GetWatchingLevel()
 // var WarningLevel = policy.GetWarningLevel()
 
+/*
 var ScoreTable = []*Cluster{
 	{
 		ClusterInfo: &ClusterInfo{
@@ -64,3 +65,4 @@ var ScoreTable = []*Cluster{
 		},
 	},
 }
+*/

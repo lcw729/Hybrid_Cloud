@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"Hybrid_Cluster/hcp-scheduler/pkg/resource"
+	"Hybrid_Cluster/hcp-scheduler/backup/resource"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
@@ -23,7 +23,6 @@ import (
 func GetPod(cluster string, pod string, pod_namespace string) (*corev1.Pod, error) {
 	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
-	p := &corev1.Pod{}
 	p, err := cluster_client.CoreV1().Pods(pod_namespace).Get(context.TODO(), pod, metav1.GetOptions{})
 	if err != nil {
 		return p, err
@@ -44,7 +43,6 @@ func GetDeploymentName(pod *corev1.Pod) string {
 func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
 	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
-	d := &v1.Deployment{}
 	deploymentName := GetDeploymentName(pod)
 	d, err := cluster_client.AppsV1().Deployments(pod.Namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
@@ -91,8 +89,8 @@ func UpdateDeployment(cluster string, deployment *v1.Deployment, replicas int32)
 
 func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	config := cm.Host_config
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -109,9 +107,8 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 		fmt.Println(err)
 		return err
 	}
-
 	// 2. hapTemplate 생성
-	hpa := hpav2beta1.HorizontalPodAutoscaler{
+	hpa := &hpav2beta1.HorizontalPodAutoscaler{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HorizontalPodAutoscaler",
 			APIVersion: "autoscaling/v2beta1",
@@ -134,14 +131,17 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 	// 3. hpaTemplate -> HCPHybridAutoScaler 생성
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa",
+			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 1,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			TargetCluster: cluster,
+			WarningCount:  1,
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
-				HpaTemplate: hpa,
+				HpaTemplate: *hpa,
 			},
+		},
+		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+			ResourceStatus: "WAITING",
 		},
 	}
 
@@ -157,9 +157,8 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 
 func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	config := cm.Host_config
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -178,8 +177,14 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 	}
 
 	// 2. hapTemplate (warningCount 1) 정보 얻기
-	client, err := kubernetes.NewForConfig(master_config)
-	hpa, err := client.AutoscalingV2beta1().HorizontalPodAutoscalers(d.Namespace).Get(context.TODO(), d.Name, metav1.GetOptions{})
+	target_cluster := cm.Cluster_configs[cluster]
+	target_clientset, err := kubernetes.NewForConfig(target_cluster)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	hpa, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(d.Namespace).Get(context.TODO(), d.Name, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -201,14 +206,17 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: hpa.Spec.ScaleTargetRef.Name + "-hpa2",
+			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa2",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 2,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			TargetCluster: cluster,
+			WarningCount:  2,
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
 				HpaTemplate: nhpa,
 			},
+		},
+		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+			ResourceStatus: "WAITING",
 		},
 	}
 	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
@@ -223,8 +231,8 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 
 func CreateVPA(cluster string, pod string, namespace string, updateMode string) error {
 	cm := cm.NewClusterManager()
-	master_config := cm.Host_config
-	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(master_config)
+	config := cm.Host_config
+	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -268,14 +276,17 @@ func CreateVPA(cluster string, pod string, namespace string, updateMode string) 
 	// 3. vpaTemplate -> HCPHybridAutoScaler 생성
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: vpa.Name + "-vpa",
+			Name: cluster + "-" + vpa.Name + "-vpa",
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			WarningCount: 3,
-			CurrentStep:  "HAS", // HAS -> Sync -> Done
+			TargetCluster: cluster,
+			WarningCount:  3,
 			ScalingOptions: resourcev1alpha1.ScalingOptions{
 				VpaTemplate: vpa,
 			},
+		},
+		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+			ResourceStatus: "WAITING",
 		},
 	}
 	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
