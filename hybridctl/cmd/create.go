@@ -97,12 +97,10 @@ func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]
 	case "Deployment":
 		LINK += "/deployment"
 		real_resource := obj.(*appsv1.Deployment)
-		fmt.Println(real_resource)
 		resource.TargetCluster = target_cluster
 		resource.RealResource = real_resource
 	}
 
-	fmt.Println(resource)
 	fmt.Println(LINK)
 	bytes, err := util.GetResponseBody("POST", LINK, &resource)
 	if err != nil {

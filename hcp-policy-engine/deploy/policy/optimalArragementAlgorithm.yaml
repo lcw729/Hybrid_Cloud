@@ -8,8 +8,7 @@ spec:
     spec:
       policies:
         - type: Algorithm
-          value:
-            - Affinity
-  RangeOfApplication: All
+          value: Affinity
+  rangeOfApplication: All
   policyStatus: Disabled
 

@@ -3,7 +3,6 @@ package v1alpha1
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	hpav2beta1 "k8s.io/api/autoscaling/v2beta1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpav1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 )
@@ -19,14 +18,23 @@ type HCPDeployment struct {
 }
 
 type HCPDeploymentSpec struct {
-	TargetCluster      string                `json:"targetCluster"`
-	Replicas           *int32                `json:"replicas,omitempty" protobuf:"varint,1,opt,name=replicas"`
-	Selector           *metav1.LabelSelector `json:"selector" protobuf:"bytes,2,opt,name=selector"`
-	Template           v1.PodTemplateSpec    `json:"template" protobuf:"bytes,3,opt,name=template"`
-	RealDeploymentSpec appsv1.DeploymentSpec `json:"realDeploymentSpec"`
+	RealDeploymentSpec     appsv1.DeploymentSpec `json:"realDeploymentSpec"`
+	RealDeploymentMetadata metav1.ObjectMeta     `json:"metadata,omitempty"`
+
+	//SchedlingStatus -Requested - Scheduled - Completed
+	SchedulingStatus string         `json:"schedulingstatus,omitempty" protobuf:"bytes,11,opt,name=schedulingstatus"`
+	SchedulingType   string         `json:"schedulingType,omitempty" protobuf:"bytes,3,opt,name=schedulingtype"`
+	SchedulingResult map[string]int `json:"schedulingresult,omitempty" protobuf:"bytes,11,opt,name=schedulingresult"`
 }
 
-type HCPDeploymentStatus struct {
+type HCPSchedulingResult struct {
+	SchedulingResult []Target
+}
+
+type Target struct {
+	Cluster  string
+	Node     string
+	Replicas *int32
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

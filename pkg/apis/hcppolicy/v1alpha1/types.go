@@ -6,7 +6,7 @@ import (
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// HCPPolicy is the Schema for the HCPpolicys API
+// HCPPolicy is the Schema for the HCPpolicies API
 type HCPPolicy struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
