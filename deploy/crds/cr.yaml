@@ -1,4 +1,4 @@
-apiVersion: hcp.k8s.io/v1alpha1
+apiVersion: hcp.crd.com/v1alpha1
 kind: HCPPolicy
 metadata:
   name: example-hcppolicy
