@@ -2,15 +2,40 @@ package algorithm
 
 import (
 	policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
-	util "Hybrid_Cluster/hcp-analytic-engine/util"
 	clusterManager "Hybrid_Cluster/util/clusterManager"
 	"fmt"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
 
-var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
+var AlgorithmMap = map[string]func() map[string]float32{
+	"DRF":      DRF,
+	"Affinity": Affinity,
+}
 
+/*
+type Score struct {
+	Key   string
+	Value float32
+}
+
+type ScoreTable []Score
+
+func (s ScoreTable) Len() int {
+	return len(s)
+}
+
+func (s ScoreTable) Less(i, j int) bool {
+	return s[i].Value < s[j].Value
+}
+
+func (s ScoreTable) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+var score_table = make(map[string]float32)
+*/
+var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
 var watching_level = policy.GetWatchingLevel()
 var warning_level = policy.GetWarningLevel()
 
@@ -78,24 +103,24 @@ func WatchingLevelCalculator() {
 // }
 
 // 최적 배치 알고리즘
-func Affinity() bool {
+func Affinity() map[string]float32 {
 	fmt.Println("---------------------------------------------------------------")
 	fmt.Println("Affinity Calculator Called")
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
-	for _, c := range util.ScoreTable {
-		for _, n := range c.Nodes {
-			n.Score = 20
-		}
-	}
-	util.ScoreTable[2].Nodes[1].Score = 40
+	score_table["hcp_cluster"] = 30.0
+	score_table["aks-master"] = 40.0
+	score_table["a"] = 20.0
+	score_table["b"] = 50.0
 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
 	fmt.Println("---------------------------------------------------------------")
-	return true
+	score_sort := SortScore()
+	fmt.Println(score_sort[0])
+	return score_table
 }
 
-func DRF() bool {
+func DRF() map[string]float32 {
 	fmt.Println("DRF Math operation Called")
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 2] Get MultiMetric")
@@ -105,11 +130,12 @@ func DRF() bool {
 	fmt.Println("[step 3-2] Search Pod Fit Resources")
 	fmt.Println("[step 3-3] Schedule Decision")
 	fmt.Println("---------------------------------------------------------------")
-	return true
+	return score_table
 }
 
+/*
 // 배치 알고리즘에 설정 값에 따라 알고리즘 변경
-func OptimalArrangementAlgorithm() bool {
+func OptimalArrangementAlgorithm() map[string]float32 {
 	fmt.Println("[step 1] Get Policy - algorithm")
 	algo := policy.GetAlgorithm()
 	if algo != "" {
@@ -128,7 +154,9 @@ func OptimalArrangementAlgorithm() bool {
 		return false
 	}
 }
+*/
 
+/*
 // 가장 점수가 높은 Cluster, Node 확인
 func OptimalNodeSelector() (*util.Cluster, *util.NodeScore) {
 	max := 0
@@ -145,3 +173,4 @@ func OptimalNodeSelector() (*util.Cluster, *util.NodeScore) {
 	}
 	return cluster, node
 }
+*/

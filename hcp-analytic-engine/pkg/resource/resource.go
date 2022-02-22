@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"Hybrid_Cluster/hcp-scheduler/pkg/resource"
+	"Hybrid_Cluster/hcp-scheduler/backup/resource"
 	cobrautil "Hybrid_Cluster/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"

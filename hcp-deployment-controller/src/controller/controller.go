@@ -5,11 +5,9 @@ import (
 	resourcev1alpha1scheme "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
 	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
-	resource "Hybrid_Cluster/resource"
 	"fmt"
 	"time"
 
-	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -204,39 +202,41 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	target_cluster := hcpdeployment.Spec.TargetCluster
-	deployment := new(v1.Deployment)
-	if target_cluster == "Undefined" {
-		fmt.Println("request to scheduler")
+	/*
+		target_cluster := hcpdeployment.Spec.TargetCluster
+		deployment := new(v1.Deployment)
+		if target_cluster == "Undefined" {
+			fmt.Println("request to scheduler")
 
-		replicas := *hcpdeployment.Spec.Replicas
-		var temp int32 = 1
-		r := &temp
-		fmt.Println(replicas)
-		rep := map[string]int32{}
-		rep["aks-master"] = 1
-		rep["hcp-cluster"] = 1
+			replicas := *hcpdeployment.Spec.Replicas
+			var temp int32 = 1
+			r := &temp
+			fmt.Println(replicas)
+			rep := map[string]int32{}
+			rep["aks-master"] = 1
+			rep["hcp-cluster"] = 1
 
-		deployment.Spec.Selector = hcpdeployment.Spec.Selector
-		deployment.Spec.Template = hcpdeployment.Spec.Template
-		deployment.ObjectMeta = hcpdeployment.ObjectMeta
+			deployment.Spec.Selector = hcpdeployment.Spec.Selector
+			deployment.Spec.Template = hcpdeployment.Spec.Template
+			deployment.ObjectMeta = hcpdeployment.ObjectMeta
 
-		deployment.Spec.Replicas = r
-		fmt.Println(resource.FindHCPClusterList("aks-master", "aks"))
-		fmt.Println("00000000")
-		resource.CreateDeployment("aks-master", "agentpool", deployment)
+			deployment.Spec.Replicas = r
+			fmt.Println(resource.FindHCPClusterList("aks-master", "aks"))
+			fmt.Println("00000000")
+			resource.CreateDeployment("aks-master", "agentpool", deployment)
 
-		fmt.Println(resource.FindHCPClusterList("hcp-cluster", "gke"))
-		deployment.Spec.Replicas = r
-		resource.CreateDeployment("hcp-cluster", "agentpool", deployment)
-	} else {
-		resource.FindHCPClusterList(target_cluster, "aks")
-		deployment.Spec.Replicas = hcpdeployment.Spec.Replicas
-		deployment.Spec.Selector = hcpdeployment.Spec.Selector
-		deployment.Spec.Template = hcpdeployment.Spec.Template
-		deployment.ObjectMeta = hcpdeployment.ObjectMeta
-		resource.CreateDeployment(target_cluster, "pool-1", deployment)
-	}
+			fmt.Println(resource.FindHCPClusterList("hcp-cluster", "gke"))
+			deployment.Spec.Replicas = r
+			resource.CreateDeployment("hcp-cluster", "agentpool", deployment)
+		} else {
+			resource.FindHCPClusterList(target_cluster, "aks")
+			deployment.Spec.Replicas = hcpdeployment.Spec.Replicas
+			deployment.Spec.Selector = hcpdeployment.Spec.Selector
+			deployment.Spec.Template = hcpdeployment.Spec.Template
+			deployment.ObjectMeta = hcpdeployment.ObjectMeta
+			resource.CreateDeployment(target_cluster, "pool-1", deployment)
+		}
+	*/
 
 	return nil
 }

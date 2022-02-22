@@ -3,8 +3,7 @@ package Policy
 import (
 	"Hybrid_Cluster/hcp-analytic-engine/util"
 	hcppolicyapis "Hybrid_Cluster/pkg/apis/hcppolicy/v1alpha1"
-	hcppolicyv1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
-	v1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset/versioned"
+	hcppolicyv1alpha1 "Hybrid_Cluster/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 	"Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
@@ -23,8 +22,7 @@ func GetInitialSettingValue(typ string) (int, string) {
 	for _, p := range policies {
 		println(p.Type)
 		if typ == "default_node_option" && p.Type == "default_node_option" {
-			var value string
-			value = p.Value
+			var value string = p.Value
 			if value == "" {
 				fmt.Printf("ERROR: No %s Value\n", typ)
 			} else {
@@ -59,7 +57,10 @@ func GetPolicy(policy_name string) *hcppolicyapis.HCPPolicy {
 
 func GetWatchingLevel() util.WatchingLevel {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	clientset, err := v1alpha1.NewForConfig(master_config)
+	clientset, err := hcppolicyv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		log.Println(err)
+	}
 	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "watching-level", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
@@ -68,8 +69,7 @@ func GetWatchingLevel() util.WatchingLevel {
 	var watchingLevel util.WatchingLevel
 	watchingLevel.Levels = make([]util.Level, 5)
 	for i, policy := range hcppolicy.Spec.Template.Spec.Policies {
-		var level util.Level
-		level = util.Level{
+		var level util.Level = util.Level{
 			Type:  policy.Type,
 			Value: policy.Value,
 		}
@@ -80,7 +80,10 @@ func GetWatchingLevel() util.WatchingLevel {
 
 func GetWarningLevel() util.Level {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	clientset, err := v1alpha1.NewForConfig(master_config)
+	clientset, err := hcppolicyv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		log.Println(err)
+	}
 	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "warning-level", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
@@ -104,7 +107,10 @@ func GetWarningLevel() util.Level {
 
 func GetAlgorithm() string {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	clientset, err := v1alpha1.NewForConfig(master_config)
+	clientset, err := hcppolicyv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		log.Println(err)
+	}
 	hcppolicy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "optimal-arrangement-algorithm", metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)

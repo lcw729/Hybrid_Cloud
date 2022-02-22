@@ -1,6 +1,6 @@
 package main
 
-import "Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
+import "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
 
 // policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
 //"Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
@@ -74,6 +74,7 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 */
 func main() {
 
+	algorithm.Affinity()
 	/*
 		cpu, _ := policy.GetInitialSettingValue("max_cpu")
 		mem, _ := policy.GetInitialSettingValue("max_memory")
@@ -86,17 +87,19 @@ func main() {
 	*/
 
 	// HPA/VPA 함수 사용 예시
-	cluster := "aks-master"
-	pod := "nginx-deploy-79f85fd859-ndl2r"
-	ns := "default"
+	/*
+		cluster := "aks-master"
+		pod := "nginx-deploy-79f85fd859-ndl2r"
+		ns := "default"
 
-	// var min int32 = 1
-	// minReplicas := &min
-	// var maxReplicas int32 = 5
-	// resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
-	// time.Sleep(20)
-	// resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
-	resource.CreateVPA(cluster, pod, ns, "Auto")
+		var min int32 = 1
+		minReplicas := &min
+		var maxReplicas int32 = 5
+		resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
+		time.Sleep(20)
+		resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
+		resource.CreateVPA(cluster, pod, ns, "Auto")
+	*/
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
