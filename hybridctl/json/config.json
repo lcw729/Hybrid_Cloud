@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "timeInWeek": [
+      {
+        "day": "Monday",
+        "hourSlots": [
+          3,
+         4
+        ]
+      }
+    ]
+  }
+}
