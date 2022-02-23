@@ -243,6 +243,12 @@ func (c *Controller) syncHandler(key string) error {
 					}
 				}
 			}
+		} else if scheduling_status == "Requested" {
+			fmt.Println("not yet scheduled")
+		} else if scheduling_status == "Completed" {
+			fmt.Println("already deployed")
+		} else {
+			fmt.Println("Invalid Scheduling Status")
 		}
 
 		return err

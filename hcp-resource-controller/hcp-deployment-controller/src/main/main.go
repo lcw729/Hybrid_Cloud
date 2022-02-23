@@ -1,7 +1,7 @@
 package main
 
 import (
-	controller "Hybrid_Cluster/hcp-deployment-controller/src/controller"
+	controller "Hybrid_Cluster/hcp-resource-controller/hcp-deployment-controller/src/controller"
 	"Hybrid_Cluster/util/clusterManager"
 	"flag"
 	"time"
