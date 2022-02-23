@@ -22,19 +22,19 @@ type HCPDeploymentSpec struct {
 	RealDeploymentMetadata metav1.ObjectMeta     `json:"metadata,omitempty"`
 
 	//SchedlingStatus -Requested - Scheduled - Completed
-	SchedulingStatus string         `json:"schedulingstatus,omitempty" protobuf:"bytes,11,opt,name=schedulingstatus"`
-	SchedulingType   string         `json:"schedulingType,omitempty" protobuf:"bytes,3,opt,name=schedulingtype"`
-	SchedulingResult map[string]int `json:"schedulingresult,omitempty" protobuf:"bytes,11,opt,name=schedulingresult"`
+	SchedulingStatus string              `json:"schedulingstatus,omitempty" protobuf:"bytes,11,opt,name=schedulingstatus"`
+	SchedulingType   string              `json:"schedulingType,omitempty" protobuf:"bytes,3,opt,name=schedulingtype"`
+	SchedulingResult HCPSchedulingResult `json:"schedulingresult,omitempty" protobuf:"bytes,11,opt,name=schedulingresult"`
 }
 
 type HCPSchedulingResult struct {
-	SchedulingResult []Target
+	Targets []Target `json:"targets,omitempty" protobuf:"bytes,11,opt,name=targets"`
 }
 
 type Target struct {
-	Cluster  string
-	Node     string
-	Replicas *int32
+	Cluster  string `json:"cluster,omitempty" protobuf:"bytes,11,opt,name=cluster"`
+	Node     string `json:"node,omitempty" protobuf:"bytes,11,opt,name=node"`
+	Replicas *int32 `json:"replicas,omitempty" protobuf:"bytes,11,opt,name=replicas"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
