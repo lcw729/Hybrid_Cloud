@@ -109,14 +109,14 @@ func Affinity() map[string]float32 {
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
-	score_table["hcp_cluster"] = 30.0
-	score_table["aks-master"] = 40.0
-	score_table["a"] = 20.0
+	score_table["a-cluster"] = 30.0
+	score_table["b-cluster"] = 40.0
+	score_table["c-cluster"] = 20.0
 	score_table["b"] = 50.0
 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
 	fmt.Println("---------------------------------------------------------------")
 	score_sort := SortScore()
-	fmt.Println(score_sort[0])
+	fmt.Println(score_sort)
 	return score_table
 }
 
