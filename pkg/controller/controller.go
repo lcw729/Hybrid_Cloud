@@ -1,15 +1,18 @@
 package controller
 
 import (
+	algorithm "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
 	"Hybrid_Cluster/hcp-analytic-engine/util"
+	"Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
 	resourcescheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	"context"
 	"fmt"
 	"time"
 
-	algorithm "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -44,18 +47,18 @@ const (
 var algorithm_list = util.AlgorithmList
 
 type Controller struct {
-	kubeclientset     kubernetes.Interface
-	resourceclientset resourcev1alpha1.Interface
-	resourceLister    lister.HCPDeploymentLister
-	resourceSynced    cache.InformerSynced
-	workqueue         workqueue.RateLimitingInterface
-	recorder          record.EventRecorder
+	kubeclientset          kubernetes.Interface
+	hcpdeploymentclientset resourcev1alpha1.Interface
+	hcpdeploymentLister    lister.HCPDeploymentLister
+	hcpdeploymentSynced    cache.InformerSynced
+	workqueue              workqueue.RateLimitingInterface
+	recorder               record.EventRecorder
 }
 
 func NewController(
 	kubeclientset kubernetes.Interface,
-	resourceclientset resourcev1alpha1.Interface,
-	resourceinformer informer.HCPDeploymentInformer) *Controller {
+	hcpdeploymentclientset resourcev1alpha1.Interface,
+	hcpdeploymentinformer informer.HCPDeploymentInformer) *Controller {
 	utilruntime.Must(resourcescheme.AddToScheme(scheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
 	eventBroadCaster := record.NewBroadcaster()
@@ -64,17 +67,17 @@ func NewController(
 	recorder := eventBroadCaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &Controller{
-		kubeclientset:     kubeclientset,
-		resourceclientset: resourceclientset,
-		resourceLister:    resourceinformer.Lister(),
-		resourceSynced:    resourceinformer.Informer().HasSynced,
-		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "resource"),
-		recorder:          recorder,
+		kubeclientset:          kubeclientset,
+		hcpdeploymentclientset: hcpdeploymentclientset,
+		hcpdeploymentLister:    hcpdeploymentinformer.Lister(),
+		hcpdeploymentSynced:    hcpdeploymentinformer.Informer().HasSynced,
+		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "resource"),
+		recorder:               recorder,
 	}
 
 	klog.Info("Setting up event handlers")
 
-	resourceinformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	hcpdeploymentinformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: controller.enqueneresource,
 		UpdateFunc: func(old, new interface{}) {
 			controller.enqueneresource(new)
@@ -107,7 +110,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) error {
 
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
-	if ok := cache.WaitForCacheSync(stopCh, c.resourceSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.hcpdeploymentSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
@@ -196,7 +199,7 @@ func (c *Controller) syncHandler(key string) error {
 		return nil
 	}
 
-	resource, err := c.resourceLister.HCPDeployments(namespace).Get(name)
+	hcpdeployment, err := c.hcpdeploymentLister.HCPDeployments(namespace).Get(name)
 	if err != nil {
 		// The Foo resource may no longer exist, in which case we stop
 		// processing.
@@ -208,16 +211,69 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	if resource.Spec.SchedulingStatus == "Requested" {
+	if hcpdeployment.Spec.SchedulingStatus == "Requested" {
 		fmt.Println("[scheduling start]")
-		scheduling_type := resource.Spec.SchedulingType
+		scheduling_type := hcpdeployment.Spec.SchedulingType
 
 		var check bool
 		switch scheduling_type {
 		case algorithm_list[1]:
-			check := algorithm.AlgorithmMap[algorithm_list[1]]
+
+			algorithm_func := algorithm.AlgorithmMap[algorithm_list[1]]
+			check = algorithm_func()
+			if !check {
+				fmt.Println("Wait for scheduling to complete")
+			} else {
+				// 최대 스코어 클러스터 반환
+				score_table := algorithm.SortScore()
+				target := score_table[0].Cluster
+				ok := registerTarget(*hcpdeployment, target)
+				if !ok {
+
+				} else {
+					fmt.Printf("success to schedule deployment : %s\n", hcpdeployment.ObjectMeta.Name)
+
+					// HCPDeployment SchedulingStatus 업데이트
+					hcpdeployment.Spec.SchedulingStatus = "Scheduled"
+
+					r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
+					if err != nil {
+						fmt.Println(err)
+					} else {
+						fmt.Printf("update HCPDeployment %s SchedulingStatus : Scheduled\n", r.ObjectMeta.Name)
+					}
+				}
+			}
 		}
 	}
 
 	return nil
+}
+
+func registerTarget(resource v1alpha1.HCPDeployment, cluster string) bool {
+	targets := resource.Spec.SchedulingResult.Targets
+
+	for _, target := range targets {
+		// 이미 target cluster 목록에 cluster가 있는 경우
+		if target.Cluster == cluster {
+			// replicas 개수 증가
+			temp := *target.Replicas
+			temp += 1
+			target.Replicas = &temp
+
+			return true
+		} else {
+			// target cluster 목록에 cluster가 없는 경우
+
+			// replicas 개수 1로 설정
+			new_target := new(v1alpha1.Target)
+			new_target.Cluster = cluster
+			var one int32 = 1
+			new_target.Replicas = &one
+			targets = append(targets, *new_target)
+
+			return true
+		}
+	}
+	return false
 }
