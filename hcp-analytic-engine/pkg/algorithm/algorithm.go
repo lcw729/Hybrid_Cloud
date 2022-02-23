@@ -8,7 +8,7 @@ import (
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
 
-var AlgorithmMap = map[string]func() map[string]float32{
+var AlgorithmMap = map[string]func() bool{
 	"DRF":      DRF,
 	"Affinity": Affinity,
 }
@@ -103,7 +103,7 @@ func WatchingLevelCalculator() {
 // }
 
 // 최적 배치 알고리즘
-func Affinity() map[string]float32 {
+func Affinity() bool {
 	fmt.Println("---------------------------------------------------------------")
 	fmt.Println("Affinity Calculator Called")
 	fmt.Println("[step 2] Get MultiMetric")
@@ -115,12 +115,10 @@ func Affinity() map[string]float32 {
 	score_table["b"] = 50.0
 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
 	fmt.Println("---------------------------------------------------------------")
-	score_sort := SortScore()
-	fmt.Println(score_sort)
-	return score_table
+	return true
 }
 
-func DRF() map[string]float32 {
+func DRF() bool {
 	fmt.Println("DRF Math operation Called")
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 2] Get MultiMetric")
@@ -130,7 +128,7 @@ func DRF() map[string]float32 {
 	fmt.Println("[step 3-2] Search Pod Fit Resources")
 	fmt.Println("[step 3-3] Schedule Decision")
 	fmt.Println("---------------------------------------------------------------")
-	return score_table
+	return true
 }
 
 /*
