@@ -1,7 +1,7 @@
 package influx
 
 import (
-	// "Hybrid_Cluster/omcplog"
+	// "Hybrid_Cloud/omcplog"
 	"fmt"
 
 	"github.com/influxdata/influxdb/client/v2"
