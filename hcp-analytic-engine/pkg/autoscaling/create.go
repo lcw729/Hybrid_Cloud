@@ -2,90 +2,18 @@ package resource
 
 import (
 	"Hybrid_Cluster/hcp-scheduler/backup/resource"
-	cobrautil "Hybrid_Cluster/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
 	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
 	cm "Hybrid_Cluster/util/clusterManager"
 	"context"
 	"fmt"
-	"strings"
 
-	v1 "k8s.io/api/apps/v1"
 	autoscaling "k8s.io/api/autoscaling/v1"
 	hpav2beta1 "k8s.io/api/autoscaling/v2beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpav1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 	"k8s.io/client-go/kubernetes"
-
-	corev1 "k8s.io/api/core/v1"
 )
-
-func GetPod(cluster string, pod string, pod_namespace string) (*corev1.Pod, error) {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
-	cluster_client := kubernetes.NewForConfigOrDie(config)
-	p, err := cluster_client.CoreV1().Pods(pod_namespace).Get(context.TODO(), pod, metav1.GetOptions{})
-	if err != nil {
-		return p, err
-	} else {
-		fmt.Printf("success to get pod %s [cluster %s, node %s]\n", p.Name, cluster, p.Spec.NodeName)
-		return p, err
-	}
-}
-
-func GetDeploymentName(pod *corev1.Pod) string {
-	str := pod.GenerateName
-	list := strings.SplitAfterN(str, "-", -1)
-	length := len(list[len(list)-2]) + 1
-	name := str[:len(str)-length]
-	return name
-}
-
-func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
-	cluster_client := kubernetes.NewForConfigOrDie(config)
-	deploymentName := GetDeploymentName(pod)
-	d, err := cluster_client.AppsV1().Deployments(pod.Namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
-	if err != nil {
-		return d, err
-	} else {
-		fmt.Printf("success to get deployment %s in cluster %s [replicas : %d]\n", d.Name, cluster, *d.Spec.Replicas)
-	}
-	return d, err
-}
-
-func CreateDeployment(cluster string, node string, deployment *v1.Deployment) error {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
-	cluster_client := kubernetes.NewForConfigOrDie(config)
-	deployment.Spec.Template.Spec.NodeName = node
-	deployment.ResourceVersion = ""
-	new_dep, err := cluster_client.AppsV1().Deployments("default").Create(context.TODO(), deployment, metav1.CreateOptions{})
-
-	if err != nil {
-		return err
-	} else {
-		fmt.Printf("success to create %s in cluster %s [replicas : %d]\n", new_dep.Name, cluster, *deployment.Spec.Replicas)
-	}
-	return nil
-}
-
-func UpdateDeployment(cluster string, deployment *v1.Deployment, replicas int32) error {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
-	cluster_client := kubernetes.NewForConfigOrDie(config)
-
-	if deployment.Status.Replicas == deployment.Status.ReadyReplicas && deployment.Status.Replicas == deployment.Status.AvailableReplicas {
-		fmt.Println("deployment status is OK")
-		deployment.Spec.Replicas = &replicas
-		new_dep, err := cluster_client.AppsV1().Deployments("default").Update(context.TODO(), deployment, metav1.UpdateOptions{})
-		if err != nil {
-			return err
-		} else {
-			fmt.Printf("success to update %s in cluster %s [replicas : %d]\n", new_dep.Name, cluster, *deployment.Spec.Replicas)
-		}
-	} else {
-		fmt.Println("deployment status is not stable")
-	}
-	return nil
-}
 
 func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
 	cm := cm.NewClusterManager()

@@ -1,7 +1,7 @@
 package algorithm
 
 import (
-	policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
+	policy "Hybrid_Cluster/hcp-resource/hcppolicy"
 	clusterManager "Hybrid_Cluster/util/clusterManager"
 	"fmt"
 
@@ -13,28 +13,6 @@ var AlgorithmMap = map[string]func() bool{
 	"Affinity": Affinity,
 }
 
-/*
-type Score struct {
-	Key   string
-	Value float32
-}
-
-type ScoreTable []Score
-
-func (s ScoreTable) Len() int {
-	return len(s)
-}
-
-func (s ScoreTable) Less(i, j int) bool {
-	return s[i].Value < s[j].Value
-}
-
-func (s ScoreTable) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-var score_table = make(map[string]float32)
-*/
 var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
 var watching_level = policy.GetWatchingLevel()
 var warning_level = policy.GetWarningLevel()
