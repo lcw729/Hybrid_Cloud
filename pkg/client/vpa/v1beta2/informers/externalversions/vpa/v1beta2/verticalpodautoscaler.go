@@ -19,10 +19,10 @@ limitations under the License.
 package v1beta2
 
 import (
-	vpav1beta2 "Hybrid_Cluster/pkg/apis/vpa/v1beta2"
-	versioned "Hybrid_Cluster/pkg/client/vpa/v1beta2/clientset/versioned"
-	internalinterfaces "Hybrid_Cluster/pkg/client/vpa/v1beta2/informers/externalversions/internalinterfaces"
-	v1beta2 "Hybrid_Cluster/pkg/client/vpa/v1beta2/listers/vpa/v1beta2"
+	vpav1beta2 "Hybrid_Cloud/pkg/apis/vpa/v1beta2"
+	versioned "Hybrid_Cloud/pkg/client/vpa/v1beta2/clientset/versioned"
+	internalinterfaces "Hybrid_Cloud/pkg/client/vpa/v1beta2/informers/externalversions/internalinterfaces"
+	v1beta2 "Hybrid_Cloud/pkg/client/vpa/v1beta2/listers/vpa/v1beta2"
 	"context"
 	time "time"
 

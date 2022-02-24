@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	v1alpha1 "Hybrid_Cloud/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
 
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"

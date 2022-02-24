@@ -1,10 +1,10 @@
 package handler
 
 import (
-	// "Hybrid_Cluster/hcp-analytic-engine/influx"
-	// "Hybrid_Cluster/omcplog"
+	// "Hybrid_Cloud/hcp-analytic-engine/influx"
+	// "Hybrid_Cloud/omcplog"
 
-	"Hybrid_Cluster/test/influx"
+	"Hybrid_Cloud/test/influx"
 	"bytes"
 	"encoding/json"
 	"os"

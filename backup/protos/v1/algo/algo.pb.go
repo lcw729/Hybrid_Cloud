@@ -3,7 +3,7 @@
 // DO NOT EDIT!
 
 /*
-Package Hybrid_Cluster_protos_v1_algo is a generated protocol buffer package.
+Package Hybrid_Cloud_protos_v1_algo is a generated protocol buffer package.
 
 It is generated from these files:
 	protos/v1/algo/algo.proto

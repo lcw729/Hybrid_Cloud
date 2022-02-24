@@ -19,7 +19,7 @@ limitations under the License.
 package externalversions
 
 import (
-	v1alpha1 "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
+	v1alpha1 "Hybrid_Cloud/pkg/apis/kubefedcluster/v1alpha1"
 	"fmt"
 
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

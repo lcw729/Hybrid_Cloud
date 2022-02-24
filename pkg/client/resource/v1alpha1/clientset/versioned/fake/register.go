@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	hcpv1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
+	hcpv1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"

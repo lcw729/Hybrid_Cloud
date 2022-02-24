@@ -19,8 +19,8 @@ limitations under the License.
 package v1beta2
 
 import (
-	v1beta2 "Hybrid_Cluster/pkg/apis/vpa/v1beta2"
-	"Hybrid_Cluster/pkg/client/vpa/v1beta2/clientset/versioned/scheme"
+	v1beta2 "Hybrid_Cloud/pkg/apis/vpa/v1beta2"
+	"Hybrid_Cloud/pkg/client/vpa/v1beta2/clientset/versioned/scheme"
 
 	rest "k8s.io/client-go/rest"
 )

@@ -1,7 +1,7 @@
 package clusterManager
 
 import (
-	// clientV1alpha1 "Hybrid_Cluster/pkg/client/policy/v1alpha1/clientset"
+	// clientV1alpha1 "Hybrid_Cloud/pkg/client/policy/v1alpha1/clientset"
 
 	"context"
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	cobrautil "Hybrid_Cluster/hybridctl/util"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"

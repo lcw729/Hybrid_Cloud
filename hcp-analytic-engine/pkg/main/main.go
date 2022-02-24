@@ -1,10 +1,10 @@
 package main
 
-import "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
+import "Hybrid_Cloud/hcp-analytic-engine/pkg/algorithm"
 
-// policy "Hybrid_Cluster/hcp-analytic-engine/pkg/policy"
-//"Hybrid_Cluster/hcp-analytic-engine/pkg/resource"
-//algopb "Hybrid_Cluster/protos/v1/algo"
+// policy "Hybrid_Cloud/hcp-analytic-engine/pkg/policy"
+//"Hybrid_Cloud/hcp-analytic-engine/pkg/resource"
+//algopb "Hybrid_Cloud/protos/v1/algo"
 
 /*
 const portNumber = "9000"

@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	internalinterfaces "Hybrid_Cluster/pkg/client/clusterregister/v1alpha1/informers/externalversions/internalinterfaces"
+	internalinterfaces "Hybrid_Cloud/pkg/client/clusterregister/v1alpha1/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

@@ -19,8 +19,8 @@ limitations under the License.
 package autoscaling
 
 import (
-	v1 "Hybrid_Cluster/pkg/client/vpa/v1/informers/externalversions/autoscaling.k8s.io/v1"
-	internalinterfaces "Hybrid_Cluster/pkg/client/vpa/v1/informers/externalversions/internalinterfaces"
+	v1 "Hybrid_Cloud/pkg/client/vpa/v1/informers/externalversions/autoscaling.k8s.io/v1"
+	internalinterfaces "Hybrid_Cloud/pkg/client/vpa/v1/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

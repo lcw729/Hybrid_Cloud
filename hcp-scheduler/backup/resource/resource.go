@@ -8,7 +8,7 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
 
-	cobrautil "Hybrid_Cluster/hybridctl/util"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

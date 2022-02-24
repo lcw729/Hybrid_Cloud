@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "Hybrid_Cluster/pkg/apis/sync/v1alpha1"
-	scheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	v1alpha1 "Hybrid_Cloud/pkg/apis/sync/v1alpha1"
+	scheme "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 	"context"
 	"time"
 

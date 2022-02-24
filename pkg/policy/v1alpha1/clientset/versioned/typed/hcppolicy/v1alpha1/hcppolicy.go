@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "Hybrid_Cluster/pkg/apis/hcppolicy/v1alpha1"
-	scheme "Hybrid_Cluster/pkg/policy/v1alpha1/clientset/versioned/scheme"
+	v1alpha1 "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
+	scheme "Hybrid_Cloud/pkg/policy/v1alpha1/clientset/versioned/scheme"
 	"context"
 	"time"
 

@@ -1,7 +1,7 @@
 package deployment
 
 import (
-	cobrautil "Hybrid_Cluster/hybridctl/util"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 	"context"
 	"fmt"
 

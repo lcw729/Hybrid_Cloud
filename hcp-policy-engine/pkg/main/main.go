@@ -17,20 +17,20 @@ limitations under the License.
 package main
 
 import (
-	// "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
+	// "Hybrid_Cloud/hcp-policy-engine/pkg/controller"
 
-	controller "Hybrid_Cluster/hcp-policy-engine/pkg/controller"
-	"Hybrid_Cluster/util/clusterManager"
+	controller "Hybrid_Cloud/hcp-policy-engine/pkg/controller"
+	"Hybrid_Cloud/util/clusterManager"
 	"flag"
 	"time"
 
-	v1alpha1hcppolicy "Hybrid_Cluster/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	v1alpha1hcppolicy "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 
 	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/klog/v2"
 
-	informers "Hybrid_Cluster/pkg/client/hcppolicy/v1alpha1/informers/externalversions"
+	informers "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/informers/externalversions"
 
 	"k8s.io/sample-controller/pkg/signals"
 )

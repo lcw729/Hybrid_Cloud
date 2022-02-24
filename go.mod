@@ -1,4 +1,4 @@
-module Hybrid_Cluster
+module Hybrid_Cloud
 
 go 1.16
 
@@ -42,7 +42,7 @@ require (
 )
 
 replace (
-	Hybrid_Cluster.com/policy-check v0.0.0 => ./policy-check
+	Hybrid_Cloud.com/policy-check v0.0.0 => ./policy-check
 	admiralty.io/multicluster-controller => admiralty.io/multicluster-controller v0.1.0
 	k8s.io/api => k8s.io/api v0.22.4
 // k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.0-alpha.4

@@ -1,8 +1,8 @@
 package hcpcluster
 
 import (
-	cobrautil "Hybrid_Cluster/hybridctl/util"
-	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"context"
 	"fmt"
 

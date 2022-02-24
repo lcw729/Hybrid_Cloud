@@ -1,10 +1,10 @@
 package main
 
 import (
-	controller "Hybrid_Cluster/hcp-cluster-manager/src/controller"
-	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	informers "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/informers/externalversions"
-	"Hybrid_Cluster/util/clusterManager"
+	controller "Hybrid_Cloud/hcp-cluster-manager/src/controller"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	informers "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/informers/externalversions"
+	"Hybrid_Cloud/util/clusterManager"
 	"flag"
 	"time"
 

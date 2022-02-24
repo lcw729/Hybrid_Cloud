@@ -1,11 +1,11 @@
 package controller
 
 import (
-	cobrautil "Hybrid_Cluster/hybridctl/util"
-	hcphasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
-	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
-	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
-	hcphasscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
+	hcphasv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
+	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
+	lister "Hybrid_Cloud/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
+	hcphasscheme "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 
 	"context"
 	"fmt"

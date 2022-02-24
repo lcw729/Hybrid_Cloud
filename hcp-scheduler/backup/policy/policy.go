@@ -6,11 +6,11 @@ import (
 	"log"
 	"strconv"
 
-	v1alpha1 "Hybrid_Cluster/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	v1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	cobrautil "Hybrid_Cluster/hybridctl/util"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 )
 
 func GetCycle() float64 {
