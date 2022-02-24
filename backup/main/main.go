@@ -6,12 +6,12 @@ import (
 	"log"
 	"time"
 
-	// "Hybrid_Cluster/analytic-engine/analyticEngine"
-	// "Hybrid_Cluster/hcp-scheduler/pkg/policy"
-	"Hybrid_Cluster/hcp-scheduler/backup/policy"
-	scheduler "Hybrid_Cluster/hcp-scheduler/backup/scheduler"
-	algopb "Hybrid_Cluster/protos/v1/algo"
-	"Hybrid_Cluster/resource"
+	// "Hybrid_Cloud/analytic-engine/analyticEngine"
+	// "Hybrid_Cloud/hcp-scheduler/pkg/policy"
+	"Hybrid_Cloud/hcp-scheduler/backup/policy"
+	scheduler "Hybrid_Cloud/hcp-scheduler/backup/scheduler"
+	algopb "Hybrid_Cloud/protos/v1/algo"
+	"Hybrid_Cloud/resource"
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/apps/v1"

@@ -1,13 +1,13 @@
 package controller
 
 import (
-	algorithm "Hybrid_Cluster/hcp-analytic-engine/pkg/algorithm"
-	"Hybrid_Cluster/hcp-analytic-engine/util"
-	"Hybrid_Cluster/pkg/apis/resource/v1alpha1"
-	resourcev1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
-	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
-	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
-	resourcescheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	algorithm "Hybrid_Cloud/hcp-analytic-engine/pkg/algorithm"
+	"Hybrid_Cloud/hcp-analytic-engine/util"
+	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
+	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
+	lister "Hybrid_Cloud/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
+	resourcescheme "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 	"context"
 	"fmt"
 	"time"
@@ -43,8 +43,6 @@ const (
 	// is synced successfully
 	MessageResourceSynced = "Foo synced successfully"
 )
-
-var algorithm_list = util.AlgorithmList
 
 type Controller struct {
 	kubeclientset          kubernetes.Interface
@@ -213,74 +211,90 @@ func (c *Controller) syncHandler(key string) error {
 
 	if hcpdeployment.Spec.SchedulingStatus == "Requested" {
 		fmt.Println("[scheduling start]")
+
 		scheduling_type := hcpdeployment.Spec.SchedulingType
+		replicas := int(*hcpdeployment.Spec.RealDeploymentSpec.Replicas)
 
-		var check bool
-		switch scheduling_type {
-		case algorithm_list[1]:
+		scheduling_type = "Affinity"
+		fmt.Println(scheduling_type)
+		var check bool = false
+		var ok bool
+		for i := 0; i < replicas; i++ {
+			// 스케줄링 알고리즘 확인
+			fmt.Println("[ 1 - check scheduling algorithm ]")
+			fmt.Println("[ 2 - scheduling ]")
+			switch scheduling_type {
+			// 스케줄링
+			case util.AlgorithmList[0]:
+				check = algorithm.AlgorithmMap[util.AlgorithmList[0]]()
+			case util.AlgorithmList[1]:
+				check = algorithm.AlgorithmMap[util.AlgorithmList[1]]()
+			}
 
-			algorithm_func := algorithm.AlgorithmMap[algorithm_list[1]]
-			replicas := int(*hcpdeployment.Spec.RealDeploymentSpec.Replicas)
-
+			fmt.Println(check)
 			if !check {
-				fmt.Println("Wait for scheduling to complete")
+				fmt.Println(check)
+				fmt.Println("fail to schedule deployment")
 			} else {
-
-				var ok bool
-				for i := 0; i < replicas; i++ {
-					check = algorithm_func()
-
-					// 최대 스코어 클러스터 반환
-					score_table := algorithm.SortScore()
-					target := score_table[0].Cluster
-					ok = registerTarget(hcpdeployment, target)
-				}
-
-				if !ok {
-
-				} else {
-					fmt.Printf("success to schedule deployment : %s\n", hcpdeployment.ObjectMeta.Name)
-
-					// HCPDeployment SchedulingStatus 업데이트
-					hcpdeployment.Spec.SchedulingStatus = "Scheduled"
-
-					r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
-					if err != nil {
-						fmt.Println(err)
-					} else {
-						fmt.Printf("update HCPDeployment %s SchedulingStatus : Scheduled\n", r.ObjectMeta.Name)
-					}
-				}
+				// 최대 스코어 클러스터 반환
+				fmt.Println("[ 3 - get scheduling result ]")
+				score_table := algorithm.SortScore()
+				target := score_table[0].Cluster
+				fmt.Println(target)
+				fmt.Println("[ 4 - register scheduling target to hcpdeployment ]")
+				ok = registerTarget(hcpdeployment, target)
+				fmt.Println(hcpdeployment.Spec.SchedulingResult.Targets)
 			}
 		}
+
+		if !ok {
+			fmt.Printf("fail to schedule deployment : %s\n", hcpdeployment.ObjectMeta.Name)
+		} else {
+			fmt.Printf("success to schedule deployment : %s\n", hcpdeployment.ObjectMeta.Name)
+
+			// HCPDeployment SchedulingStatus 업데이트
+			hcpdeployment.Spec.SchedulingStatus = "Scheduled"
+
+			r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Printf("update HCPDeployment %s SchedulingStatus : Scheduled\n", r.ObjectMeta.Name)
+			}
+		}
+
 	}
 	return nil
 }
 
 func registerTarget(resource *v1alpha1.HCPDeployment, cluster string) bool {
+
 	targets := resource.Spec.SchedulingResult.Targets
 
-	for _, target := range targets {
+	for i, target := range targets {
 		// 이미 target cluster 목록에 cluster가 있는 경우
 		if target.Cluster == cluster {
 			// replicas 개수 증가
 			temp := *target.Replicas
 			temp += 1
 			target.Replicas = &temp
-
-			return true
-		} else {
-			// target cluster 목록에 cluster가 없는 경우
-
-			// replicas 개수 1로 설정
-			new_target := new(v1alpha1.Target)
-			new_target.Cluster = cluster
-			var one int32 = 1
-			new_target.Replicas = &one
-			targets = append(targets, *new_target)
-
+			targets[i] = target
+			resource.Spec.SchedulingResult.Targets = targets
+			fmt.Println(resource.Spec.SchedulingResult.Targets)
 			return true
 		}
 	}
-	return false
+
+	// target cluster 목록에 cluster가 없는 경우
+
+	// replicas 개수 1로 설정
+	new_target := new(v1alpha1.Target)
+	new_target.Cluster = cluster
+	var one int32 = 1
+	new_target.Replicas = &one
+	targets = append(targets, *new_target)
+	resource.Spec.SchedulingResult.Targets = targets
+	fmt.Println(resource.Spec.SchedulingResult.Targets)
+
+	return true
 }
