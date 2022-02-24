@@ -220,14 +220,22 @@ func (c *Controller) syncHandler(key string) error {
 		case algorithm_list[1]:
 
 			algorithm_func := algorithm.AlgorithmMap[algorithm_list[1]]
-			check = algorithm_func()
+			replicas := int(*hcpdeployment.Spec.RealDeploymentSpec.Replicas)
+
 			if !check {
 				fmt.Println("Wait for scheduling to complete")
 			} else {
-				// 최대 스코어 클러스터 반환
-				score_table := algorithm.SortScore()
-				target := score_table[0].Cluster
-				ok := registerTarget(*hcpdeployment, target)
+
+				var ok bool
+				for i := 0; i < replicas; i++ {
+					check = algorithm_func()
+
+					// 최대 스코어 클러스터 반환
+					score_table := algorithm.SortScore()
+					target := score_table[0].Cluster
+					ok = registerTarget(hcpdeployment, target)
+				}
+
 				if !ok {
 
 				} else {
@@ -246,11 +254,10 @@ func (c *Controller) syncHandler(key string) error {
 			}
 		}
 	}
-
 	return nil
 }
 
-func registerTarget(resource v1alpha1.HCPDeployment, cluster string) bool {
+func registerTarget(resource *v1alpha1.HCPDeployment, cluster string) bool {
 	targets := resource.Spec.SchedulingResult.Targets
 
 	for _, target := range targets {
