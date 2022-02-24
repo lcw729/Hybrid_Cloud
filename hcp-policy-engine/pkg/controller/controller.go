@@ -251,38 +251,3 @@ func (c *Controller) enqueueHCPPolicy(obj interface{}) {
 	}
 	c.workqueue.Add(key)
 }
-
-// func (c *Controller) handleObject(obj interface{}) {
-// 	var object metav1.Object
-// 	var ok bool
-// 	if object, ok = obj.(metav1.Object); !ok {
-// 		tombstone, ok := obj.(cache.DeletedFinalStateUnknown)
-// 		if !ok {
-// 			utilruntime.HandleError(fmt.Errorf("error decoding object, invalid type"))
-// 			return
-// 		}
-// 		object, ok = tombstone.Obj.(metav1.Object)
-// 		if !ok {
-// 			utilruntime.HandleError(fmt.Errorf("error decoding object tombstone, invalid type"))
-// 			return
-// 		}
-// 		klog.V(4).Infof("Recovered deleted object '%s' from tombstone", object.GetName())
-// 	}
-// 	klog.V(4).Infof("Processing object: %s", object.GetName())
-// 	if ownerRef := metav1.GetControllerOf(object); ownerRef != nil {
-// 		// If this object is not owned by a Foo, we should not do anything more
-// 		// with it.
-// 		if ownerRef.Kind != "HCPPolicy" {
-// 			return
-// 		}
-
-// 		hcppolicy, err := c.hcppolicyLister.HCPPolicies(object.GetNamespace()).Get(ownerRef.Name)
-// 		if err != nil {
-// 			klog.V(4).Infof("ignoring orphaned object '%s' of hcppolicy '%s'", object.GetSelfLink(), ownerRef.Name)
-// 			return
-// 		}
-
-// 		c.enqueueHCPPolicy(hcppolicy)
-// 		return
-// 	}
-// }
