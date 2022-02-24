@@ -19,7 +19,7 @@ limitations under the License.
 package internalinterfaces
 
 import (
-	versioned "Hybrid_Cluster/pkg/policy/v1alpha1/clientset/versioned"
+	versioned "Hybrid_Cloud/pkg/policy/v1alpha1/clientset/versioned"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

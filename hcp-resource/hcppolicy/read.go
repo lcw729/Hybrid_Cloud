@@ -1,10 +1,10 @@
 package resource
 
 import (
-	"Hybrid_Cluster/hcp-analytic-engine/util"
-	hcppolicyapis "Hybrid_Cluster/pkg/apis/hcppolicy/v1alpha1"
-	hcppolicyv1alpha1 "Hybrid_Cluster/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
-	"Hybrid_Cluster/util/clusterManager"
+	"Hybrid_Cloud/hcp-analytic-engine/util"
+	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
+	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
 	"strconv"
@@ -116,7 +116,7 @@ func GetAlgorithm() (string, error) {
 	policies := hcppolicy.Spec.Template.Spec.Policies
 	if len(policies) == 1 {
 		policy := policies[0]
-		if policy.Type == "Algorithm" && len(policy.Value) == 1 {
+		if policy.Type == "Algorithm" {
 			algorithm := policy.Value
 			for _, algo := range util.AlgorithmList {
 				if algo == algorithm {

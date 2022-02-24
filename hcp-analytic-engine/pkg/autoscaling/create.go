@@ -1,10 +1,10 @@
 package resource
 
 import (
-	"Hybrid_Cluster/hcp-scheduler/backup/resource"
-	resourcev1alpha1 "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
-	hasv1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
-	cm "Hybrid_Cluster/util/clusterManager"
+	"Hybrid_Cloud/hcp-scheduler/backup/resource"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	hasv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
+	cm "Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
 

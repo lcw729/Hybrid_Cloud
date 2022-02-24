@@ -1,8 +1,8 @@
 package util
 
 import (
-	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	"Hybrid_Cluster/util/clusterManager"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"io/ioutil"
 

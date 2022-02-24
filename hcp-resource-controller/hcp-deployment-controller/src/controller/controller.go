@@ -1,16 +1,16 @@
 package controller
 
 import (
-	resourcev1alpha1apis "Hybrid_Cluster/pkg/apis/resource/v1alpha1"
-	resourcev1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
-	resourcev1alpha1scheme "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
-	informer "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
-	lister "Hybrid_Cluster/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
+	resourcev1alpha1apis "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
+	resourcev1alpha1scheme "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
+	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
+	lister "Hybrid_Cloud/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
 	"context"
 	"fmt"
 	"time"
 
-	"Hybrid_Cluster/hybridctl/util"
+	"Hybrid_Cloud/hybridctl/util"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -204,61 +204,63 @@ func (c *Controller) syncHandler(key string) error {
 			utilruntime.HandleError(fmt.Errorf("HCPDeployment '%s' in work queue no longer exists", key))
 			return nil
 		}
+	}
 
-		scheduling_status := hcpdeployment.Spec.SchedulingStatus
+	scheduling_status := hcpdeployment.Spec.SchedulingStatus
 
-		if scheduling_status == "Scheduled" {
-			targets := hcpdeployment.Spec.SchedulingResult.Targets
-			size := len(targets)
-			if size < 1 {
-				fmt.Println("Target cluster should be more than one.")
+	if scheduling_status == "Scheduled" {
+		targets := hcpdeployment.Spec.SchedulingResult.Targets
+		size := len(targets)
+		if size < 1 {
+			fmt.Println("Target cluster should be more than one.")
+		} else {
+			var count int32 = 0
+			real_replicas := *hcpdeployment.Spec.RealDeploymentSpec.Replicas
+
+			for i := 0; i < size; i++ {
+				count += *targets[i].Replicas
+			}
+
+			if count < real_replicas {
+				fmt.Println("Insufficient number of replicas.")
+			} else if count > real_replicas {
+				fmt.Println("Excessive number of replicas")
 			} else {
-				var count int32 = 0
-				real_replicas := *hcpdeployment.Spec.RealDeploymentSpec.Replicas
-
-				for i := 0; i < size; i++ {
-					count += *targets[i].Replicas
-				}
-
-				if count < real_replicas {
-					fmt.Println("Insufficient number of replicas.")
-				} else if count > real_replicas {
-					fmt.Println("Excessive number of replicas")
+				fmt.Println("Appropriate number of replicas")
+				ok := DeployKubeDeployment(hcpdeployment)
+				if !ok {
+					fmt.Println("fail to schedule deployment")
 				} else {
-					fmt.Println("Appropriate number of replicas")
-					ok := DeployKubeDeployment(*hcpdeployment)
-					if !ok {
-						fmt.Println("fail to schedule deployment")
-					} else {
-						fmt.Println("success to schedule deployment")
+					fmt.Println("success to schedule deployment")
 
-						// HCPDeployment SchedulingStatus 업데이트
-						hcpdeployment.Spec.SchedulingStatus = "Completed"
-						r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
-						if err != nil {
-							fmt.Println(err)
-						} else {
-							fmt.Printf("update HCPDeployment %s SchedulingStatus : Completed\n", r.ObjectMeta.Name)
-						}
+					// HCPDeployment SchedulingStatus 업데이트
+					hcpdeployment.Spec.SchedulingStatus = "Completed"
+					r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
+					if err != nil {
+						fmt.Println(err)
+					} else {
+						fmt.Printf("update HCPDeployment %s SchedulingStatus : Completed\n", r.ObjectMeta.Name)
 					}
 				}
 			}
-		} else if scheduling_status == "Requested" {
-			fmt.Println("not yet scheduled")
-		} else if scheduling_status == "Completed" {
-			fmt.Println("already deployed")
-		} else {
-			fmt.Println("Invalid Scheduling Status")
 		}
-
-		return err
+	} else if scheduling_status == "Requested" {
+		fmt.Println("not yet scheduled")
+	} else if scheduling_status == "Completed" {
+		fmt.Println("already deployed")
+	} else {
+		fmt.Println("Invalid Scheduling Status")
 	}
+
 	return nil
 }
 
-func DeployKubeDeployment(hcp_resource resourcev1alpha1apis.HCPDeployment) bool {
+func DeployKubeDeployment(hcp_resource *resourcev1alpha1apis.HCPDeployment) bool {
 	targets := hcp_resource.Spec.SchedulingResult.Targets
 	metadata := hcp_resource.Spec.RealDeploymentMetadata
+	if metadata.Namespace == "" {
+		metadata.Namespace = "default"
+	}
 	spec := hcp_resource.Spec.RealDeploymentSpec
 
 	// HCPDeployment SchedulingResult에 따라 Deployment 배포

@@ -1,7 +1,7 @@
 package main
 
 import (
-	monitoringEngine "Hybrid_Cluster/hcp-monitoring-engine/metricCollector"
+	monitoringEngine "Hybrid_Cloud/hcp-monitoring-engine/metricCollector"
 	"fmt"
 )
 

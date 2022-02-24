@@ -872,6 +872,6 @@ sigs.k8s.io/structured-merge-diff/v4/typed
 sigs.k8s.io/structured-merge-diff/v4/value
 # sigs.k8s.io/yaml v1.2.0
 sigs.k8s.io/yaml
-# Hybrid_Cluster.com/policy-check v0.0.0 => ./policy-check
+# Hybrid_Cloud.com/policy-check v0.0.0 => ./policy-check
 # admiralty.io/multicluster-controller => admiralty.io/multicluster-controller v0.1.0
 # k8s.io/api => k8s.io/api v0.22.4

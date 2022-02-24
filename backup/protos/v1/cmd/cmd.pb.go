@@ -3,7 +3,7 @@
 // DO NOT EDIT!
 
 /*
-Package Hybrid_Cluster_proto_v1_cmd is a generated protocol buffer package.
+Package Hybrid_Cloud_proto_v1_cmd is a generated protocol buffer package.
 
 It is generated from these files:
 	proto/v1/cmd/cmd.proto

@@ -1,8 +1,8 @@
 package algorithm
 
 import (
-	policy "Hybrid_Cluster/hcp-resource/hcppolicy"
-	clusterManager "Hybrid_Cluster/util/clusterManager"
+	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
+	clusterManager "Hybrid_Cloud/util/clusterManager"
 	"fmt"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
@@ -14,14 +14,14 @@ var AlgorithmMap = map[string]func() bool{
 }
 
 var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
-var watching_level = policy.GetWatchingLevel()
-var warning_level = policy.GetWarningLevel()
 
 func WatchingLevelCalculator() {
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 2] Get Policy - watching level & warning level")
+	watching_level := policy.GetWatchingLevel()
 	fmt.Println("< Watching Level > \n", watching_level)
 	// 각 클러스터의 watching level 계산하고 warning level 초과 시 targetCluster에 추가
+	warning_level := policy.GetWarningLevel()
 	fmt.Println("< Warning  Level > \n", warning_level)
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 3] Get MultiMetric")
@@ -87,10 +87,10 @@ func Affinity() bool {
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
-	score_table["a-cluster"] = 30.0
-	score_table["b-cluster"] = 40.0
-	score_table["c-cluster"] = 20.0
-	score_table["b"] = 50.0
+	score_table["hcp-cluster"] = 50.0
+	score_table["a-cluster"] = 40.0
+	score_table["b-cluster"] = 20.0
+	score_table["c-cluster"] = 10.0
 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
 	fmt.Println("---------------------------------------------------------------")
 	return true

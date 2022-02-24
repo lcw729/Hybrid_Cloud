@@ -1,7 +1,7 @@
 // protos/v1/cmd/cmd.proto
 syntax = "proto3";
 
-option go_package = "Hybrid_Cluster/proto/v1/cmd";
+option go_package = "Hybrid_Cloud/proto/v1/cmd";
 
 package v1.cmd;
 

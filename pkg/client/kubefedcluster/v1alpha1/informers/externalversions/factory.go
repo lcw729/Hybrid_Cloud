@@ -19,9 +19,9 @@ limitations under the License.
 package externalversions
 
 import (
-	versioned "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/clientset/versioned"
-	internalinterfaces "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/informers/externalversions/internalinterfaces"
-	kubefedcluster "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/informers/externalversions/kubefedcluster"
+	versioned "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/clientset/versioned"
+	internalinterfaces "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/informers/externalversions/internalinterfaces"
+	kubefedcluster "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/informers/externalversions/kubefedcluster"
 	reflect "reflect"
 	sync "sync"
 	time "time"

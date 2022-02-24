@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	kubefedclusterv1alpha1 "Hybrid_Cluster/pkg/apis/kubefedcluster/v1alpha1"
-	versioned "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/clientset/versioned"
-	internalinterfaces "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/informers/externalversions/internalinterfaces"
-	v1alpha1 "Hybrid_Cluster/pkg/client/kubefedcluster/v1alpha1/listers/kubefedcluster/v1alpha1"
+	kubefedclusterv1alpha1 "Hybrid_Cloud/pkg/apis/kubefedcluster/v1alpha1"
+	versioned "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/clientset/versioned"
+	internalinterfaces "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/informers/externalversions/internalinterfaces"
+	v1alpha1 "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/listers/kubefedcluster/v1alpha1"
 	"context"
 	time "time"
 

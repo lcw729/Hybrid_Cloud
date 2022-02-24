@@ -1,6 +1,6 @@
 package handler
 
-import "Hybrid_Cluster/util/clusterManager"
+import "Hybrid_Cloud/util/clusterManager"
 
 type HttpManager struct {
 	HTTPServer_IP   string

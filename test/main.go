@@ -1,7 +1,7 @@
 // package main
 
 // import (
-// 	"Hybrid_Cluster/test/pkg/handler"
+// 	"Hybrid_Cloud/test/pkg/handler"
 // 	"encoding/json"
 // 	"fmt"
 // 	"time"
@@ -9,10 +9,10 @@
 package main
 
 import (
-	hcppolicyapis "Hybrid_Cluster/pkg/apis/hcppolicy/v1alpha1"
-	hcppolicyv1alpha1 "Hybrid_Cluster/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
-	"Hybrid_Cluster/test/pkg/handler"
-	"Hybrid_Cluster/util/clusterManager"
+	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
+	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	"Hybrid_Cloud/test/pkg/handler"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"encoding/json"
 	"fmt"

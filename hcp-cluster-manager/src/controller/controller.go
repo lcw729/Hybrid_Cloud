@@ -1,13 +1,13 @@
 package controller
 
 import (
-	cobrautil "Hybrid_Cluster/hybridctl/util"
-	namespacefunc "Hybrid_Cluster/kube-resource/namespace"
-	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	informer "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/informers/externalversions/hcpcluster/v1alpha1"
-	lister "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
-	hcpclusterscheme "Hybrid_Cluster/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
-	"Hybrid_Cluster/util/clusterManager"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
+	namespacefunc "Hybrid_Cloud/kube-resource/namespace"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	informer "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/informers/externalversions/hcpcluster/v1alpha1"
+	lister "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
+	hcpclusterscheme "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
 	"log"

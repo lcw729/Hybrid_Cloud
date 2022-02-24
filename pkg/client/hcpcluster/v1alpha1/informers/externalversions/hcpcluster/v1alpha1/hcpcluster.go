@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	hcpclusterv1alpha1 "Hybrid_Cluster/pkg/apis/hcpcluster/v1alpha1"
-	versioned "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	internalinterfaces "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/informers/externalversions/internalinterfaces"
-	v1alpha1 "Hybrid_Cluster/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
+	versioned "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	internalinterfaces "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/informers/externalversions/internalinterfaces"
+	v1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
 	"context"
 	time "time"
 

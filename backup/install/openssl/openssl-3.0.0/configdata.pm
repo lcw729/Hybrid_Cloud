@@ -30198,8 +30198,8 @@ unless (caller) {
     use File::Copy;
     use Pod::Usage;
 
-    use lib '/root/Go/src/Hybrid_Cluster/install/openssl/openssl-3.0.0/util/perl';
-    use OpenSSL::fallback '/root/Go/src/Hybrid_Cluster/install/openssl/openssl-3.0.0/external/perl/MODULES.txt';
+    use lib '/root/Go/src/Hybrid_Cloud/install/openssl/openssl-3.0.0/util/perl';
+    use OpenSSL::fallback '/root/Go/src/Hybrid_Cloud/install/openssl/openssl-3.0.0/external/perl/MODULES.txt';
 
     my $here = dirname($0);
 
@@ -30226,7 +30226,7 @@ unless (caller) {
             );
 
         use lib '.';
-        use lib '/root/Go/src/Hybrid_Cluster/install/openssl/openssl-3.0.0/Configurations';
+        use lib '/root/Go/src/Hybrid_Cloud/install/openssl/openssl-3.0.0/Configurations';
         use gentemplate;
 
         print 'Creating ',$buildfile_template,"\n";
@@ -30243,8 +30243,8 @@ unless (caller) {
 
         my $prepend = <<'_____';
 use File::Spec::Functions;
-use lib '/root/Go/src/Hybrid_Cluster/install/openssl/openssl-3.0.0/util/perl';
-use lib '/root/Go/src/Hybrid_Cluster/install/openssl/openssl-3.0.0/Configurations';
+use lib '/root/Go/src/Hybrid_Cloud/install/openssl/openssl-3.0.0/util/perl';
+use lib '/root/Go/src/Hybrid_Cloud/install/openssl/openssl-3.0.0/Configurations';
 use lib '.';
 use platform;
 _____

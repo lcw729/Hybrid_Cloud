@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	autoscalingv1beta2 "Hybrid_Cluster/pkg/apis/vpa/v1beta2"
+	autoscalingv1beta2 "Hybrid_Cloud/pkg/apis/vpa/v1beta2"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"

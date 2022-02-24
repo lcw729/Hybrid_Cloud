@@ -1,18 +1,18 @@
 package main
 
 import (
-	controller "Hybrid_Cluster/hcp-resource-controller/hcp-deployment-controller/src/controller"
-	"Hybrid_Cluster/util/clusterManager"
+	controller "Hybrid_Cloud/hcp-resource-controller/hcp-deployment-controller/src/controller"
+	"Hybrid_Cloud/util/clusterManager"
 	"flag"
 	"time"
 
-	resourcev1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/clientset/versioned"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 
 	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/klog/v2"
 
-	informers "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions"
+	informers "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions"
 
 	"k8s.io/sample-controller/pkg/signals"
 )

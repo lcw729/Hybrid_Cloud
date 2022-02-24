@@ -1,7 +1,7 @@
 // protos/v1/algo/algo.proto
 syntax = "proto3";
 
-option go_package = "Hybrid_Cluster/protos/v1/algo";
+option go_package = "Hybrid_Cloud/protos/v1/algo";
 
 package v1.algo;
 

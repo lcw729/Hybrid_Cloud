@@ -19,8 +19,8 @@ limitations under the License.
 package resource
 
 import (
-	internalinterfaces "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/internalinterfaces"
-	v1alpha1 "Hybrid_Cluster/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
+	internalinterfaces "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/internalinterfaces"
+	v1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.
