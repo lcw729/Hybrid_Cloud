@@ -215,7 +215,6 @@ func (c *Controller) syncHandler(key string) error {
 		scheduling_type := hcpdeployment.Spec.SchedulingType
 		replicas := int(*hcpdeployment.Spec.RealDeploymentSpec.Replicas)
 
-		scheduling_type = "Affinity"
 		fmt.Println(scheduling_type)
 		var check bool = false
 		var ok bool
@@ -240,10 +239,8 @@ func (c *Controller) syncHandler(key string) error {
 				fmt.Println("[ 3 - get scheduling result ]")
 				score_table := algorithm.SortScore()
 				target := score_table[0].Cluster
-				fmt.Println(target)
 				fmt.Println("[ 4 - register scheduling target to hcpdeployment ]")
 				ok = registerTarget(hcpdeployment, target)
-				fmt.Println(hcpdeployment.Spec.SchedulingResult.Targets)
 			}
 		}
 
