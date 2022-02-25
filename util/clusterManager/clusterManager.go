@@ -117,7 +117,7 @@ func GetNodeList(c *kubernetes.Clientset) (*corev1.NodeList, error) {
 
 func NewClusterManager() *ClusterManager {
 	fed_namespace := "kube-federation-system"
-	host_config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	host_config, err := cobrautil.BuildConfigFromFlags("kube-master", "/mnt/config")
 	if err != nil {
 		fmt.Println(err)
 	}
