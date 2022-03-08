@@ -1,31 +1,20 @@
 package main
 
-import (
-	"context"
-	"fmt"
-	"log"
-	"time"
+// "Hybrid_Cloud/analytic-engine/analyticEngine"
+// "Hybrid_Cloud/hcp-scheduler/pkg/policy"
 
-	// "Hybrid_Cloud/analytic-engine/analyticEngine"
-	// "Hybrid_Cloud/hcp-scheduler/pkg/policy"
-	"Hybrid_Cloud/hcp-scheduler/backup/policy"
-	scheduler "Hybrid_Cloud/hcp-scheduler/backup/scheduler"
-	algopb "Hybrid_Cloud/protos/v1/algo"
-	"Hybrid_Cloud/resource"
+// algopb "Hybrid_Cloud/protos/v1/algo"
+// "Hybrid_Cloud/resource"
 
-	"google.golang.org/grpc"
-	v1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	// // grpc "google.golang.org/grpc"
-	// "context"
-	// "fmt"
-	// "log"
-	// "time"
-	// v1 "k8s.io/api/apps/v1"
-	// "k8s.io/client-go/kubernetes"
-)
+// // grpc "google.golang.org/grpc"
+// "context"
+// "fmt"
+// "log"
+// "time"
+// v1 "k8s.io/api/apps/v1"
+// "k8s.io/client-go/kubernetes"
 
+/*
 func main() {
 	replicas := int32(3)
 
@@ -145,3 +134,4 @@ func optimalArrangement(c algopb.AlgoClient, ctx context.Context) {
 
 	log.Printf("Config: %v ", r)
 }
+*/
