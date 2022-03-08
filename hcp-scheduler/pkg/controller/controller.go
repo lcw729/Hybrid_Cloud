@@ -1,8 +1,8 @@
 package controller
 
 import (
-	algorithm "Hybrid_Cloud/hcp-analytic-engine/pkg/algorithm"
 	"Hybrid_Cloud/hcp-analytic-engine/util"
+	algorithm "Hybrid_Cloud/hcp-scheduler/pkg/algorithm"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
@@ -209,6 +209,7 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
+	// 스케줄링되지 않은 파드 감지
 	if hcpdeployment.Spec.SchedulingStatus == "Requested" {
 		fmt.Println("[scheduling start]")
 
