@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 
+	ns "Hybrid_Cloud/kube-resource/namespace"
+
 	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -17,7 +19,7 @@ func CreateDeployment(cluster string, node string, deployment *v1.Deployment) er
 	deployment.ResourceVersion = ""
 
 	namespace := deployment.ObjectMeta.Namespace
-	CheckAndCreateNamespace(cluster, namespace)
+	ns.CheckAndCreateNamespace(cluster, namespace)
 	new_dep, err := cluster_client.AppsV1().Deployments(namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {
