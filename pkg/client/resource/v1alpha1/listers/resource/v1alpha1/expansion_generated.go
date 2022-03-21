@@ -33,3 +33,11 @@ type HCPHybridAutoScalerListerExpansion interface{}
 // HCPHybridAutoScalerNamespaceListerExpansion allows custom methods to be added to
 // HCPHybridAutoScalerNamespaceLister.
 type HCPHybridAutoScalerNamespaceListerExpansion interface{}
+
+// HCPPodListerExpansion allows custom methods to be added to
+// HCPPodLister.
+type HCPPodListerExpansion interface{}
+
+// HCPPodNamespaceListerExpansion allows custom methods to be added to
+// HCPPodNamespaceLister.
+type HCPPodNamespaceListerExpansion interface{}

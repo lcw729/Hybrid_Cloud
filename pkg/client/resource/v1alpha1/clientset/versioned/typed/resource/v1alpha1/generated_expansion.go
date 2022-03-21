@@ -21,3 +21,5 @@ package v1alpha1
 type HCPDeploymentExpansion interface{}
 
 type HCPHybridAutoScalerExpansion interface{}
+
+type HCPPodExpansion interface{}

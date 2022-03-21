@@ -28,6 +28,8 @@ type Interface interface {
 	HCPDeployments() HCPDeploymentInformer
 	// HCPHybridAutoScalers returns a HCPHybridAutoScalerInformer.
 	HCPHybridAutoScalers() HCPHybridAutoScalerInformer
+	// HCPPods returns a HCPPodInformer.
+	HCPPods() HCPPodInformer
 }
 
 type version struct {
@@ -49,4 +51,9 @@ func (v *version) HCPDeployments() HCPDeploymentInformer {
 // HCPHybridAutoScalers returns a HCPHybridAutoScalerInformer.
 func (v *version) HCPHybridAutoScalers() HCPHybridAutoScalerInformer {
 	return &hCPHybridAutoScalerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// HCPPods returns a HCPPodInformer.
+func (v *version) HCPPods() HCPPodInformer {
+	return &hCPPodInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

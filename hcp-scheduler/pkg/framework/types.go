@@ -1,7 +1,8 @@
 package framework
 
 import (
-	"Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	"errors"
 	"fmt"
 	"sort"
@@ -67,7 +68,7 @@ type ClusterInfo struct {
 	RequestedResources *Resources
 	AllocableResources *Resources
 	CapacityResources  *Resources
-	ClusterList        *v1alpha1.HCPClusterList
+	ClusterList        *hcpclusterv1alpha1.HCPClusterList
 }
 
 // PodInfo is a wrapper to a Pod with additional pre-computed information to
@@ -78,7 +79,7 @@ type PodInfo struct {
 	NodeName    string
 	PodName     string
 
-	Pod *v1.Pod
+	Pod *resourcev1alpha1.HCPPod
 
 	RequestedResources *Resources
 	AllocableResources *Resources
@@ -194,7 +195,7 @@ func (pi *PodInfo) DeepCopy() *PodInfo {
 
 // Update creates a full new PodInfo by default. And only updates the pod when the PodInfo
 // has been instantiated and the passed pod is the exact same one as the original pod.
-func (pi *PodInfo) Update(pod *v1.Pod) {
+func (pi *PodInfo) Update(pod *resourcev1alpha1.HCPPod) {
 	if pod != nil && pi.Pod != nil && pi.Pod.UID == pod.UID {
 		// PodInfo includes immutable information, and so it is safe to update the pod in place if it is
 		// the exact same pod
@@ -203,7 +204,7 @@ func (pi *PodInfo) Update(pod *v1.Pod) {
 	}
 	var preferredAffinityTerms []v1.WeightedPodAffinityTerm
 	var preferredAntiAffinityTerms []v1.WeightedPodAffinityTerm
-	if affinity := pod.Spec.Affinity; affinity != nil {
+	if affinity := pod.Spec.RealPodSpec.Affinity; affinity != nil {
 		if a := affinity.PodAffinity; a != nil {
 			preferredAffinityTerms = a.PreferredDuringSchedulingIgnoredDuringExecution
 		}
@@ -214,12 +215,12 @@ func (pi *PodInfo) Update(pod *v1.Pod) {
 
 	// Attempt to parse the affinity terms
 	var parseErrs []error
-	requiredAffinityTerms, err := getAffinityTerms(pod, getPodAffinityTerms(pod.Spec.Affinity))
+	requiredAffinityTerms, err := getAffinityTerms(pod, getPodAffinityTerms(pod.Spec.RealPodSpec.Affinity))
 	if err != nil {
 		parseErrs = append(parseErrs, fmt.Errorf("requiredAffinityTerms: %w", err))
 	}
 	requiredAntiAffinityTerms, err := getAffinityTerms(pod,
-		getPodAntiAffinityTerms(pod.Spec.Affinity))
+		getPodAntiAffinityTerms(pod.Spec.RealPodSpec.Affinity))
 	if err != nil {
 		parseErrs = append(parseErrs, fmt.Errorf("requiredAntiAffinityTerms: %w", err))
 	}
@@ -241,7 +242,7 @@ func (pi *PodInfo) Update(pod *v1.Pod) {
 }
 
 // Matches returns true if the pod matches the label selector and namespaces or namespace selector.
-func (at *AffinityTerm) Matches(pod *v1.Pod, nsLabels labels.Set) bool {
+func (at *AffinityTerm) Matches(pod *resourcev1alpha1.HCPPod, nsLabels labels.Set) bool {
 	if at.Namespaces.Has(pod.Namespace) || at.NamespaceSelector.Matches(nsLabels) {
 		return at.Selector.Matches(labels.Set(pod.Labels))
 	}
@@ -258,7 +259,7 @@ type Diagnosis struct {
 
 // FitError describes a fit error of a pod.
 type FitError struct {
-	Pod         *v1.Pod
+	Pod         *resourcev1alpha1.HCPPod
 	NumAllNodes int
 	Diagnosis   Diagnosis
 }
@@ -293,7 +294,7 @@ func (f *FitError) Error() string {
 	return reasonMsg
 }
 
-func newAffinityTerm(pod *v1.Pod, term *v1.PodAffinityTerm) (*AffinityTerm, error) {
+func newAffinityTerm(pod *resourcev1alpha1.HCPPod, term *v1.PodAffinityTerm) (*AffinityTerm, error) {
 	selector, err := metav1.LabelSelectorAsSelector(term.LabelSelector)
 	if err != nil {
 		return nil, err
@@ -310,7 +311,7 @@ func newAffinityTerm(pod *v1.Pod, term *v1.PodAffinityTerm) (*AffinityTerm, erro
 
 // getAffinityTerms receives a Pod and affinity terms and returns the namespaces and
 // selectors of the terms.
-func getAffinityTerms(pod *v1.Pod, v1Terms []v1.PodAffinityTerm) ([]AffinityTerm, error) {
+func getAffinityTerms(pod *resourcev1alpha1.HCPPod, v1Terms []v1.PodAffinityTerm) ([]AffinityTerm, error) {
 	if v1Terms == nil {
 		return nil, nil
 	}
@@ -328,7 +329,7 @@ func getAffinityTerms(pod *v1.Pod, v1Terms []v1.PodAffinityTerm) ([]AffinityTerm
 }
 
 // getWeightedAffinityTerms returns the list of processed affinity terms.
-func getWeightedAffinityTerms(pod *v1.Pod, v1Terms []v1.WeightedPodAffinityTerm) ([]WeightedAffinityTerm, error) {
+func getWeightedAffinityTerms(pod *resourcev1alpha1.HCPPod, v1Terms []v1.WeightedPodAffinityTerm) ([]WeightedAffinityTerm, error) {
 	if v1Terms == nil {
 		return nil, nil
 	}
@@ -346,7 +347,7 @@ func getWeightedAffinityTerms(pod *v1.Pod, v1Terms []v1.WeightedPodAffinityTerm)
 }
 
 // NewPodInfo returns a new PodInfo.
-func NewPodInfo(pod *v1.Pod) *PodInfo {
+func NewPodInfo(pod *resourcev1alpha1.HCPPod) *PodInfo {
 	pInfo := &PodInfo{}
 	pInfo.Update(pod)
 	return pInfo
@@ -380,7 +381,7 @@ func getPodAntiAffinityTerms(affinity *v1.Affinity) (terms []v1.PodAffinityTerm)
 
 // returns a set of names according to the namespaces indicated in podAffinityTerm.
 // If namespaces is empty it considers the given pod's namespace.
-func getNamespacesFromPodAffinityTerm(pod *v1.Pod, podAffinityTerm *v1.PodAffinityTerm) sets.String {
+func getNamespacesFromPodAffinityTerm(pod *resourcev1alpha1.HCPPod, podAffinityTerm *v1.PodAffinityTerm) sets.String {
 	names := sets.String{}
 	if len(podAffinityTerm.Namespaces) == 0 && podAffinityTerm.NamespaceSelector == nil {
 		names.Insert(pod.Namespace)
@@ -444,14 +445,14 @@ func (n *NodeInfo) Node() *v1.Node {
 // corresponding NodeInfo. In order for the simulation to work, we call this method
 // on the pods returned from SchedulerCache, so that predicate functions see
 // only the pods that are not removed from the NodeInfo.
-func (n *NodeInfo) FilterOutPods(pods []*v1.Pod) []*v1.Pod {
+func (n *NodeInfo) FilterOutPods(pods []*resourcev1alpha1.HCPPod) []*resourcev1alpha1.HCPPod {
 	node := n.Node()
 	if node == nil {
 		return pods
 	}
-	filtered := make([]*v1.Pod, 0, len(pods))
+	filtered := make([]*resourcev1alpha1.HCPPod, 0, len(pods))
 	for _, p := range pods {
-		if p.Spec.NodeName != node.Name {
+		if p.Spec.RealPodSpec.NodeName != node.Name {
 			filtered = append(filtered, p)
 			continue
 		}
@@ -472,7 +473,7 @@ func (n *NodeInfo) FilterOutPods(pods []*v1.Pod) []*v1.Pod {
 }
 
 // GetPodKey returns the string key of a pod.
-func GetPodKey(pod *v1.Pod) (string, error) {
+func GetPodKey(pod *resourcev1alpha1.HCPPod) (string, error) {
 	uid := string(pod.UID)
 	if len(uid) == 0 {
 		return "", errors.New("cannot get cache key for pod with empty UID")

@@ -57,6 +57,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hcp().V1alpha1().HCPDeployments().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("hcphybridautoscalers"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Hcp().V1alpha1().HCPHybridAutoScalers().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("hcppods"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Hcp().V1alpha1().HCPPods().Informer()}, nil
 
 	}
 
