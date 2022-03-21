@@ -3,9 +3,36 @@ package v1alpha1
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	hpav2beta1 "k8s.io/api/autoscaling/v2beta1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpav1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 )
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+type HCPPod struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              HCPPodSpec       `json:"spec,omitempty"`
+	Status            corev1.PodStatus `json:"status,omitempty"`
+}
+
+type HCPPodSpec struct {
+	RealPodSpec     corev1.PodSpec    `json:"realDeploymentSpec"`
+	RealPodMetadata metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	//SchedlingStatus -Requested - Scheduled - Completed
+	SchedulingStatus string              `json:"schedulingstatus,omitempty" protobuf:"bytes,11,opt,name=schedulingstatus"`
+	SchedulingType   string              `json:"schedulingType,omitempty" protobuf:"bytes,3,opt,name=schedulingtype"`
+	SchedulingResult HCPSchedulingResult `json:"schedulingresult,omitempty" protobuf:"bytes,11,opt,name=schedulingresult"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+type HCPPodList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []HCPPod `json:"items"`
+}
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

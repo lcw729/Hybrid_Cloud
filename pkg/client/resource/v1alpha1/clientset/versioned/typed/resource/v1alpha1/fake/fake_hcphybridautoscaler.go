@@ -117,7 +117,7 @@ func (c *FakeHCPHybridAutoScalers) UpdateStatus(ctx context.Context, hCPHybridAu
 // Delete takes name of the hCPHybridAutoScaler and deletes it. Returns an error if one occurs.
 func (c *FakeHCPHybridAutoScalers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(hcphybridautoscalersResource, c.ns, name), &v1alpha1.HCPHybridAutoScaler{})
+		Invokes(testing.NewDeleteActionWithOptions(hcphybridautoscalersResource, c.ns, name, opts), &v1alpha1.HCPHybridAutoScaler{})
 
 	return err
 }

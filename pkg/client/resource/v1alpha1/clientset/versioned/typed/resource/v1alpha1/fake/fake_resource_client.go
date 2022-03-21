@@ -37,6 +37,10 @@ func (c *FakeHcpV1alpha1) HCPHybridAutoScalers(namespace string) v1alpha1.HCPHyb
 	return &FakeHCPHybridAutoScalers{c, namespace}
 }
 
+func (c *FakeHcpV1alpha1) HCPPods(namespace string) v1alpha1.HCPPodInterface {
+	return &FakeHCPPods{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeHcpV1alpha1) RESTClient() rest.Interface {
