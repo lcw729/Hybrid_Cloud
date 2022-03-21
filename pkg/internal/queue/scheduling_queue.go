@@ -69,14 +69,6 @@ type SchedulingQueue interface {
 	Pop() (*framework.QueuedPodInfo, error)
 	Update(oldPod, newPod *v1alpha1.HCPPod) error
 	Delete(pod *v1alpha1.HCPPod) error
-
-	/*
-		MoveAllToActiveOrBackoffQueue(event framework.ClusterEvent, preCheck PreEnqueueCheck)
-		AssignedPodAdded(pod *v1alpha1.HCPPod)
-		AssignedPodUpdated(pod *v1alpha1.HCPPod)
-		PendingPods() []*v1alpha1.HCPPod
-	*/
-
 	// Close closes the SchedulingQueue so that the goroutine which is
 	// waiting to pop items can exit gracefully.
 	Close()
@@ -510,43 +502,6 @@ func (p *PriorityQueue) Delete(pod *v1alpha1.HCPPod) error {
 	return nil
 }
 
-/*
-// NOTE: this function assumes lock has been acquired in caller
-func (p *PriorityQueue) movePodsToActiveOrBackoffQueue(podInfoList []*framework.QueuedPodInfo, event framework.ClusterEvent) {
-	moved := false
-	for _, pInfo := range podInfoList {
-		// If the event doesn't help making the Pod schedulable, continue.
-		// Note: we don't run the check if pInfo.UnschedulablePlugins is nil, which denotes
-		// either there is some abnormal error, or scheduling the pod failed by plugins other than PreFilter, Filter and Permit.
-		// In that case, it's desired to move it anyways.
-		if len(pInfo.UnschedulablePlugins) != 0 && !p.podMatchesEvent(pInfo, event) {
-			continue
-		}
-		moved = true
-		pod := pInfo.Pod
-		if p.isPodBackingoff(pInfo) {
-			if err := p.podBackoffQ.Add(pInfo); err != nil {
-				klog.ErrorS(err, "Error adding pod to the backoff queue", "pod", klog.KObj(pod))
-			} else {
-				//("backoff", event.Label).Inc()
-				p.unschedulableQ.delete(pod)
-			}
-		} else {
-			if err := p.activeQ.Add(pInfo); err != nil {
-				klog.ErrorS(err, "Error adding pod to the scheduling queue", "pod", klog.KObj(pod))
-			} else {
-				//metrics.SchedulerQueueIncomingPods.WithLabelValues("active", event.Label).Inc()
-				p.unschedulableQ.delete(pod)
-			}
-		}
-	}
-	p.moveRequestCycle = p.schedulingCycle
-	if moved {
-		p.cond.Broadcast()
-	}
-}
-*/
-
 // getUnschedulablePodsWithMatchingAffinityTerm returns unschedulable pods which have
 // any affinity term that matches "pod".
 // NOTE: this function assumes lock has been acquired in caller.
@@ -684,47 +639,6 @@ func GetPodFullName(pod *v1alpha1.HCPPod) string {
 	// (DNS subdomain format).
 	return pod.Name + "_" + pod.Namespace
 }
-
-/*
-// nominator is a structure that stores pods nominated to run on nodes.
-// It exists because nominatedNodeName of pod objects stored in the structure
-// may be different than what scheduler has here. We should be able to find pods
-// by their UID and update/delete them.
-type nominator struct {
-	// podLister is used to verify if the given pod is alive.
-	podLister listersv1.PodLister
-	// nominatedPods is a map keyed by a node name and the value is a list of
-	// pods which are nominated to run on the node. These are pods which can be in
-	// the activeQ or unschedulableQ.
-	nominatedPods map[string][]*framework.PodInfo
-	// nominatedPodToNode is map keyed by a Pod UID to the node name where it is
-	// nominated.
-	nominatedPodToNode map[types.UID]string
-
-	sync.RWMutex
-}
-
-// AddNominatedPod adds a pod to the nominated pods of the given node.
-// This is called during the preemption process after a node is nominated to run
-// the pod. We update the structure before sending a request to update the pod
-// object to avoid races with the following scheduling cycles.
-func (npm *nominator) AddNominatedPod(pi *framework.PodInfo, nominatingInfo *framework.NominatingInfo) {
-	npm.Lock()
-	npm.add(pi, nominatingInfo)
-	npm.Unlock()
-}
-
-// NewPodNominator creates a nominator as a backing of framework.PodNominator.
-// A podLister is passed in so as to check if the pod exists
-// before adding its nominatedNode info.
-func NewPodNominator(podLister listersv1.PodLister) framework.PodNominator {
-	return &nominator{
-		podLister:          podLister,
-		nominatedPods:      make(map[string][]*framework.PodInfo),
-		nominatedPodToNode: make(map[types.UID]string),
-	}
-}
-*/
 
 func podInfoKeyFunc(obj interface{}) (string, error) {
 	return cache.MetaNamespaceKeyFunc(obj.(*framework.QueuedPodInfo).Pod)
