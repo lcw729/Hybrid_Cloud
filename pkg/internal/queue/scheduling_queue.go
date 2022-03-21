@@ -9,6 +9,8 @@ import (
 
 	"Hybrid_Cloud/hcp-scheduler/pkg/internal/heap"
 
+	v1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -45,15 +47,15 @@ const (
 	DefaultPodMaxBackoffDuration time.Duration = 10 * time.Second
 )
 
-type PreEnqueueCheck func(pod *v1.Pod)
+type PreEnqueueCheck func(pod *v1alpha1.HCPPod)
 
 type SchedulingQueue interface {
 	framework.PodNominator
-	Add(pod *v1.Pod) error
+	Add(pod *v1alpha1.HCPPod) error
 	// Activate moves the given pods to activeQ iff they're in unschedulableQ or backoffQ.
 	// The passed-in pods are originally compiled from plugins that want to activate Pods,
 	// by injecting the pods through a reserved CycleState struct (PodsToActivate).
-	Activate(pods map[string]*v1.Pod)
+	Activate(pods map[string]*v1alpha1.HCPPod)
 	// AddUnschedulableIfNotPresent adds an unschedulable pod back to scheduling queue.
 	// The podSchedulingCycle represents the current scheduling cycle number which can be
 	// returned by calling SchedulingCycle().
@@ -65,14 +67,14 @@ type SchedulingQueue interface {
 	// Pop removes the head of the queue and returns it. It blocks if the
 	// queue is empty and waits until a new item is added to the queue.
 	Pop() (*framework.QueuedPodInfo, error)
-	Update(oldPod, newPod *v1.Pod) error
-	Delete(pod *v1.Pod) error
+	Update(oldPod, newPod *v1alpha1.HCPPod) error
+	Delete(pod *v1alpha1.HCPPod) error
 
 	/*
 		MoveAllToActiveOrBackoffQueue(event framework.ClusterEvent, preCheck PreEnqueueCheck)
-		AssignedPodAdded(pod *v1.Pod)
-		AssignedPodUpdated(pod *v1.Pod)
-		PendingPods() []*v1.Pod
+		AssignedPodAdded(pod *v1alpha1.HCPPod)
+		AssignedPodUpdated(pod *v1alpha1.HCPPod)
+		PendingPods() []*v1alpha1.HCPPod
 	*/
 
 	// Close closes the SchedulingQueue so that the goroutine which is
@@ -159,7 +161,7 @@ var defaultPriorityQueueOptions = priorityQueueOptions{
 }
 
 // newQueuedPodInfoForLookup builds a QueuedPodInfo object for a lookup in the queue.
-func newQueuedPodInfoForLookup(pod *v1.Pod, plugins ...string) *framework.QueuedPodInfo {
+func newQueuedPodInfoForLookup(pod *v1alpha1.HCPPod, plugins ...string) *framework.QueuedPodInfo {
 	// Since this is only used for a lookup in the queue, we only need to set the Pod,
 	// and so we avoid creating a full PodInfo, which is expensive to instantiate frequently.
 	return &framework.QueuedPodInfo{
@@ -218,7 +220,7 @@ func (p *PriorityQueue) Run() {
 
 // Add adds a pod to the active queue. It should be called only when a new pod
 // is added so there is no chance the pod is already in active/unschedulable/backoff queues
-func (p *PriorityQueue) Add(pod *v1.Pod) error {
+func (p *PriorityQueue) Add(pod *v1alpha1.HCPPod) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	pInfo := p.newQueuedPodInfo(pod)
@@ -242,7 +244,7 @@ func (p *PriorityQueue) Add(pod *v1.Pod) error {
 }
 
 // Activate moves the given pods to activeQ iff they're in unschedulableQ or backoffQ.
-func (p *PriorityQueue) Activate(pods map[string]*v1.Pod) {
+func (p *PriorityQueue) Activate(pods map[string]*v1alpha1.HCPPod) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -258,7 +260,7 @@ func (p *PriorityQueue) Activate(pods map[string]*v1.Pod) {
 	}
 }
 
-func (p *PriorityQueue) activate(pod *v1.Pod) bool {
+func (p *PriorityQueue) activate(pod *v1alpha1.HCPPod) bool {
 	// Verify if the pod is present in activeQ.
 	if _, exists, _ := p.activeQ.Get(newQueuedPodInfoForLookup(pod)); exists {
 		// No need to activate if it's already present in activeQ.
@@ -422,8 +424,8 @@ func (p *PriorityQueue) Pop() (*framework.QueuedPodInfo, error) {
 
 // isPodUpdated checks if the pod is updated in a way that it may have become
 // schedulable. It drops status of the pod and compares it with old version.
-func isPodUpdated(oldPod, newPod *v1.Pod) bool {
-	strip := func(pod *v1.Pod) *v1.Pod {
+func isPodUpdated(oldPod, newPod *v1alpha1.HCPPod) bool {
+	strip := func(pod *v1alpha1.HCPPod) *v1alpha1.HCPPod {
 		p := pod.DeepCopy()
 		p.ResourceVersion = ""
 		p.Generation = 0
@@ -439,7 +441,7 @@ func isPodUpdated(oldPod, newPod *v1.Pod) bool {
 // the item from the unschedulable queue if pod is updated in a way that it may
 // become schedulable and adds the updated one to the active queue.
 // If pod is not present in any of the queues, it is added to the active queue.
-func (p *PriorityQueue) Update(oldPod, newPod *v1.Pod) error {
+func (p *PriorityQueue) Update(oldPod, newPod *v1alpha1.HCPPod) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -496,7 +498,7 @@ func (p *PriorityQueue) Update(oldPod, newPod *v1.Pod) error {
 
 // Delete deletes the item from either of the two queues. It assumes the pod is
 // only in one queue.
-func (p *PriorityQueue) Delete(pod *v1.Pod) error {
+func (p *PriorityQueue) Delete(pod *v1alpha1.HCPPod) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.PodNominator.DeleteNominatedPodIfExists(pod)
@@ -548,7 +550,7 @@ func (p *PriorityQueue) movePodsToActiveOrBackoffQueue(podInfoList []*framework.
 // getUnschedulablePodsWithMatchingAffinityTerm returns unschedulable pods which have
 // any affinity term that matches "pod".
 // NOTE: this function assumes lock has been acquired in caller.
-func (p *PriorityQueue) getUnschedulablePodsWithMatchingAffinityTerm(pod *v1.Pod) []*framework.QueuedPodInfo {
+func (p *PriorityQueue) getUnschedulablePodsWithMatchingAffinityTerm(pod *v1alpha1.HCPPod) []*framework.QueuedPodInfo {
 	var nsLabels labels.Set
 	nsLabels = interpodaffinity.GetNamespaceLabelsSnapshot(pod.Namespace, p.nsLister)
 
@@ -574,7 +576,7 @@ func (p *PriorityQueue) Close() {
 	p.cond.Broadcast()
 }
 
-func updatePod(oldPodInfo interface{}, newPod *v1.Pod) *framework.QueuedPodInfo {
+func updatePod(oldPodInfo interface{}, newPod *v1alpha1.HCPPod) *framework.QueuedPodInfo {
 	pInfo := oldPodInfo.(*framework.QueuedPodInfo)
 	pInfo.Update(newPod)
 	return pInfo
@@ -585,7 +587,7 @@ func updatePod(oldPodInfo interface{}, newPod *v1.Pod) *framework.QueuedPodInfo 
 type UnschedulablePodsMap struct {
 	// podInfoMap is a map key by a pod's full-name and the value is a pointer to the QueuedPodInfo.
 	podInfoMap map[string]*framework.QueuedPodInfo
-	keyFunc    func(*v1.Pod) string
+	keyFunc    func(*v1alpha1.HCPPod) string
 	// metricRecorder updates the counter when elements of an unschedulablePodsMap
 	// get added or removed, and it does nothing if it's nil
 	metricRecorder metrics.MetricRecorder
@@ -601,7 +603,7 @@ func (u *UnschedulablePodsMap) addOrUpdate(pInfo *framework.QueuedPodInfo) {
 }
 
 // Delete deletes a pod from the unschedulable podInfoMap.
-func (u *UnschedulablePodsMap) delete(pod *v1.Pod) {
+func (u *UnschedulablePodsMap) delete(pod *v1alpha1.HCPPod) {
 	podID := u.keyFunc(pod)
 	if _, exists := u.podInfoMap[podID]; exists && u.metricRecorder != nil {
 		u.metricRecorder.Dec()
@@ -611,7 +613,7 @@ func (u *UnschedulablePodsMap) delete(pod *v1.Pod) {
 
 // Get returns the QueuedPodInfo if a pod with the same key as the key of the given "pod"
 // is found in the map. It returns nil otherwise.
-func (u *UnschedulablePodsMap) get(pod *v1.Pod) *framework.QueuedPodInfo {
+func (u *UnschedulablePodsMap) get(pod *v1alpha1.HCPPod) *framework.QueuedPodInfo {
 	podKey := u.keyFunc(pod)
 	if pInfo, exists := u.podInfoMap[podKey]; exists {
 		return pInfo
@@ -636,7 +638,7 @@ func (p *PriorityQueue) podsCompareBackoffCompleted(podInfo1, podInfo2 interface
 }
 
 // newQueuedPodInfo builds a QueuedPodInfo object.
-func (p *PriorityQueue) newQueuedPodInfo(pod *v1.Pod, plugins ...string) *framework.QueuedPodInfo {
+func (p *PriorityQueue) newQueuedPodInfo(pod *v1alpha1.HCPPod, plugins ...string) *framework.QueuedPodInfo {
 	now := p.clock.Now()
 	return &framework.QueuedPodInfo{
 		PodInfo:                 framework.NewPodInfo(pod),
@@ -671,9 +673,16 @@ func (p *PriorityQueue) calculateBackoffDuration(podInfo *framework.QueuedPodInf
 func newUnschedulablePodsMap(metricRecorder metrics.MetricRecorder) *UnschedulablePodsMap {
 	return &UnschedulablePodsMap{
 		podInfoMap:     make(map[string]*framework.QueuedPodInfo),
-		keyFunc:        util.GetPodFullName,
+		keyFunc:        GetPodFullName,
 		metricRecorder: metricRecorder,
 	}
+}
+
+// GetPodFullName returns a name that uniquely identifies a pod.
+func GetPodFullName(pod *v1alpha1.HCPPod) string {
+	// Use underscore as the delimiter because it is not allowed in pod name
+	// (DNS subdomain format).
+	return pod.Name + "_" + pod.Namespace
 }
 
 /*
