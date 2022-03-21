@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.7
 	github.com/googleapis/gnostic v0.5.5
+	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb v1.9.6
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
@@ -41,11 +42,12 @@ require (
 replace (
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
 	k8s.io/api => k8s.io/api v0.23.4
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.0-alpha.4
-	k8s.io/apimachinery => k8s.io/apimachinery v0.23.0-alpha.4
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.4
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.10.3
+	k8s.io/apimachinery => k8s.io/apimachinery v0.22.4
 	k8s.io/apiserver => k8s.io/apiserver v0.23.0-alpha.4
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.23.0-alpha.4
-	k8s.io/client-go => k8s.io/client-go v0.23.4
+	k8s.io/client-go => k8s.io/client-go v0.22.4
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.23.4
 	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.23.4
 	k8s.io/code-generator => k8s.io/code-generator v0.22.4

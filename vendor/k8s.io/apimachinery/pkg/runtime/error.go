@@ -19,7 +19,6 @@ package runtime
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -125,26 +124,20 @@ func IsMissingVersion(err error) bool {
 // strictDecodingError is a base error type that is returned by a strict Decoder such
 // as UniversalStrictDecoder.
 type strictDecodingError struct {
-	errors []error
+	message string
+	data    string
 }
 
 // NewStrictDecodingError creates a new strictDecodingError object.
-func NewStrictDecodingError(errors []error) error {
+func NewStrictDecodingError(message string, data string) error {
 	return &strictDecodingError{
-		errors: errors,
+		message: message,
+		data:    data,
 	}
 }
 
 func (e *strictDecodingError) Error() string {
-	var s strings.Builder
-	s.WriteString("strict decoding error: ")
-	for i, err := range e.errors {
-		if i != 0 {
-			s.WriteString(", ")
-		}
-		s.WriteString(err.Error())
-	}
-	return s.String()
+	return fmt.Sprintf("strict decoder error for %s: %s", e.data, e.message)
 }
 
 // IsStrictDecodingError returns true if the error indicates that the provided object
