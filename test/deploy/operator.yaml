@@ -18,7 +18,7 @@ spec:
         - name: regcred
       containers:
         - name: test
-          image: ketidevit/test:v0.0.1
+          image: ketidevit2/test:v0.0.1
           command:
           - test
           imagePullPolicy: Always
