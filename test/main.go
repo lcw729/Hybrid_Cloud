@@ -9,18 +9,14 @@
 package main
 
 import (
-	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
-	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	// hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
+	// hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	// "Hybrid_Cloud/test/pkg/handler"
+	// "Hybrid_Cloud/util/clusterManager"
 	"Hybrid_Cloud/test/pkg/handler"
-	"Hybrid_Cloud/util/clusterManager"
-	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog/v2"
 )
 
 // func main() {
@@ -80,30 +76,33 @@ import (
 // }
 
 func main() {
-	cpu, _ := GetInitialSettingValue("max_cpu")
-	mem, _ := GetInitialSettingValue("max_memory")
-	extra, _ := GetInitialSettingValue("extra")
+	/*
+		cpu, _ := GetInitialSettingValue("max_cpu")
+		mem, _ := GetInitialSettingValue("max_memory")
+		extra, _ := GetInitialSettingValue("extra")
 
-	fmt.Println(extra)
-	cpu = cpu * (100 - extra) / 100
-	mem = mem * (100 - extra) / 100
-	fmt.Println(cpu, mem)
+		fmt.Println(extra)
+		cpu = cpu * (100 - extra) / 100
+		mem = mem * (100 - extra) / 100
+		fmt.Println(cpu, mem)
+	*/
 	// c := influx.InfluxDBClient("10.0.5.83", "31051", "root", "root")
 	// c.Query("select \"CPUUsageNanoCores\", \"MemoryUsageBytes\", \"NetworkLatency\"  from (select * from Pods where \"cluster\"='"+cluster+"' and \"namespace\"='"+namespace+"' and \"pod\"=~/"+depname+"/ order by time DESC limit "+podnum+") order by time desc", "Metrics", "")
-	/*
-		var cluster_list = []string{"gke-cluster", "eks-cluster", "aks-cluster"}
 
-		var podNum = []int{13, 9, 13}
+	var cluster_list = []string{"gke-cluster", "eks-cluster", "aks-cluster"}
 
-		for {
-			for i := 0; i < len(cluster_list); i++ {
-				Calculate_WatchingLevel(podNum[i], cluster_list[i])
-			}
-			time.Sleep(2 * time.Second)
+	var podNum = []int{13, 9, 13}
+
+	for {
+		for i := 0; i < len(cluster_list); i++ {
+			Calculate_WatchingLevel(podNum[i], cluster_list[i])
 		}
-	*/
+		time.Sleep(2 * time.Second)
+	}
+
 }
 
+/*
 func GetInitialSettingValue(typ string) (int, string) {
 	policy := GetPolicy("initial-setting")
 	policies := policy.Spec.Template.Spec.Policies
@@ -143,6 +142,7 @@ func GetPolicy(policy_name string) *hcppolicyapis.HCPPolicy {
 	}
 	return policy
 }
+*/
 
 type PodMetric struct {
 	Podmetrics []struct {
