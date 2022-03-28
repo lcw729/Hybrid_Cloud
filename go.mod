@@ -3,6 +3,7 @@ module Hybrid_Cloud
 go 1.16
 
 require (
+	cloud.google.com/go/container v1.2.0
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
 	github.com/go-logr/logr v1.2.0
