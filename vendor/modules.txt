@@ -1,5 +1,12 @@
 # cloud.google.com/go/compute v1.3.0
 cloud.google.com/go/compute/metadata
+# cloud.google.com/go/container v1.2.0
+## explicit
+cloud.google.com/go/container
+# cloud.google.com/go/iam v0.3.0
+## explicit
+# cloud.google.com/go/storage v1.10.0
+## explicit
 # github.com/Jeffail/gabs v1.4.0
 ## explicit
 github.com/Jeffail/gabs
@@ -329,7 +336,7 @@ google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20220218161850-94dd64e39d7c
+# google.golang.org/genproto v0.0.0-20220222213610-43724f9ea8cf
 google.golang.org/genproto/googleapis/rpc/code
 google.golang.org/genproto/googleapis/rpc/errdetails
 google.golang.org/genproto/googleapis/rpc/status
