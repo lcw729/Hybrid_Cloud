@@ -74,7 +74,6 @@ github.com/emicklei/go-restful/log
 github.com/evanphx/json-patch
 # github.com/fatih/structs v1.1.0
 ## explicit
-github.com/fatih/structs
 # github.com/fsnotify/fsnotify v1.5.1
 github.com/fsnotify/fsnotify
 # github.com/ghodss/yaml v1.0.0
