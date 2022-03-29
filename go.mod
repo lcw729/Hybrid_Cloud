@@ -4,8 +4,11 @@ go 1.16
 
 require (
 	cloud.google.com/go/container v1.2.0
+	cloud.google.com/go/iam v0.3.0 // indirect
+	cloud.google.com/go/storage v1.10.0 // indirect
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
+	github.com/fatih/structs v1.1.0
 	github.com/go-logr/logr v1.2.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
@@ -14,6 +17,7 @@ require (
 	github.com/googleapis/gnostic v0.5.5
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb v1.9.6
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1

@@ -4,6 +4,10 @@ cloud.google.com/go/compute/metadata
 ## explicit
 cloud.google.com/go/container/apiv1
 cloud.google.com/go/container/internal
+# cloud.google.com/go/iam v0.3.0
+## explicit
+# cloud.google.com/go/storage v1.10.0
+## explicit
 # github.com/Jeffail/gabs v1.4.0
 ## explicit
 github.com/Jeffail/gabs
@@ -68,6 +72,9 @@ github.com/emicklei/go-restful
 github.com/emicklei/go-restful/log
 # github.com/evanphx/json-patch v4.12.0+incompatible
 github.com/evanphx/json-patch
+# github.com/fatih/structs v1.1.0
+## explicit
+github.com/fatih/structs
 # github.com/fsnotify/fsnotify v1.5.1
 github.com/fsnotify/fsnotify
 # github.com/ghodss/yaml v1.0.0
@@ -178,6 +185,8 @@ github.com/magiconair/properties
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
+# github.com/mattn/go-runewidth v0.0.9
+github.com/mattn/go-runewidth
 # github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/mitchellh/mapstructure v1.4.3
@@ -186,6 +195,9 @@ github.com/mitchellh/mapstructure
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.2
 github.com/modern-go/reflect2
+# github.com/olekukonko/tablewriter v0.0.5
+## explicit
+github.com/olekukonko/tablewriter
 # github.com/pelletier/go-toml v1.9.4
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.9.1
