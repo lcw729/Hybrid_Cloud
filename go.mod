@@ -4,8 +4,6 @@ go 1.16
 
 require (
 	cloud.google.com/go/container v1.2.0
-	cloud.google.com/go/iam v0.3.0 // indirect
-	cloud.google.com/go/storage v1.10.0
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
 	github.com/go-logr/logr v1.2.0
@@ -21,7 +19,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/tools v0.1.6-0.20210820212750-d4cc65f0b2ff
 	google.golang.org/api v0.70.0
 	google.golang.org/genproto v0.0.0-20220222213610-43724f9ea8cf
