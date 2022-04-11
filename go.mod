@@ -4,6 +4,9 @@ go 1.16
 
 require (
 	cloud.google.com/go/container v1.2.0
+	cloud.google.com/go/iam v0.3.0 // indirect
+	cloud.google.com/go/kms v1.4.0 // indirect
+	cloud.google.com/go/pubsub v1.3.1
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
 	github.com/go-logr/logr v1.2.0
