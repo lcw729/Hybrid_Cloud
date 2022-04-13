@@ -28,7 +28,10 @@ func WatchingLevelCalculator() {
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 4] Calculate watching level")
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		return
+	}
 	for _, cluster := range cm.Cluster_list.Items {
 		fmt.Println(cluster.Name)
 		TargetCluster[cluster.Name] = &cluster
