@@ -4,14 +4,15 @@ import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
 	clusterManager "Hybrid_Cloud/util/clusterManager"
 	"fmt"
+	"math/rand"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
 
-var AlgorithmMap = map[string]func() bool{
-	"DRF":      DRF,
-	"Affinity": Affinity,
-}
+// var AlgorithmMap = map[string]func() bool{
+// 	"DRF":      DRF,
+// 	"Affinity": Affinity,
+// }
 
 var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
 
@@ -28,7 +29,11 @@ func WatchingLevelCalculator() {
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 4] Calculate watching level")
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	for _, cluster := range cm.Cluster_list.Items {
 		fmt.Println(cluster.Name)
 		TargetCluster[cluster.Name] = &cluster
@@ -81,19 +86,21 @@ func WatchingLevelCalculator() {
 // }
 
 // 최적 배치 알고리즘
-func Affinity() bool {
+func Affinity(clusterList *[]string) string {
 	fmt.Println("---------------------------------------------------------------")
 	fmt.Println("Affinity Calculator Called")
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
-	score_table["hcp-cluster"] = 50.0
-	score_table["a-cluster"] = 40.0
-	score_table["b-cluster"] = 20.0
-	score_table["c-cluster"] = 10.0
+	score_table := NewScoreTable(clusterList)
+	score_table["hcp-cluster"] = rand.Float32()
+	score_table["eks-cluster"] = rand.Float32()
+	score_table["aks-master"] = rand.Float32()
+	result := score_table.SortScore()
 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
 	fmt.Println("---------------------------------------------------------------")
-	return true
+	fmt.Println(score_table)
+	return result[0].Cluster
 }
 
 func DRF() bool {
