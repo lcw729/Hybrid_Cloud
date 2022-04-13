@@ -16,7 +16,11 @@ import (
 )
 
 func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
-	cm := cm.NewClusterManager()
+	cm, err := cm.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 	config := cm.Host_config
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
@@ -84,7 +88,10 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 }
 
 func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
-	cm := cm.NewClusterManager()
+	cm, err := cm.NewClusterManager()
+	if err != nil {
+		return err
+	}
 	config := cm.Host_config
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
@@ -158,7 +165,10 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 }
 
 func CreateVPA(cluster string, pod string, namespace string, updateMode string) error {
-	cm := cm.NewClusterManager()
+	cm, err := cm.NewClusterManager()
+	if err != nil {
+		return err
+	}
 	config := cm.Host_config
 	hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
 	if err != nil {
