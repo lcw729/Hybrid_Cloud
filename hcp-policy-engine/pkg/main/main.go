@@ -22,6 +22,7 @@ import (
 	controller "Hybrid_Cloud/hcp-policy-engine/pkg/controller"
 	"Hybrid_Cloud/util/clusterManager"
 	"flag"
+	"fmt"
 	"time"
 
 	v1alpha1hcppolicy "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
@@ -43,7 +44,11 @@ func main() {
 
 	stopCh := signals.SetupSignalHandler()
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	hcppolicyclient, err := v1alpha1hcppolicy.NewForConfig(cm.Host_config)
 	if err != nil {
 		klog.Info(err)

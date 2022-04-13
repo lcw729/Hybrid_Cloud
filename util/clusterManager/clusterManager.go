@@ -115,11 +115,11 @@ func GetNodeList(c *kubernetes.Clientset) (*corev1.NodeList, error) {
 	return nodeList, nil
 }
 
-func NewClusterManager() *ClusterManager {
+func NewClusterManager() (*ClusterManager, error) {
 	fed_namespace := "kube-federation-system"
-	host_config, err := cobrautil.BuildConfigFromFlags("kube-master", "/mnt/config")
+	host_config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	host_client := genericclient.NewForConfigOrDie(host_config)
 	host_kubeclient := kubernetes.NewForConfigOrDie(host_config)
@@ -142,5 +142,5 @@ func NewClusterManager() *ClusterManager {
 		Cluster_genClients:  cluster_gen_clients,
 		Cluster_kubeClients: cluster_kube_clients,
 	}
-	return cm
+	return cm, nil
 }

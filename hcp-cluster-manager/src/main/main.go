@@ -6,6 +6,7 @@ import (
 	informers "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/informers/externalversions"
 	"Hybrid_Cloud/util/clusterManager"
 	"flag"
+	"fmt"
 	"time"
 
 	kubeinformers "k8s.io/client-go/informers"
@@ -20,7 +21,11 @@ func main() {
 
 	stopCh := signals.SetupSignalHandler()
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	hcpcluster_client, err := hcpclusterv1alpha1.NewForConfig(cm.Host_config)
 	if err != nil {
 		klog.Info(err)

@@ -158,12 +158,12 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(bytes, &real_resource)
 
 	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
-	algorithm, err := policy.GetAlgorithm()
-	fmt.Println(algorithm)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// algorithm, err := policy.GetAlgorithm()
+	// fmt.Println(algorithm)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
 	fmt.Println(resource.TargetCluster)
 	// TargetCluster가 지정되지 않은 경우
@@ -196,7 +196,7 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 
 				// SchedulingStatus "Requested"
 				SchedulingStatus: "Requested",
-				SchedulingType:   algorithm,
+				// SchedulingType:   algorithm,
 			},
 		}
 

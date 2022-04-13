@@ -4,6 +4,7 @@ import (
 	controller "Hybrid_Cloud/hcp-resource-controller/hcp-deployment-controller/src/controller"
 	"Hybrid_Cloud/util/clusterManager"
 	"flag"
+	"fmt"
 	"time"
 
 	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
@@ -23,7 +24,11 @@ func main() {
 
 	stopCh := signals.SetupSignalHandler()
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	client, err := resourcev1alpha1.NewForConfig(cm.Host_config)
 	if err != nil {
 		klog.Info(err)
