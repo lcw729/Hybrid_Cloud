@@ -284,7 +284,10 @@ func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.
 		fmt.Println("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		return false
+	}
 	scope, err := options.GetScopeFromKubeFedConfig(master_config, ns.Name)
 	if err != nil {
 		return false

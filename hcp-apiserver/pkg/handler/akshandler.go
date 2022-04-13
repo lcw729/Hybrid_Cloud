@@ -10,8 +10,30 @@ import (
 	"strings"
 )
 
-func AksStart(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["start"]
+func AKSStart(input util.AKSAPIParameter) (*http.Response, error) {
+	api := converter.AKSAPI["start"]
+	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
+	fmt.Println(os.Getenv("SubscriptionId"))
+	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
+	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
+	fmt.Println(api)
+	hosturl := api
+	response, err := util.AuthorizationAndHTTP("POST", hosturl, nil)
+	return response, err
+}
+
+func AKSStop(input util.AKSAPIParameter) (*http.Response, error) {
+	api := converter.AKSAPI["stop"]
+	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
+	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
+	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
+	hosturl := api
+	response, err := util.AuthorizationAndHTTP("POST", hosturl, nil)
+	return response, err
+}
+
+func AKSRotateCerts(input util.AKSAPIParameter) (*http.Response, error) {
+	api := converter.AKSAPI["rotateCerts"]
 	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
 	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
 	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
@@ -21,29 +43,8 @@ func AksStart(input util.AKSAPIParameter) (*http.Response, error) {
 	return response, err
 }
 
-func AksStop(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["stop"]
-	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
-	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
-	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
-	hosturl := api
-	response, err := util.AuthorizationAndHTTP("POST", hosturl, nil)
-	return response, err
-}
-
-func AksRotateCerts(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["rotateCerts"]
-	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
-	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
-	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
-	fmt.Println(api)
-	hosturl := api
-	response, err := util.AuthorizationAndHTTP("POST", hosturl, nil)
-	return response, err
-}
-
-func AksGetOSoptions(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["getOSoptions"]
+func AKSGetOSoptions(input util.AKSAPIParameter) (*http.Response, error) {
+	api := converter.AKSAPI["getOSoptions"]
 	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
 	api = strings.ReplaceAll(api, "{location}", input.Location)
 	hosturl := api
@@ -53,7 +54,7 @@ func AksGetOSoptions(input util.AKSAPIParameter) (*http.Response, error) {
 }
 
 func MaintenanceconfigurationCreateOrUpdate(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["maintenanceconfigurationCreate/Update"]
+	api := converter.AKSAPI["maintenanceconfigurationCreate/Update"]
 	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
 	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
 	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
@@ -65,7 +66,7 @@ func MaintenanceconfigurationCreateOrUpdate(input util.AKSAPIParameter) (*http.R
 }
 
 func MaintenanceconfigurationDelete(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["maintenanceconfigurationDelete"]
+	api := converter.AKSAPI["maintenanceconfigurationDelete"]
 	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
 	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
 	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
@@ -77,7 +78,7 @@ func MaintenanceconfigurationDelete(input util.AKSAPIParameter) (*http.Response,
 }
 
 func MaintenanceconfigurationList(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["maintenanceconfigurationList"]
+	api := converter.AKSAPI["maintenanceconfigurationList"]
 	fmt.Println(input)
 	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
 	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
@@ -89,14 +90,13 @@ func MaintenanceconfigurationList(input util.AKSAPIParameter) (*http.Response, e
 }
 
 func MaintenanceconfigurationShow(input util.AKSAPIParameter) (*http.Response, error) {
-	api := converter.AksAPI["maintenanceconfigurationShow"]
+	api := converter.AKSAPI["maintenanceconfigurationShow"]
 	fmt.Println(input)
 	api = strings.ReplaceAll(api, "{subscriptionId}", os.Getenv("SubscriptionId"))
 	api = strings.ReplaceAll(api, "{resourceGroupName}", input.ResourceGroupName)
 	api = strings.ReplaceAll(api, "{resourceName}", input.ClusterName)
 	api = strings.ReplaceAll(api, "{configName}", input.ConfigName)
 	hosturl := api
-	// fmt.Println(api)
 	response, err := util.AuthorizationAndHTTP("GET", hosturl, nil)
 	return response, err
 }

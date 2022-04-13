@@ -14,7 +14,7 @@ func CreateAddon(w http.ResponseWriter, req *http.Request) {
 	var createAddonInput eks.CreateAddonInput
 
 	util.Parser(req, &createAddonInput)
-	out, err := handler.CreateAddon(createAddonInput)
+	out, err := handler.EKSCreateAddon(createAddonInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -30,7 +30,7 @@ func DeleteAddon(w http.ResponseWriter, req *http.Request) {
 	var deleteAddonInput eks.DeleteAddonInput
 
 	util.Parser(req, &deleteAddonInput)
-	out, err := handler.DeleteAddon(deleteAddonInput)
+	out, err := handler.EKSDeleteAddon(deleteAddonInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -46,7 +46,7 @@ func DescribeAddon(w http.ResponseWriter, req *http.Request) {
 	var describeAddonInput eks.DescribeAddonInput
 
 	util.Parser(req, &describeAddonInput)
-	out, err := handler.DescribeAddon(describeAddonInput)
+	out, err := handler.EKSDescribeAddon(describeAddonInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -62,7 +62,7 @@ func DescribeAddonVersions(w http.ResponseWriter, req *http.Request) {
 	var describeAddonVersionsInput eks.DescribeAddonVersionsInput
 
 	util.Parser(req, &describeAddonVersionsInput)
-	out, err := handler.DescribeAddonVersions(describeAddonVersionsInput)
+	out, err := handler.EKSDescribeAddonVersions(describeAddonVersionsInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -79,7 +79,7 @@ func ListAddon(w http.ResponseWriter, req *http.Request) {
 	var listAddonInput eks.ListAddonsInput
 
 	util.Parser(req, &listAddonInput)
-	out, err := handler.ListAddon(listAddonInput)
+	out, err := handler.EKSListAddon(listAddonInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -96,7 +96,7 @@ func UpdateAddon(w http.ResponseWriter, req *http.Request) {
 	var updateAddonInput eks.UpdateAddonInput
 
 	util.Parser(req, &updateAddonInput)
-	out, err := handler.UpdateAddon(updateAddonInput)
+	out, err := handler.EKSUpdateAddon(updateAddonInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -111,7 +111,7 @@ func ListUpdate(w http.ResponseWriter, req *http.Request) {
 	var listUpdateInput eks.ListUpdatesInput
 
 	util.Parser(req, &listUpdateInput)
-	out, err := handler.ListUpdate(listUpdateInput)
+	out, err := handler.EKSListUpdate(listUpdateInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -126,7 +126,7 @@ func DescribeUpdate(w http.ResponseWriter, req *http.Request) {
 	var describeUpdateInput eks.DescribeUpdateInput
 
 	util.Parser(req, &describeUpdateInput)
-	out, err := handler.DescribeUpdate(describeUpdateInput)
+	out, err := handler.EKSDescribeUpdate(describeUpdateInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -141,7 +141,7 @@ func ListTagsForResource(w http.ResponseWriter, req *http.Request) {
 	var listTagsForResourceInput eks.ListTagsForResourceInput
 
 	util.Parser(req, &listTagsForResourceInput)
-	out, err := handler.ListTagsForResource(listTagsForResourceInput)
+	out, err := handler.EKSListTagsForResource(listTagsForResourceInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -156,7 +156,7 @@ func AssociateIdentityProviderConfig(w http.ResponseWriter, req *http.Request) {
 	var associateIdentityProviderConfigInput eks.AssociateIdentityProviderConfigInput
 
 	util.Parser(req, &associateIdentityProviderConfigInput)
-	out, err := handler.AssociateIdentityProviderConfig(associateIdentityProviderConfigInput)
+	out, err := handler.EKSAssociateIdentityProviderConfig(associateIdentityProviderConfigInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -171,7 +171,7 @@ func AssociateEncryptionConfig(w http.ResponseWriter, req *http.Request) {
 	var associateEncryptionConfigInput eks.AssociateEncryptionConfigInput
 
 	util.Parser(req, &associateEncryptionConfigInput)
-	out, err := handler.AssociateEncryptionConfig(associateEncryptionConfigInput)
+	out, err := handler.EKSAssociateEncryptionConfig(associateEncryptionConfigInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -186,7 +186,7 @@ func DisassociateIdentityProviderConfig(w http.ResponseWriter, req *http.Request
 	var disassociateIdentityProviderConfigInput eks.DisassociateIdentityProviderConfigInput
 
 	util.Parser(req, &disassociateIdentityProviderConfigInput)
-	out, err := handler.DisassociateIdentityProviderConfig(disassociateIdentityProviderConfigInput)
+	out, err := handler.EKSDisassociateIdentityProviderConfig(disassociateIdentityProviderConfigInput)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -201,7 +201,7 @@ func DescribeIdentityProviderConfig(w http.ResponseWriter, req *http.Request) {
 	var input eks.DescribeIdentityProviderConfigInput
 
 	util.Parser(req, &input)
-	out, err := handler.DescribeIdentityProviderConfig(input)
+	out, err := handler.EKSDescribeIdentityProviderConfig(input)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -216,7 +216,7 @@ func ListIdentityProviderConfigs(w http.ResponseWriter, req *http.Request) {
 	var input eks.ListIdentityProviderConfigsInput
 
 	util.Parser(req, &input)
-	out, err := handler.ListIdentityProviderConfigs(input)
+	out, err := handler.EKSListIdentityProviderConfigs(input)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -231,7 +231,7 @@ func TagResource(w http.ResponseWriter, req *http.Request) {
 	var input eks.TagResourceInput
 
 	util.Parser(req, &input)
-	out, err := handler.TagResource(input)
+	out, err := handler.EKSTagResource(input)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -246,7 +246,7 @@ func UntagResource(w http.ResponseWriter, req *http.Request) {
 	var input eks.UntagResourceInput
 
 	util.Parser(req, &input)
-	out, err := handler.UntagResource(input)
+	out, err := handler.EKSUntagResource(input)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -261,7 +261,7 @@ func UpdateClusterConfig(w http.ResponseWriter, req *http.Request) {
 	var input eks.UpdateClusterConfigInput
 
 	util.Parser(req, &input)
-	out, err := handler.UpdateClusterConfig(input)
+	out, err := handler.EKSUpdateClusterConfig(input)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)
@@ -276,7 +276,7 @@ func UpdateNodegroupConfig(w http.ResponseWriter, req *http.Request) {
 	var input eks.UpdateNodegroupConfigInput
 
 	util.Parser(req, &input)
-	out, err := handler.UpdateNodeGroupConfig(input)
+	out, err := handler.EKSUpdateNodeGroupConfig(input)
 	var jsonData []byte
 	if err != nil {
 		jsonData, _ = json.Marshal(&err)

@@ -436,10 +436,10 @@ func Connectedk8sUpgrade(w http.ResponseWriter, req *http.Request) {
 }
 
 // etc
-func AksStart(w http.ResponseWriter, req *http.Request) {
+func AKSStart(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAPIParameter
 	util.Parser(req, &input)
-	response, err := handler.AksStart(input)
+	response, err := handler.AKSStart(input)
 	CheckErr(err)
 	bytes, err := ioutil.ReadAll(response.Body)
 	CheckErr(err)
@@ -449,10 +449,10 @@ func AksStart(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func AksStop(w http.ResponseWriter, req *http.Request) {
+func AKSStop(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAPIParameter
 	util.Parser(req, &input)
-	response, err := handler.AksStop(input)
+	response, err := handler.AKSStop(input)
 	CheckErr(err)
 	bytes, err := ioutil.ReadAll(response.Body)
 	CheckErr(err)
@@ -461,10 +461,10 @@ func AksStop(w http.ResponseWriter, req *http.Request) {
 	w.Write(bytes)
 }
 
-func AksRotateCerts(w http.ResponseWriter, req *http.Request) {
+func AKSRotateCerts(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAPIParameter
 	util.Parser(req, &input)
-	response, err := handler.AksRotateCerts(input)
+	response, err := handler.AKSRotateCerts(input)
 	CheckErr(err)
 	bytes, err := ioutil.ReadAll(response.Body)
 	CheckErr(err)
@@ -473,10 +473,10 @@ func AksRotateCerts(w http.ResponseWriter, req *http.Request) {
 	w.Write(bytes)
 }
 
-func AksGetOSoptions(w http.ResponseWriter, req *http.Request) {
+func AKSGetOSoptions(w http.ResponseWriter, req *http.Request) {
 	var input util.AKSAPIParameter
 	util.Parser(req, &input)
-	response, err := handler.AksGetOSoptions(input)
+	response, err := handler.AKSGetOSoptions(input)
 	CheckErr(err)
 	bytes, err := ioutil.ReadAll(response.Body)
 	CheckErr(err)
@@ -492,8 +492,8 @@ func AppUp(w http.ResponseWriter, req *http.Request) {
 	if input.Acr != "" {
 		args = append(args, "--acr", input.Acr)
 	}
-	if input.AksCluster != "" {
-		args = append(args, "--aks-cluster", input.AksCluster)
+	if input.AKSCluster != "" {
+		args = append(args, "--aks-cluster", input.AKSCluster)
 	}
 	if input.BranchName != "" {
 		args = append(args, "--branch-name", input.BranchName)
