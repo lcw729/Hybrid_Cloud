@@ -23,12 +23,20 @@ func (s ScoreTable) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-var score_table = make(map[string]float32) // 정렬하고 싶은 map
+type ClusterScoreTable map[string]float32 // 정렬하고 싶은 map
 
-func SortScore() ScoreTable {
-	sorted := make(ScoreTable, len(score_table))
+func NewScoreTable(clusterList *[]string) ClusterScoreTable {
+	score_table := make(map[string]float32, len(*clusterList))
+	for _, i := range *clusterList {
+		score_table[i] = 0
+	}
+	return score_table
+}
 
-	for cluster, score := range score_table {
+func (s *ClusterScoreTable) SortScore() ScoreTable {
+	sorted := make(ScoreTable, len(*s))
+
+	for cluster, score := range *s {
 		sorted = append(sorted, Score{cluster, score})
 	}
 	sort.Sort(sort.Reverse(sorted))
@@ -36,10 +44,10 @@ func SortScore() ScoreTable {
 	return sorted
 }
 
-func SortCluster() []string {
-	sorted := make([]string, 0, len(score_table))
+func (s *ClusterScoreTable) SortCluster() []string {
+	sorted := make([]string, 0, len(*s))
 
-	for cluster := range score_table {
+	for cluster := range *s {
 		sorted = append(sorted, cluster)
 	}
 	sort.Strings(sorted)
