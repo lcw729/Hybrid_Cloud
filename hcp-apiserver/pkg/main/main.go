@@ -66,10 +66,10 @@ func handlerRequests() http.Handler {
 	mux.HandleFunc("/aks/connectedk8s/upgrade", aksFunc.Connectedk8sUpgrade)
 
 	// etc
-	mux.HandleFunc("/aks/start", aksFunc.AksStart)
-	mux.HandleFunc("/aks/stop", aksFunc.AksStop)
-	mux.HandleFunc("/aks/rotate-certs", aksFunc.AksRotateCerts)
-	mux.HandleFunc("/aks/get-os-options", aksFunc.AksGetOSoptions)
+	mux.HandleFunc("/aks/start", aksFunc.AKSStart)
+	mux.HandleFunc("/aks/stop", aksFunc.AKSStop)
+	mux.HandleFunc("/aks/rotate-certs", aksFunc.AKSRotateCerts)
+	mux.HandleFunc("/aks/get-os-options", aksFunc.AKSGetOSoptions)
 	mux.HandleFunc("/aks/app-up", aksFunc.AppUp)
 	mux.HandleFunc("/aks/browse", aksFunc.Browse)
 	mux.HandleFunc("/aks/check-acr", aksFunc.CheckAcr)

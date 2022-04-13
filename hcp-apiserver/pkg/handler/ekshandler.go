@@ -36,7 +36,7 @@ func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 	return eksSvc, nil
 }
 
-func CreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error) {
+func EKSCreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error) {
 
 	// println(*addonInput.ClusterName)
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
@@ -57,7 +57,7 @@ func CreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error
 	return out, err
 }
 
-func DeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, error) {
+func EKSDeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, error) {
 
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
@@ -72,7 +72,7 @@ func DeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, error
 	return out, err
 }
 
-func DescribeAddon(addonInput eks.DescribeAddonInput) (*eks.DescribeAddonOutput, error) {
+func EKSDescribeAddon(addonInput eks.DescribeAddonInput) (*eks.DescribeAddonOutput, error) {
 
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
@@ -87,7 +87,7 @@ func DescribeAddon(addonInput eks.DescribeAddonInput) (*eks.DescribeAddonOutput,
 	return out, err
 }
 
-func DescribeAddonVersions(addonInput eks.DescribeAddonVersionsInput) (*eks.DescribeAddonVersionsOutput, error) {
+func EKSDescribeAddonVersions(addonInput eks.DescribeAddonVersionsInput) (*eks.DescribeAddonVersionsOutput, error) {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -102,7 +102,7 @@ func DescribeAddonVersions(addonInput eks.DescribeAddonVersionsInput) (*eks.Desc
 	return out, err
 }
 
-func ListAddon(addonInput eks.ListAddonsInput) (*eks.ListAddonsOutput, error) {
+func EKSListAddon(addonInput eks.ListAddonsInput) (*eks.ListAddonsOutput, error) {
 
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
@@ -116,7 +116,7 @@ func ListAddon(addonInput eks.ListAddonsInput) (*eks.ListAddonsOutput, error) {
 	return out, err
 }
 
-func UpdateAddon(addonInput eks.UpdateAddonInput) (*eks.UpdateAddonOutput, error) {
+func EKSUpdateAddon(addonInput eks.UpdateAddonInput) (*eks.UpdateAddonOutput, error) {
 
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
@@ -131,7 +131,7 @@ func UpdateAddon(addonInput eks.UpdateAddonInput) (*eks.UpdateAddonOutput, error
 	return out, err
 }
 
-func AssociateEncryptionConfig(input eks.AssociateEncryptionConfigInput) (*eks.AssociateEncryptionConfigOutput, error) {
+func EKSAssociateEncryptionConfig(input eks.AssociateEncryptionConfigInput) (*eks.AssociateEncryptionConfigOutput, error) {
 	eksSvc, err := GetEKSClient(input.ClusterName)
 	if eksSvc == nil {
 		return nil, err
@@ -148,7 +148,7 @@ func AssociateEncryptionConfig(input eks.AssociateEncryptionConfigInput) (*eks.A
 
 // identity provider
 
-func AssociateIdentityProviderConfig(input eks.AssociateIdentityProviderConfigInput) (*eks.AssociateIdentityProviderConfigOutput, error) {
+func EKSAssociateIdentityProviderConfig(input eks.AssociateIdentityProviderConfigInput) (*eks.AssociateIdentityProviderConfigOutput, error) {
 
 	// println(*Input.ClusterName)
 	eksSvc, err := GetEKSClient(input.ClusterName)
@@ -166,7 +166,7 @@ func AssociateIdentityProviderConfig(input eks.AssociateIdentityProviderConfigIn
 	return out, err
 }
 
-func DisassociateIdentityProviderConfig(input eks.DisassociateIdentityProviderConfigInput) (*eks.DisassociateIdentityProviderConfigOutput, error) {
+func EKSDisassociateIdentityProviderConfig(input eks.DisassociateIdentityProviderConfigInput) (*eks.DisassociateIdentityProviderConfigOutput, error) {
 
 	// println(*Input.ClusterName)
 	eksSvc, err := GetEKSClient(input.ClusterName)
@@ -183,7 +183,7 @@ func DisassociateIdentityProviderConfig(input eks.DisassociateIdentityProviderCo
 	return out, err
 }
 
-func DescribeIdentityProviderConfig(input eks.DescribeIdentityProviderConfigInput) (*eks.DescribeIdentityProviderConfigOutput, error) {
+func EKSDescribeIdentityProviderConfig(input eks.DescribeIdentityProviderConfigInput) (*eks.DescribeIdentityProviderConfigOutput, error) {
 
 	// println(*Input.ClusterName)
 	eksSvc, err := GetEKSClient(input.ClusterName)
@@ -199,7 +199,7 @@ func DescribeIdentityProviderConfig(input eks.DescribeIdentityProviderConfigInpu
 	return out, err
 }
 
-func ListIdentityProviderConfigs(input eks.ListIdentityProviderConfigsInput) (*eks.ListIdentityProviderConfigsOutput, error) {
+func EKSListIdentityProviderConfigs(input eks.ListIdentityProviderConfigsInput) (*eks.ListIdentityProviderConfigsOutput, error) {
 
 	// println(*Input.ClusterName)
 	eksSvc, err := GetEKSClient(input.ClusterName)
@@ -218,7 +218,7 @@ func ListIdentityProviderConfigs(input eks.ListIdentityProviderConfigsInput) (*e
 
 // tag
 
-func ListTagsForResource(listTagsForResourceInput eks.ListTagsForResourceInput) (*eks.ListTagsForResourceOutput, error) {
+func EKSListTagsForResource(listTagsForResourceInput eks.ListTagsForResourceInput) (*eks.ListTagsForResourceOutput, error) {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -233,7 +233,7 @@ func ListTagsForResource(listTagsForResourceInput eks.ListTagsForResourceInput) 
 	return out, err
 }
 
-func TagResource(input eks.TagResourceInput) (*eks.TagResourceOutput, error) {
+func EKSTagResource(input eks.TagResourceInput) (*eks.TagResourceOutput, error) {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -249,7 +249,7 @@ func TagResource(input eks.TagResourceInput) (*eks.TagResourceOutput, error) {
 	return out, err
 }
 
-func UntagResource(input eks.UntagResourceInput) (*eks.UntagResourceOutput, error) {
+func EKSUntagResource(input eks.UntagResourceInput) (*eks.UntagResourceOutput, error) {
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -268,7 +268,7 @@ func UntagResource(input eks.UntagResourceInput) (*eks.UntagResourceOutput, erro
 
 // update
 
-func ListUpdate(listUpdateInput eks.ListUpdatesInput) (*eks.ListUpdatesOutput, error) {
+func EKSListUpdate(listUpdateInput eks.ListUpdatesInput) (*eks.ListUpdatesOutput, error) {
 
 	eksSvc, err := GetEKSClient(listUpdateInput.Name)
 	if eksSvc == nil {
@@ -286,7 +286,7 @@ func ListUpdate(listUpdateInput eks.ListUpdatesInput) (*eks.ListUpdatesOutput, e
 	return out, err
 }
 
-func DescribeUpdate(describeUpdateInput eks.DescribeUpdateInput) (*eks.DescribeUpdateOutput, error) {
+func EKSDescribeUpdate(describeUpdateInput eks.DescribeUpdateInput) (*eks.DescribeUpdateOutput, error) {
 
 	eksSvc, err := GetEKSClient(describeUpdateInput.Name)
 	if eksSvc == nil {
@@ -303,7 +303,7 @@ func DescribeUpdate(describeUpdateInput eks.DescribeUpdateInput) (*eks.DescribeU
 	return out, err
 }
 
-func UpdateClusterConfig(input eks.UpdateClusterConfigInput) (*eks.UpdateClusterConfigOutput, error) {
+func EKSUpdateClusterConfig(input eks.UpdateClusterConfigInput) (*eks.UpdateClusterConfigOutput, error) {
 
 	eksSvc, err := GetEKSClient(input.Name)
 	if eksSvc == nil {
@@ -320,7 +320,7 @@ func UpdateClusterConfig(input eks.UpdateClusterConfigInput) (*eks.UpdateCluster
 	return out, err
 }
 
-func UpdateNodeGroupConfig(input eks.UpdateNodegroupConfigInput) (*eks.UpdateNodegroupConfigOutput, error) {
+func EKSUpdateNodeGroupConfig(input eks.UpdateNodegroupConfigInput) (*eks.UpdateNodegroupConfigOutput, error) {
 
 	eksSvc, err := GetEKSClient(input.ClusterName)
 	if eksSvc == nil {

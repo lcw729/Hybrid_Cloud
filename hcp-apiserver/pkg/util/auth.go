@@ -72,6 +72,7 @@ func AuthorizationAndHTTP(method string, hosturl string, input interface{}) (*ht
 		break
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	fmt.Println(GetBearer().Access_token)
 	request.Header.Add("Authorization", "Bearer "+GetBearer().Access_token)
 
 	client := &http.Client{}

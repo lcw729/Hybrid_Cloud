@@ -34,7 +34,7 @@ type AKSAPIParameter struct {
 	ConfigName        string
 	ConfigFile        Config
 	Acr               string
-	AksCluster        string
+	AKSCluster        string
 	BranchName        string
 	DoNotWait         string
 	Port              string
