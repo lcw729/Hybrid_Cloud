@@ -280,7 +280,11 @@ func (c *Controller) syncHandler(key string) error {
 	} else {
 		// JOIN/UNJOIN Cluster 상태 확인
 
-		cm := clusterManager.NewClusterManager()
+		cm, err := clusterManager.NewClusterManager()
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 		if err != nil {
 			klog.Info(err)
 			return err
@@ -479,7 +483,11 @@ func JoinCluster(platform string,
 		klog.Info("< Step 5-2 > Create Secret Resource [" + cluster_secret.Name + "] in " + "master")
 	}
 
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
 	var disabledTLSValidations []fedv1b1.TLSValidation
 
 	if cm.Host_config.TLSClientConfig.Insecure {
@@ -505,7 +513,7 @@ func JoinCluster(platform string,
 	}
 
 	clientset := kubefed.NewForConfigOrDie(master_config)
-	err := clientset.Create(context.TODO(), kubefedcluster)
+	err = clientset.Create(context.TODO(), kubefedcluster)
 
 	if err != nil {
 		log.Println(err)

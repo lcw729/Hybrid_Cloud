@@ -37,7 +37,7 @@ func CheckAndCreateNamespace(cluster string, namespace string) (*corev1.Namespac
 			fmt.Println(err)
 			return nil, err
 		} else {
-			fmt.Printf("success to create namespace %s in %s", namespace, cluster)
+			fmt.Printf("success to create namespace %s in %s\n", namespace, cluster)
 			return ns, nil
 		}
 	}

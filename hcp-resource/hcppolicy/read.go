@@ -23,7 +23,11 @@ type Level struct {
 }
 
 func GetHCPPolicy(policy_name string) (*hcppolicyapis.HCPPolicy, error) {
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	c, err := hcppolicyv1alpha1.NewForConfig(cm.Host_config)
 	if err != nil {

@@ -4,9 +4,6 @@ go 1.16
 
 require (
 	cloud.google.com/go/container v1.2.0
-	cloud.google.com/go/iam v0.3.0 // indirect
-	cloud.google.com/go/kms v1.4.0 // indirect
-	cloud.google.com/go/pubsub v1.3.1
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
 	github.com/go-logr/logr v1.2.0
@@ -70,7 +67,7 @@ replace (
 	k8s.io/kubectl => k8s.io/kubectl v0.23.4
 	k8s.io/kubelet => k8s.io/kubelet v0.23.4
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.23.4
-	k8s.io/metrics => k8s.io/metrics v0.23.4
+	k8s.io/metrics => k8s.io/metrics v0.22.4
 	k8s.io/mount-utils => k8s.io/mount-utils v0.23.4
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.23.4
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.23.4

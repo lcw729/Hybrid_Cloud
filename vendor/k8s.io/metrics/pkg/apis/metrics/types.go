@@ -30,9 +30,6 @@ import (
 // NodeMetrics sets resource usage metrics of a node.
 type NodeMetrics struct {
 	metav1.TypeMeta
-	// Standard object's metadata.
-	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-	// +optional
 	metav1.ObjectMeta
 
 	// The following fields define time interval from which metrics were
@@ -65,9 +62,6 @@ type NodeMetricsList struct {
 // PodMetrics sets resource usage metrics of a pod.
 type PodMetrics struct {
 	metav1.TypeMeta
-	// Standard object's metadata.
-	// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-	// +optional
 	metav1.ObjectMeta
 
 	// The following fields define time interval from which metrics were

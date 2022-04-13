@@ -64,7 +64,10 @@ func UnMarshalKubeConfig(data []byte) (KubeConfig, error) {
 }
 
 func ChangeConfigClusterName(platform string, clustername string) error {
-	cm := clusterManager.NewClusterManager()
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		return err
+	}
 	master_config := cm.Host_config
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 	if err != nil {
