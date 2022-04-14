@@ -22,6 +22,7 @@ func CreateNamespace(cluster string, namespace string) (*corev1.Namespace, error
 		fmt.Println(err)
 		return nil, err
 	}
+
 	temp := GetNamespace(cluster, namespace)
 	if temp == nil {
 		Namespace := corev1.Namespace{
@@ -35,6 +36,7 @@ func CreateNamespace(cluster string, namespace string) (*corev1.Namespace, error
 		}
 		ns, err := client.CoreV1().Namespaces().Create(context.TODO(), &Namespace, metav1.CreateOptions{})
 		if err != nil {
+			fmt.Println("---")
 			fmt.Println(err)
 			return nil, err
 		} else {
