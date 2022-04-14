@@ -14,7 +14,7 @@ fi
 cd ~/.kube
 touch kubeconfig
 cat /dev/null > kubeconfig
-export KUBECONFIG="~/.kube/kubeconfig"
+export KUBECONFIG=~/.kube/kubeconfig
 
 case "$1" in 
     "aks") 
@@ -35,7 +35,10 @@ case "$1" in
         exit 0
         ;;
 esac
+if [ "$?" -ne 0 ]; then
+    exit 1; 
+fi
 export KUBECONFIG=~/.kube/config
-cd ~/Go/src/Hybrid_Cloud/hybridctl/pkg/hybridctl
+cd /root/go/src/Hybrid_Cloud/hybridctl/pkg/hybridctl
 go build
 ./hybridctl join register $1 $2

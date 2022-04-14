@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# kubectl register platform clustername 
-if [ -z "$1" ]; then 
-    echo "ERROR: Input PlatformType"
-    exit 0
-fi
+# # kubectl register platform clustername 
+# if [ -z "$1" ]; then 
+#     echo "ERROR: Input PlatformType"
+#     exit 0
+# fi
 
-if [ -z "$2" ]; then 
-    echo "ERROR: Input Cluster Name"
-    exit 0
-fi
+# if [ -z "$2" ]; then 
+#     echo "ERROR: Input Cluster Name"
+#     exit 0
+# fi
 
 cd ~/.kube
 touch kubeconfig
@@ -30,12 +30,12 @@ case "$1" in
     "gke")
         gcloud container clusters get-credentials "$2"
         ;;
-    *)
-        echo "ERROR: Platform is wrong"
-        exit 0
-        ;;
 esac
-export KUBECONFIG=~/.kube/config
-cd ~/Go/src/Hybrid_Cloud/hybridctl/pkg/hybridctl
-go build
-./hybridctl join register $1 $2
+
+if [ "$?" -ne 0 ]; then
+    exit 1; 
+fi
+# export KUBECONFIG=~/.kube/config
+# cd /root/go/src/Hybrid_Cloud/hybridctl/pkg/hybridctl
+# go build
+# ./hybridctl join register $1 $2
