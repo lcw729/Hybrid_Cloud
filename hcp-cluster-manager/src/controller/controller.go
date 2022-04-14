@@ -35,6 +35,8 @@ import (
 	kubefed "sigs.k8s.io/kubefed/pkg/client/generic"
 )
 
+var HCP_NAMESPACE string = "hcp"
+
 const controllerAgentName = "hcp-cluster-manager"
 
 const (
@@ -69,7 +71,7 @@ func NewController(
 	klog.V(4).Info("Creating event broadcaster")
 	eventBroadCaster := record.NewBroadcaster()
 	eventBroadCaster.StartStructuredLogging(0)
-	eventBroadCaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("hcp")})
+	eventBroadCaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events(HCP_NAMESPACE)})
 	recorder := eventBroadCaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &Controller{
@@ -219,7 +221,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	joinstatus := hcpcluster.Spec.JoinStatus
-	platform := hcpcluster.Spec.ClusterPlatform
+	// platform := hcpcluster.Spec.ClusterPlatform
 	clustername := hcpcluster.Name
 
 	var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
@@ -229,11 +231,11 @@ func (c *Controller) syncHandler(key string) error {
 	// JOIN 대기
 	if joinstatus == "JOINING" {
 		klog.Info("[JOIN START]")
-
-		if JoinCluster(platform, clustername, master_config, join_cluster_config, hcp_cluster) {
+		fmt.Println(clustername)
+		if JoinCluster(clustername, master_config, join_cluster_config, hcp_cluster) {
 
 			hcpcluster.Spec.JoinStatus = "JOIN"
-			_, err = hcp_cluster.HcpV1alpha1().HCPClusters("hcp").Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+			_, err = hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
 			if err != nil {
 				klog.Info(err)
 				return err
@@ -254,7 +256,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		if UnJoinCluster(clustername, master_config, join_cluster_config) {
 			hcpcluster.Spec.JoinStatus = "UNJOIN"
-			_, err = hcp_cluster.HcpV1alpha1().HCPClusters("hcp").Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+			_, err = hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
 			if err != nil {
 				klog.Info(err)
 				return err
@@ -267,9 +269,9 @@ func (c *Controller) syncHandler(key string) error {
 	} else if joinstatus == "UNREADY" {
 		// UNREADY -- JOIN UNSTABLE
 		if UnJoinCluster(clustername, master_config, join_cluster_config) {
-			if JoinCluster(platform, clustername, master_config, join_cluster_config, hcp_cluster) {
+			if JoinCluster(clustername, master_config, join_cluster_config, hcp_cluster) {
 				hcpcluster.Spec.JoinStatus = "JOIN"
-				hcp_cluster.HcpV1alpha1().HCPClusters("hcp").Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+				hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
 				klog.Infof("success to join %s", clustername)
 			} else {
 				klog.Infof("fail to join %s", clustername)
@@ -308,7 +310,7 @@ func (c *Controller) syncHandler(key string) error {
 							klog.Infof("%s is in a unstable state", clustername)
 							klog.Info("Type: ", kubefed_Type)
 							hcpcluster.Spec.JoinStatus = "UNREADY"
-							_, err = hcp_cluster.HcpV1alpha1().HCPClusters("hcp").Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
+							_, err = hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
 							if err != nil {
 								klog.Info(err)
 								return err
@@ -343,8 +345,7 @@ func (c *Controller) syncHandler(key string) error {
 
 }
 
-func JoinCluster(platform string,
-	clustername string,
+func JoinCluster(clustername string,
 	master_config *rest.Config,
 	join_cluster_config *rest.Config,
 	hcp_cluster *hcpclusterv1alpha1.Clientset) bool {
@@ -354,7 +355,7 @@ func JoinCluster(platform string,
 
 	ns := "kube-federation-system"
 	// 1. CREATE namespace "kube-federation-system"
-	namespace, err_ns := namespacefunc.CheckAndCreateNamespace(clustername, ns)
+	namespace, err_ns := namespacefunc.CreateNamespace(clustername, ns)
 	if err_ns != nil {
 		log.Println(err_ns)
 		return false
