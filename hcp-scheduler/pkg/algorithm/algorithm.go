@@ -93,9 +93,9 @@ func Affinity(clusterList *[]string) string {
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
 	score_table := NewScoreTable(clusterList)
-	score_table["hcp-cluster"] = rand.Float32()
-	score_table["eks-cluster"] = rand.Float32()
-	score_table["aks-master"] = rand.Float32()
+	for _, i := range *clusterList {
+		score_table[i] = rand.Float32()
+	}
 	result := score_table.SortScore()
 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
 	fmt.Println("---------------------------------------------------------------")
