@@ -5,11 +5,12 @@ import (
 	"context"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-func FindNamespaceList(cluster string, namespace string) bool {
+func GetNamespace(cluster string, namespace string) *corev1.Namespace {
 
 	config, err := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	if err != nil {
@@ -25,8 +26,8 @@ func FindNamespaceList(cluster string, namespace string) bool {
 	for i := range namespaceList.Items {
 
 		if namespaceList.Items[i].Name == namespace {
-			return true
+			return &namespaceList.Items[i]
 		}
 	}
-	return false
+	return nil
 }

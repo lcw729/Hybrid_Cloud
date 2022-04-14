@@ -19,7 +19,7 @@ func CreateDeployment(cluster string, node string, deployment *v1.Deployment) er
 	deployment.ResourceVersion = ""
 
 	namespace := deployment.ObjectMeta.Namespace
-	ns.CheckAndCreateNamespace(cluster, namespace)
+	ns.CreateNamespace(cluster, namespace)
 	new_dep, err := cluster_client.AppsV1().Deployments(namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {

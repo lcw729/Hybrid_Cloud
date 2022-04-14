@@ -10,7 +10,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func CheckAndCreateNamespace(cluster string, namespace string) (*corev1.Namespace, error) {
+func CreateNamespace(cluster string, namespace string) (*corev1.Namespace, error) {
 	config, err := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	if err != nil {
 		fmt.Println(err)
@@ -22,7 +22,8 @@ func CheckAndCreateNamespace(cluster string, namespace string) (*corev1.Namespac
 		fmt.Println(err)
 		return nil, err
 	}
-	if !FindNamespaceList(cluster, namespace) {
+	temp := GetNamespace(cluster, namespace)
+	if temp == nil {
 		Namespace := corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Namespace",
@@ -40,6 +41,7 @@ func CheckAndCreateNamespace(cluster string, namespace string) (*corev1.Namespac
 			fmt.Printf("success to create namespace %s in %s\n", namespace, cluster)
 			return ns, nil
 		}
+	} else {
+		return temp, err
 	}
-	return nil, err
 }
