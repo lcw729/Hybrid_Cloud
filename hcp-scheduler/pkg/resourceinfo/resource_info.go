@@ -6,6 +6,7 @@ import (
 	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"context"
 	"fmt"
+	"sort"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,6 +24,46 @@ type ClusterInfo struct {
 	RequestedResources *Resources
 	AllocableResources *Resources
 	CapacityResources  *Resources
+}
+
+type Score struct {
+	Cluster string
+	Score   int32
+}
+
+type ScoreTable []Score
+
+func (s ScoreTable) Len() int {
+	return len(s)
+}
+
+func (s ScoreTable) Less(i, j int) bool {
+	return s[i].Score < s[j].Score
+}
+
+func (s ScoreTable) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+type TargetClustersScoreTable map[string]int32 // 정렬하고 싶은 map
+
+func (c *ClusterInfoList) NewScoreTable() TargetClustersScoreTable {
+	score_table := make(map[string]int32, len(*c))
+	for _, i := range *c {
+		score_table[i.ClusterName] = 0
+	}
+	return score_table
+}
+
+func (s *TargetClustersScoreTable) SortScore() ScoreTable {
+	sorted := make(ScoreTable, len(*s))
+
+	for cluster, score := range *s {
+		sorted = append(sorted, Score{cluster, score})
+	}
+	sort.Sort(sort.Reverse(sorted))
+
+	return sorted
 }
 
 func JoinClusterList() ([]v1alpha1.HCPCluster, error) {

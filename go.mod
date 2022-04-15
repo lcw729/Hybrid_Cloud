@@ -10,7 +10,6 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.5.2
-	github.com/google/go-cmp v0.5.7
 	github.com/googleapis/gnostic v0.5.5
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb v1.9.6
@@ -30,17 +29,15 @@ require (
 	k8s.io/autoscaler/vertical-pod-autoscaler v0.10.0
 	k8s.io/client-go v0.23.4
 	k8s.io/code-generator v0.23.4
-	k8s.io/component-helpers v0.23.4
 	k8s.io/gengo v0.0.0-20210813121822-485abfe95c7c
 	k8s.io/klog/v2 v2.30.0
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
-	k8s.io/kube-scheduler v0.23.4
-	k8s.io/kubernetes v1.23.4
 	k8s.io/metrics v0.23.4
 	k8s.io/sample-controller v0.23.4
 	sigs.k8s.io/aws-iam-authenticator v0.5.5
 	sigs.k8s.io/controller-runtime v0.11.1
 	sigs.k8s.io/kubefed v0.9.1
+	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 )
 
 replace (
@@ -72,5 +69,7 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.23.4
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.23.4
 	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.10.3
+// k8s.io/kubernetes/pkg/scheduler/api => k8s.io/kubernetes/pkg/scheduler/api v1.17.17
+// k8s.io/kubernetes/pkg/scheduler/api => k8s.io/kubernetes/pkg/scheduler/api v1.17.17
 // sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.6.0
 )
