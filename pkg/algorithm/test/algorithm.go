@@ -2,6 +2,7 @@ package algorithm
 
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
+	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
 	clusterManager "Hybrid_Cloud/util/clusterManager"
 	"fmt"
 	"math/rand"
@@ -92,7 +93,7 @@ func Affinity(clusterList *[]string) string {
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
-	score_table := NewScoreTable(clusterList)
+	score_table := scoretable.NewScoreTable(clusterList)
 	for _, i := range *clusterList {
 		score_table[i] = rand.Float32()
 	}

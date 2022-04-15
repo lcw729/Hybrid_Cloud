@@ -1,4 +1,4 @@
-package algorithm
+package scoretable
 
 import (
 	"sort"
