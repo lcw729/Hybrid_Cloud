@@ -1,18 +1,39 @@
 package priorities
 
-/*
-type resource struct {
-	pod   *v1.Pod
-	nodes []*v1.Node
-	name  string
-}
+import (
+	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
+	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"fmt"
+	"testing"
+
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 func TestNodeAffinityPriority(t *testing.T) {
-	label1 := map[string]string{"foo": "bar"}
-	label2 := map[string]string{"key": "value"}
-	label3 := map[string]string{"az": "az1"}
-	// label4 := map[string]string{"abc": "az11", "def": "az22"}
-	// label5 := map[string]string{"foo": "bar", "key": "value", "az": "az1"}
+	// Test
+	label1 := map[string]string{"foo": "bar"}                              // weight 2
+	label2 := map[string]string{"key": "value"}                            // weight 4
+	label3 := map[string]string{"az": "az1"}                               // weight 5
+	label4 := map[string]string{"abc": "az11", "def": "az22"}              // weight 0
+	label5 := map[string]string{"foo": "bar", "key": "value", "az": "az1"} // weight 2 + 4 + 5 = 11
+	fmt.Println("AAAA")
+	var clusterinfo_list resourceinfo.ClusterInfoList
+	node_list_1 := []*v1.Node{
+		{ObjectMeta: metav1.ObjectMeta{Name: "machine1", Labels: label5}},
+		{ObjectMeta: metav1.ObjectMeta{Name: "machine2", Labels: label2}},
+		{ObjectMeta: metav1.ObjectMeta{Name: "machine3", Labels: label3}},
+	}
+	fmt.Println("AAAA")
+	createTestClusters(&clusterinfo_list, node_list_1, "test_cluster_1")
+
+	node_list_2 := []*v1.Node{
+		{ObjectMeta: metav1.ObjectMeta{Name: "machine4", Labels: label1}},
+		{ObjectMeta: metav1.ObjectMeta{Name: "machine5", Labels: label4}},
+		{ObjectMeta: metav1.ObjectMeta{Name: "machine6", Labels: label3}},
+	}
+	createTestClusters(&clusterinfo_list, node_list_2, "test_cluster_2")
 
 	affinity1 := &v1.Affinity{
 		NodeAffinity: &v1.NodeAffinity{
@@ -61,16 +82,6 @@ func TestNodeAffinityPriority(t *testing.T) {
 					Preference: v1.NodeSelectorTerm{
 						MatchExpressions: []v1.NodeSelectorRequirement{
 							{
-								Key:      "foo",
-								Operator: v1.NodeSelectorOpIn,
-								Values:   []string{"bar"},
-							},
-							{
-								Key:      "key",
-								Operator: v1.NodeSelectorOpIn,
-								Values:   []string{"value"},
-							},
-							{
 								Key:      "az",
 								Operator: v1.NodeSelectorOpIn,
 								Values:   []string{"az1"},
@@ -82,30 +93,30 @@ func TestNodeAffinityPriority(t *testing.T) {
 		},
 	}
 
-	test := resource{
-		pod: &v1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{},
-			},
-			Spec: v1.PodSpec{
-				Affinity: affinity2,
-			},
-		},
-		nodes: []*v1.Node{
-			{ObjectMeta: metav1.ObjectMeta{Name: "machine1", Labels: label1}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "machine2", Labels: label2}},
-			{ObjectMeta: metav1.ObjectMeta{Name: "machine3", Labels: label3}},
-		},
+	var rep int32 = 2
 
-		name: "all machines are same priority as NodeAffinity is nil",
+	test_deployment := &v1alpha1.HCPDeployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        "test_deployment",
+			Annotations: map[string]string{},
+		},
+		Spec: v1alpha1.HCPDeploymentSpec{
+			RealDeploymentSpec: appsv1.DeploymentSpec{
+				Replicas: &rep,
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Affinity: affinity2,
+					},
+				},
+			},
+		},
 	}
 
-	t.Run(test.name, func(t *testing.T) {
-		for i, r := range test.nodes {
-			score := NodeAffinity(test.pod, r)
-			fmt.Println(i, score)
-		}
-	})
+	replicas := *test_deployment.Spec.RealDeploymentSpec.Replicas
 
+	fake_pod := newPodFromHCPDeployment(test_deployment)
+
+	for i := 0; i < int(replicas); i++ {
+		scoring(fake_pod, &clusterinfo_list, "Affinity")
+	}
 }
-*/
