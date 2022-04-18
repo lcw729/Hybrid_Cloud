@@ -866,6 +866,11 @@ k8s.io/kube-openapi/pkg/util/sets
 k8s.io/kube-openapi/pkg/validation/spec
 # k8s.io/kubectl v0.21.2 => k8s.io/kubectl v0.23.4
 k8s.io/kubectl/pkg/util/openapi
+# k8s.io/kubernetes v1.23.5
+## explicit
+k8s.io/kubernetes/pkg/apis/core
+k8s.io/kubernetes/pkg/apis/core/helper
+k8s.io/kubernetes/pkg/apis/core/v1/helper
 # k8s.io/metrics v0.23.4 => k8s.io/metrics v0.22.4
 ## explicit
 k8s.io/metrics/pkg/apis/metrics
