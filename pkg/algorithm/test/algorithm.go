@@ -2,10 +2,8 @@ package algorithm
 
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
-	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
 	clusterManager "Hybrid_Cloud/util/clusterManager"
 	"fmt"
-	"math/rand"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
@@ -86,23 +84,23 @@ func WatchingLevelCalculator() {
 // 	// }
 // }
 
-// 최적 배치 알고리즘
-func Affinity(clusterList *[]string) string {
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("Affinity Calculator Called")
-	fmt.Println("[step 2] Get MultiMetric")
-	// monitoringEngine.MetricCollector()
-	fmt.Println("[step 3-1] Start analysis Resource Affinity")
-	score_table := scoretable.NewScoreTable(clusterList)
-	for _, i := range *clusterList {
-		score_table[i] = rand.Float32()
-	}
-	result := score_table.SortScore()
-	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println(score_table)
-	return result[0].Cluster
-}
+// // 최적 배치 알고리즘
+// func Affinity(clusterList *[]string) string {
+// 	fmt.Println("---------------------------------------------------------------")
+// 	fmt.Println("Affinity Calculator Called")
+// 	fmt.Println("[step 2] Get MultiMetric")
+// 	// monitoringEngine.MetricCollector()
+// 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
+// 	// score_table := scoretable.NewScoreTable(clusterList)
+// 	// for _, i := range *clusterList {
+// 	// 	score_table[i] = rand.Float32()
+// 	// }
+// 	// result := score_table.SortScore()
+// 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
+// 	fmt.Println("---------------------------------------------------------------")
+// 	// fmt.Println(score_table)
+// 	// return result[0].Cluster
+// }
 
 func DRF() bool {
 	fmt.Println("DRF Math operation Called")
