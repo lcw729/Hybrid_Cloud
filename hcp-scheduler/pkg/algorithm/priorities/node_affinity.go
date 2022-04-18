@@ -17,7 +17,6 @@ limitations under the License.
 package priorities
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -25,31 +24,15 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 )
 
-func NodeAffinity(pod *v1.Pod, clusterinfoList *resourceinfo.ClusterInfoList) resourceinfo.TargetClustersScoreTable {
-
-	score_table := clusterinfoList.NewScoreTable()
-	for _, clusterinfo := range *clusterinfoList {
-		var score int32 = 0
-		node_list := clusterinfo.Nodes
-		for _, node := range node_list {
-			score += calculateNodeAffinity(pod, node.Node)
-		}
-		score_table[clusterinfo.ClusterName] = int32(score)
-	}
-
-	return score_table
-}
-
 // CalculateNodeAffinityPriorityMap prioritizes nodes according to node affinity scheduling preferences
 // indicated in PreferredDuringSchedulingIgnoredDuringExecution. Each time a node match a preferredSchedulingTerm,
 // it will a get an add of preferredSchedulingTerm.Weight. Thus, the more preferredSchedulingTerms
 // the node satisfies and the more the preferredSchedulingTerm that is satisfied weights, the higher
 // score the node gets.
-func calculateNodeAffinity(pod *v1.Pod, node *v1.Node) int32 {
+func NodeAffinity(pod *v1.Pod, node *v1.Node) int32 {
 
 	// default is the podspec.
 	affinity := pod.Spec.Affinity
-
 	var count int32
 	// A nil element of PreferredDuringSchedulingIgnoredDuringExecution matches no objects.
 	// An element of PreferredDuringSchedulingIgnoredDuringExecution that refers to an
@@ -57,6 +40,7 @@ func calculateNodeAffinity(pod *v1.Pod, node *v1.Node) int32 {
 	if affinity != nil && affinity.NodeAffinity != nil && affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution != nil {
 		// Match PreferredDuringSchedulingIgnoredDuringExecution term by term.
 		for i := range affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+
 			preferredSchedulingTerm := &affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution[i]
 			if preferredSchedulingTerm.Weight == 0 {
 				continue
@@ -65,12 +49,15 @@ func calculateNodeAffinity(pod *v1.Pod, node *v1.Node) int32 {
 			// TODO: Avoid computing it for all nodes if this becomes a performance problem.
 			nodeSelector, err := NodeSelectorRequirementsAsSelector(preferredSchedulingTerm.Preference.MatchExpressions)
 			if err != nil {
+				fmt.Println(err)
 				return -1
 			}
-			if nodeSelector.Matches(labels.Set(node.Labels)) {
+
+			if nodeSelector.Matches(labels.Set((*node).Labels)) {
 				count += preferredSchedulingTerm.Weight
 			}
 		}
+
 	}
 
 	return count
