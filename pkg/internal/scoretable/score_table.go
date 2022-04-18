@@ -1,7 +1,19 @@
 package scoretable
 
 import (
+	"math"
 	"sort"
+)
+
+const (
+	// MaxNodeScore is the maximum score a Score plugin is expected to return.
+	MaxNodeScore int32 = 100
+
+	// MinNodeScore is the minimum score a Score plugin is expected to return.
+	MinNodeScore int32 = 0
+
+	// MaxTotalScore is the maximum total score.
+	MaxTotalScore int32 = math.MaxInt32
 )
 
 type Score struct {
@@ -23,20 +35,16 @@ func (s ScoreTable) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-type TargetClustersScoreTable map[string]float32 // 정렬하고 싶은 map
+func NewScoreTable(size int) *map[string]float32 {
+	score_table := make(map[string]float32, size)
 
-func NewScoreTable(clusterList *[]string) TargetClustersScoreTable {
-	score_table := make(map[string]float32, len(*clusterList))
-	for _, i := range *clusterList {
-		score_table[i] = 0
-	}
-	return score_table
+	return &score_table
 }
 
-func (s *TargetClustersScoreTable) SortScore() ScoreTable {
-	sorted := make(ScoreTable, len(*s))
+func SortScore(score_table map[string]float32) ScoreTable {
+	sorted := make(ScoreTable, len(score_table))
 
-	for cluster, score := range *s {
+	for cluster, score := range score_table {
 		sorted = append(sorted, Score{cluster, score})
 	}
 	sort.Sort(sort.Reverse(sorted))
