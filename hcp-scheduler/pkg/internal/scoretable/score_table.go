@@ -14,14 +14,26 @@ const (
 
 	// MaxTotalScore is the maximum total score.
 	MaxTotalScore int32 = math.MaxInt32
+
+	MaxCount
 )
 
-type Score struct {
-	Cluster string
-	Score   float32
+type ClusterScoreList []ClusterScore
+
+type ClusterScore struct {
+	Cluster       string
+	NodeScoreList NodeScoreList
+	Score         float32
 }
 
-type ScoreTable []Score
+type NodeScoreList []NodeScore
+
+type NodeScore struct {
+	Name  string
+	Score int64
+}
+
+type ScoreTable ClusterScoreList
 
 func (s ScoreTable) Len() int {
 	return len(s)
@@ -35,21 +47,8 @@ func (s ScoreTable) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func NewScoreTable(size int) *map[string]float32 {
-	score_table := make(map[string]float32, size)
-
-	return &score_table
-}
-
-func SortScore(score_table map[string]float32) ScoreTable {
-	sorted := make(ScoreTable, len(score_table))
-
-	for cluster, score := range score_table {
-		sorted = append(sorted, Score{cluster, score})
-	}
-	sort.Sort(sort.Reverse(sorted))
-
-	return sorted
+func (s *ScoreTable) SortScore() {
+	sort.Sort(sort.Reverse(*s))
 }
 
 /*

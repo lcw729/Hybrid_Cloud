@@ -8,7 +8,7 @@ import (
 )
 
 // CountIntolerableTaintsPreferNoSchedule gives the count of intolerable taints of a pod with effect PreferNoSchedule
-func countInTolerableTaintsPreferNoSchedule(taints []v1.Taint, tolerations []v1.Toleration) (intolerableTaints int) {
+func countIntolerableTaintsPreferNoSchedule(taints []v1.Taint, tolerations []v1.Toleration) (intolerableTaints int) {
 	for _, taint := range taints {
 		// check only on taints that have effect PreferNoSchedule
 		if taint.Effect != v1.TaintEffectPreferNoSchedule {
@@ -20,7 +20,7 @@ func countInTolerableTaintsPreferNoSchedule(taints []v1.Taint, tolerations []v1.
 			intolerableTaints++
 		}
 	}
-	return intolerableTaints
+	return
 }
 
 // Taint에 해당하는 toleration이 존재하는지 확인
@@ -46,18 +46,22 @@ func getAllTolerationPreferNoSchedule(tolerations []v1.Toleration) (tolerationLi
 
 // ComputeTaintTolerationPriorityMap prepares the priority list for all the nodes based on the number of intolerable taints on the node
 func TaintToleration(pod *v1.Pod, node *v1.Node) int32 {
-
+	fmt.Println("[2] TaintToleration")
 	if node == nil {
 		return -1
 	}
 	// To hold all the tolerations with Effect PreferNoSchedule
 	var tolerationsPreferNoSchedule = getAllTolerationPreferNoSchedule(pod.Spec.Tolerations)
-	score := int32(countInTolerableTaintsPreferNoSchedule(node.Spec.Taints, tolerationsPreferNoSchedule))
+	score := int32(countIntolerableTaintsPreferNoSchedule(node.Spec.Taints, tolerationsPreferNoSchedule))
 
 	// 모두 intolerable인 경우, MinNodeScore
 	if score > 0 {
+		fmt.Println(node.Spec.Taints)
 		taints_len := int32(len(node.Spec.Taints))
+		fmt.Println(taints_len)
+		fmt.Println(score)
 		if score == taints_len {
+			fmt.Println("same")
 			score = scoretable.MinNodeScore
 		} else {
 			fmt.Println("here")
@@ -69,4 +73,8 @@ func TaintToleration(pod *v1.Pod, node *v1.Node) int32 {
 	}
 
 	return score
+}
+
+func Normalize() {
+
 }
