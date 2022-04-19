@@ -9,6 +9,7 @@ import (
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
+	"sort"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,13 +22,12 @@ type Scheduler struct {
 	SchedulingResource *v1.Pod
 	ClusterClients     map[string]*kubernetes.Clientset
 	ClusterInfoList    resourceinfo.ClusterInfoList
-	NodeScoreList      scoretable.NodeScoreList
-	SchedulingResult   []v1alpha1.Target
-	SchdPolicy         string
+	//NodeScoreMap       map[string]int32
+	SchedulingResult []v1alpha1.Target
+	SchdPolicy       string
 }
 
 var AlgorithmMap = map[string]func(*v1.Pod, *v1.Node) int32{
-
 	"Affinity":        priorities.NodeAffinity,
 	"TaintToleration": priorities.TaintToleration,
 }
@@ -237,23 +237,70 @@ func (sched *Scheduler) Scoring(algorithm string) {
 
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(&sched.ClusterInfoList)
 
-	for _, clusterinfo := range sched.ClusterInfoList {
-		fmt.Println("==>", clusterinfo.ClusterName)
-		score = 0
-		for _, node := range (*clusterinfo).Nodes {
-			node.NodeScore = AlgorithmMap[algorithm](*pod, node.Node)
-			node_score := node.NodeScore
-			if node_score == -1 {
-				fmt.Println("fail to scoring node")
-				return
-			} else {
-				fmt.Println(node.NodeName, "score :", node_score)
-				score += node_score
+	switch algorithm {
+
+	case "Affinity":
+		for _, clusterinfo := range sched.ClusterInfoList {
+			fmt.Println("==>", clusterinfo.ClusterName)
+			score = 0
+			for _, node := range (*clusterinfo).Nodes {
+				var node_score int32 = priorities.NodeAffinity(*pod, node.Node)
+				if node_score == -1 {
+					fmt.Println("fail to scoring node")
+					return
+				} else {
+					node.NodeScore = node_score
+					fmt.Println(node.NodeName, "score :", node_score)
+					score += node_score
+				}
 			}
 			clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
+			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
 		}
-		fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
+	case "TaintToleration":
+		var node_score int32
+		var result []int32
+
+		// Get intolerable taints count
+		for _, clusterinfo := range sched.ClusterInfoList {
+			for _, node := range (*clusterinfo).Nodes {
+				node_score = priorities.TaintToleration(*pod, node.Node)
+				if node_score == -1 {
+					fmt.Println("fail to scoring node")
+					return
+				} else {
+					node.NodeScore = node_score
+					result = append(result, node_score)
+				}
+			}
+		}
+
+		// sort intolerable taints count and get max value
+		sort.Slice(result, func(i, j int) bool {
+			return result[i] > result[j]
+		})
+		max := result[0]
+
+		// scoring - normalize for intolerable taints count
+		fmt.Println("[REAL SCORE]")
+		for _, clusterinfo := range sched.ClusterInfoList {
+			fmt.Println("==>", clusterinfo.ClusterName)
+			score = 0
+			for _, node := range (*clusterinfo).Nodes {
+				if node.NodeScore == 0 {
+					node.NodeScore = scoretable.MaxNodeScore
+				} else {
+					node.NodeScore = int32(100 * ((float32(max) - float32(node.NodeScore)) / float32(max)))
+					score += node.NodeScore
+				}
+				fmt.Println("===>", node.NodeName, node.NodeScore)
+			}
+			clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
+			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
+		}
+
 	}
+
 }
 
 func (sched *Scheduler) scheduleOne(ctx context.Context) {
