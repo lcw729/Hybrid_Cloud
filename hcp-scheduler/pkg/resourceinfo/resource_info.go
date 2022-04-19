@@ -20,10 +20,27 @@ type ClusterInfoList []*ClusterInfo
 
 type ClusterInfo struct {
 	ClusterName        string
+	ClusterScore       int32
 	Nodes              []*NodeInfo
 	RequestedResources *Resources
 	AllocableResources *Resources
 	CapacityResources  *Resources
+}
+
+// CreateNodeInfoMap obtains a list of pods and pivots that list into a map where the keys are node names
+// and the values are the aggregated information for that node.
+func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
+
+	fmt.Println("[1-1] create clusterInfoMap")
+	ClusterNameToInfo := make(map[string]*ClusterInfo)
+	for _, cluster := range *clusters {
+		clusterName := cluster.ClusterName
+		if _, ok := ClusterNameToInfo[clusterName]; !ok {
+			ClusterNameToInfo[clusterName] = cluster
+		}
+	}
+
+	return ClusterNameToInfo
 }
 
 func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
@@ -31,7 +48,7 @@ func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 	var joinCluster_list []v1alpha1.HCPCluster
 	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	if err != nil {
-		fmt.Println("this error")
+		fmt.Println("err")
 		return nil, err
 	}
 
@@ -39,7 +56,7 @@ func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 
 	cluster_list, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		fmt.Println("this error")
+		fmt.Println("err")
 		return nil, err
 	}
 
@@ -64,8 +81,9 @@ func NewClusterInfoList() *ClusterInfoList {
 	for _, hcpcluster := range joinCluster_list {
 		cluster_name := hcpcluster.Name
 		clusterInfo := ClusterInfo{
-			ClusterName: cluster_name,
-			Nodes:       GetNodeInfo(cluster_name),
+			ClusterName:  cluster_name,
+			ClusterScore: 0,
+			Nodes:        GetNodeInfo(cluster_name),
 		}
 		clusterInfo_list = append(clusterInfo_list, &clusterInfo)
 
@@ -78,7 +96,7 @@ func GetNodeInfo(clusterName string) []*NodeInfo {
 	var nodeInfo []*NodeInfo
 	config, err := cobrautil.BuildConfigFromFlags(clusterName, "/root/.kube/config")
 	if err != nil {
-		fmt.Println("this error")
+		fmt.Println(err)
 		return nil
 	}
 
@@ -86,11 +104,11 @@ func GetNodeInfo(clusterName string) []*NodeInfo {
 
 	_, err = cluster_client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		fmt.Println("this error")
+		fmt.Println(err)
 		return nil
 	}
-	return nodeInfo
 
+	return nodeInfo
 }
 
 func NodeMetrics(clusterName string) {
@@ -150,7 +168,8 @@ type NodeInfo struct {
 	ClusterName string
 	NodeName    string
 	// Overall node information.
-	Node *v1.Node
+	Node      *v1.Node
+	NodeScore int32
 
 	// Pods running on the node.
 	Pods []*PodInfo
