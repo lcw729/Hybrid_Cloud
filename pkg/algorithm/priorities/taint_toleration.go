@@ -1,9 +1,6 @@
 package priorities
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
-	"fmt"
-
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -46,7 +43,6 @@ func getAllTolerationPreferNoSchedule(tolerations []v1.Toleration) (tolerationLi
 
 // ComputeTaintTolerationPriorityMap prepares the priority list for all the nodes based on the number of intolerable taints on the node
 func TaintToleration(pod *v1.Pod, node *v1.Node) int32 {
-	fmt.Println("[2] TaintToleration")
 	if node == nil {
 		return -1
 	}
@@ -54,27 +50,5 @@ func TaintToleration(pod *v1.Pod, node *v1.Node) int32 {
 	var tolerationsPreferNoSchedule = getAllTolerationPreferNoSchedule(pod.Spec.Tolerations)
 	score := int32(countIntolerableTaintsPreferNoSchedule(node.Spec.Taints, tolerationsPreferNoSchedule))
 
-	// 모두 intolerable인 경우, MinNodeScore
-	if score > 0 {
-		fmt.Println(node.Spec.Taints)
-		taints_len := int32(len(node.Spec.Taints))
-		fmt.Println(taints_len)
-		fmt.Println(score)
-		if score == taints_len {
-			fmt.Println("same")
-			score = scoretable.MinNodeScore
-		} else {
-			fmt.Println("here")
-			score = int32(100 * float64(score) / float64(taints_len))
-		}
-	} else if score == 0 {
-		// intolerable인 경우, 개수에 따라 차등 점수
-		score = scoretable.MaxNodeScore
-	}
-
 	return score
-}
-
-func Normalize() {
-
 }
