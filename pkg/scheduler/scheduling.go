@@ -104,6 +104,7 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 	fmt.Println("[scheduling start]")
 	schedule_type := sched.SchedPolicy
 	schedule_type = "ImageLocality"
+
 	fmt.Println("=> algorithm :", schedule_type)
 	//replicas := *deployment.Spec.RealDeploymentSpec.Replicas
 	var scheduling_result []v1alpha1.Target
@@ -338,6 +339,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 					score += node_score
 				}
 			}
+
 			sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
 			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
 		}
