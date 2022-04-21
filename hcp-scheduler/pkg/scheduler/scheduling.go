@@ -94,20 +94,18 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 
 	fmt.Println("[scheduling start]")
 	schedule_type := sched.SchdPolicy
-	schedule_type = "TaintToleration"
+	schedule_type = "NodeResourcesBalancedAllocation"
 	fmt.Println("=> algorithm :", schedule_type)
 	//replicas := *deployment.Spec.RealDeploymentSpec.Replicas
 	var scheduling_result []v1alpha1.Target
 	var cnt int32 = 0
 
 	var replicas int32 = 2
-	priorities.CreateTestClusterTaintAndToleration(&sched.ClusterInfoList)
-	sched.SchedulingResource = priorities.PodWithTolerations([]v1.Toleration{{
-		Key:      "foo",
-		Operator: v1.TolerationOpEqual,
-		Value:    "bar",
-		Effect:   v1.TaintEffectPreferNoSchedule,
-	}})
+	priorities.CreateTestClusterNodeResourcesBalancedAllocation(&sched.ClusterInfoList)
+
+	pod := priorities.TestPodsNodeResourcesBalancedAllocation[0]
+
+	sched.SchedulingResource = pod
 
 	/*
 		var rep int32 = 2
@@ -291,9 +289,35 @@ func (sched *Scheduler) Scoring(algorithm string) {
 					node.NodeScore = scoretable.MaxNodeScore
 				} else {
 					node.NodeScore = int32(100 * ((float32(max) - float32(node.NodeScore)) / float32(max)))
-					score += node.NodeScore
 				}
+				score += node.NodeScore
 				fmt.Println("===>", node.NodeName, node.NodeScore)
+			}
+
+			if int32(len((*clusterinfo).Nodes)) > 0 {
+				// clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score / int32(len((*clusterinfo).Nodes))
+				clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
+				fmt.Println("*", clusterinfo.ClusterName, "total score :", clusterInfoMap[clusterinfo.ClusterName].ClusterScore)
+			} else {
+				clusterInfoMap[clusterinfo.ClusterName].ClusterScore = 0
+				fmt.Println("*", clusterinfo.ClusterName, "total score :", clusterInfoMap[clusterinfo.ClusterName].ClusterScore)
+			}
+		}
+	case "NodeResourcesBalancedAllocation":
+		// 현재 pod이 배치 된 후, CPU와 Memory 사용률이 균형을 검사
+		for _, clusterinfo := range sched.ClusterInfoList {
+			fmt.Println("==>", clusterinfo.ClusterName)
+			score = 0
+			for _, node := range (*clusterinfo).Nodes {
+				var node_score int32 = int32(priorities.NodeResourcesBalancedAllocation(*pod, node.Node))
+				if node_score == -1 {
+					fmt.Println("fail to scoring node")
+					return
+				} else {
+					node.NodeScore = node_score
+					fmt.Println(node.NodeName, "score :", node_score)
+					score += node_score
+				}
 			}
 			clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
 			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
