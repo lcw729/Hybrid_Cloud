@@ -33,7 +33,7 @@ require (
 	k8s.io/gengo v0.0.0-20210813121822-485abfe95c7c
 	k8s.io/klog/v2 v2.30.0
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
-	k8s.io/kubernetes v1.23.5
+	k8s.io/kubernetes v1.23.5 // indirect
 	k8s.io/metrics v0.23.4
 	k8s.io/sample-controller v0.23.4
 	sigs.k8s.io/aws-iam-authenticator v0.5.5

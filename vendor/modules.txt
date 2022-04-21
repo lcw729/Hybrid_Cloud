@@ -875,7 +875,10 @@ k8s.io/kube-openapi/pkg/validation/spec
 k8s.io/kubectl/pkg/util/openapi
 # k8s.io/kubernetes v1.23.5
 ## explicit
+<<<<<<< HEAD
 k8s.io/kubernetes/pkg/util/parsers
+=======
+>>>>>>> 991a0f3847f226a398c337ee22902e7319316b5f
 # k8s.io/metrics v0.23.4 => k8s.io/metrics v0.22.4
 ## explicit
 k8s.io/metrics/pkg/apis/metrics
