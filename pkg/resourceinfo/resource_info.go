@@ -43,6 +43,37 @@ func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
 	return ClusterNameToInfo
 }
 
+/*
+// createNodeInfoMap obtains a list of pods and pivots that list into a map
+// where the keys are node names and the values are the aggregated information
+// for that node.
+func CreateNodeInfoMap(clusters *ClusterInfoList) map[string]*NodeInfo {
+	nodeNameToInfo := make(map[string]*NodeInfo)
+	//
+	// 	for _, pod := range pods {
+	// 		nodeName := pod.Spec.NodeName
+	// 		if _, ok := nodeNameToInfo[nodeName]; !ok {
+	// 			nodeNameToInfo[nodeName] = NewNodeInfo()
+	// 		}
+	// 		nodeNameToInfo[nodeName].AddPod(pod)
+	// 	}
+	//
+	imageExistenceMap := CreateImageExistenceMap(clusters)
+
+	for _, cluster := range *clusters {
+		nodes := cluster.Nodes
+		for _, node := range nodes {
+			if _, ok := nodeNameToInfo[node.Node.Name]; !ok {
+				nodeNameToInfo[node.Node.Name] = node
+			}
+			nodeInfo := nodeNameToInfo[node.Node.Name]
+			nodeInfo.ImageStates = GetNodeImageStates(node.Node, imageExistenceMap)
+			node = nodeInfo
+		}
+	}
+	return nodeNameToInfo
+}
+*/
 func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 
 	var joinCluster_list []v1alpha1.HCPCluster
@@ -128,6 +159,51 @@ func NodeMetrics(clusterName string) {
 
 }
 
+// ImageStates returns the state information of all images.
+func (n *NodeInfo) GetImageStates() map[string]*ImageStateSummary {
+	if n == nil {
+		return nil
+	}
+	return n.ImageStates
+}
+
+// createImageExistenceMap returns a map recording on which nodes the images exist, keyed by the images' names.
+func CreateImageExistenceMap(clusterinfoList *ClusterInfoList) map[string]sets.String {
+	imageExistenceMap := make(map[string]sets.String)
+
+	for _, cluster := range *clusterinfoList {
+		nodes := cluster.Nodes
+		for _, node := range nodes {
+			for _, image := range node.Node.Status.Images {
+				for _, name := range image.Names {
+					if _, ok := imageExistenceMap[name]; !ok {
+						imageExistenceMap[name] = sets.NewString(node.Node.Name)
+					} else {
+						imageExistenceMap[name].Insert(node.Node.Name)
+					}
+				}
+			}
+		}
+	}
+	fmt.Println()
+	return imageExistenceMap
+}
+
+// getNodeImageStates returns the given node's image states based on the given imageExistence map.
+func GetNodeImageStates(node *v1.Node, imageExistenceMap map[string]sets.String) map[string]*ImageStateSummary {
+	imageStates := make(map[string]*ImageStateSummary)
+
+	for _, image := range (*node).Status.Images {
+		for _, name := range image.Names {
+			imageStates[name] = &ImageStateSummary{
+				Size:     image.SizeBytes,
+				NumNodes: len(imageExistenceMap[name]),
+			}
+		}
+	}
+	return imageStates
+}
+
 // PodInfo is a wrapper to a Pod with additional pre-computed information to
 // accelerate processing. This information is typically immutable (e.g., pre-processed
 // inter-pod affinity selectors).
@@ -163,6 +239,14 @@ type WeightedAffinityTerm struct {
 	Weight int32
 }
 
+// ImageStateSummary provides summarized information about the state of an image.
+type ImageStateSummary struct {
+	// Size of the image
+	Size int64
+	// Used to track how many nodes have this image
+	NumNodes int
+}
+
 // NodeInfo is node level aggregated information.
 type NodeInfo struct {
 	ClusterName string
@@ -179,6 +263,8 @@ type NodeInfo struct {
 
 	// The subset of pods with required anti-affinity.
 	PodsWithRequiredAntiAffinity []*PodInfo
+
+	ImageStates map[string]*ImageStateSummary
 
 	// Total requested resources of all pods on this node.
 	RequestedResources   *Resource

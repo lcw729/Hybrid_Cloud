@@ -7,13 +7,13 @@ import (
 
 const (
 	// MaxNodeScore is the maximum score a Score plugin is expected to return.
-	MaxNodeScore int32 = 100
+	MaxNodeScore int64 = 100
 
 	// MinNodeScore is the minimum score a Score plugin is expected to return.
-	MinNodeScore int32 = 0
+	MinNodeScore int64 = 0
 
 	// MaxTotalScore is the maximum total score.
-	MaxTotalScore int32 = math.MaxInt32
+	MaxTotalScore int64 = math.MaxInt64
 
 	MaxCount
 )
