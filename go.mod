@@ -25,6 +25,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.23.4
+	k8s.io/apiserver v0.23.4 // indirect
 	k8s.io/autoscaler v0.0.0-20220307092253-72e2fabe59e9
 	k8s.io/autoscaler/vertical-pod-autoscaler v0.10.0
 	k8s.io/client-go v0.23.4
@@ -38,7 +39,6 @@ require (
 	sigs.k8s.io/aws-iam-authenticator v0.5.5
 	sigs.k8s.io/controller-runtime v0.11.1
 	sigs.k8s.io/kubefed v0.9.1
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 )
 
 replace (
@@ -64,6 +64,7 @@ replace (
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.23.4
 	k8s.io/kubectl => k8s.io/kubectl v0.23.4
 	k8s.io/kubelet => k8s.io/kubelet v0.23.4
+	k8s.io/kubernetes/pkg/features => k8s.io/kubernetes/pkg/features v1.17.13
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.23.4
 	k8s.io/metrics => k8s.io/metrics v0.22.4
 	k8s.io/mount-utils => k8s.io/mount-utils v0.23.4
