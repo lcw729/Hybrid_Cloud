@@ -105,44 +105,15 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 	schedule_type = "ImageLocality"
 
 	fmt.Println("=> algorithm :", schedule_type)
-	//replicas := *deployment.Spec.RealDeploymentSpec.Replicas
+	replicas := *deployment.Spec.RealDeploymentSpec.Replicas
 
 	var scheduling_result []v1alpha1.Target
 	var cnt int32 = 0
 
-	var replicas int32 = 2
+	// set schedulingResource
+	sched.SchedulingResource = newPodFromHCPDeployment(deployment)
 
-	pod := priorities.TestPodsImageLocality[1]
-
-	sched.SchedulingResource = pod
-
-	/*
-		var rep int32 = 2
-
-				test_deployment := &v1alpha1.HCPDeployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:        "test_deployment",
-						Annotations: map[string]string{},
-					},
-					Spec: v1alpha1.HCPDeploymentSpec{
-						RealDeploymentSpec: appsv1.DeploymentSpec{
-							Replicas: &rep,
-							Template: v1.PodTemplateSpec{
-								Spec: v1.PodSpec{
-									Affinity: affinity2,
-								},
-							},
-						},
-					},
-				}
-
-
-			replicas := *test_deployment.Spec.RealDeploymentSpec.Replicas
-
-			// set schedulingResource
-			sched.SchedulingResource := newPodFromHCPDeployment(test_deployment)
-	*/
-
+	sched.Filtering("CheckNodeUnschedulable")
 	for i := 0; i < int(replicas); i++ {
 		sched.Scoring(schedule_type)
 		best_cluster := sched.getMaxScoreCluster()

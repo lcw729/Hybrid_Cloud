@@ -2,10 +2,9 @@ package resourceinfo
 
 import (
 	cobrautil "Hybrid_Cloud/hybridctl/util"
-	"Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
-	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"context"
 	"fmt"
+	"strings"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,45 +13,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 )
-
-func NewClusterInfoList() *ClusterInfoList {
-
-	var clusterInfo_list ClusterInfoList
-	joinCluster_list, err := JoinClusterList()
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-
-	for _, hcpcluster := range joinCluster_list {
-		cluster_name := hcpcluster.Name
-		clusterInfo := ClusterInfo{
-			ClusterName:  cluster_name,
-			ClusterScore: 0,
-			Nodes:        GetNodeInfo(cluster_name),
-		}
-		clusterInfo_list = append(clusterInfo_list, clusterInfo)
-
-	}
-
-	return &clusterInfo_list
-}
-
-// CreateNodeInfoMap obtains a list of pods and pivots that list into a map where the keys are node names
-// and the values are the aggregated information for that node.
-func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
-
-	fmt.Println("[1-1] create clusterInfoMap")
-	ClusterNameToInfo := make(map[string]*ClusterInfo)
-	for _, cluster := range *clusters {
-		clusterName := cluster.ClusterName
-		if _, ok := ClusterNameToInfo[clusterName]; !ok {
-			ClusterNameToInfo[clusterName] = &cluster
-		}
-	}
-
-	return ClusterNameToInfo
-}
 
 /*
 // createNodeInfoMap obtains a list of pods and pivots that list into a map
@@ -85,30 +45,20 @@ func CreateNodeInfoMap(clusters *ClusterInfoList) map[string]*NodeInfo {
 	return nodeNameToInfo
 }
 */
-func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 
-	var joinCluster_list []v1alpha1.HCPCluster
-	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	if err != nil {
-		fmt.Println("err")
-		return nil, err
+func NewNodeInfo(name string, pods ...*v1.Pod) *NodeInfo {
+	ni := &NodeInfo{
+		NodeName:           name,
+		RequestedResources: &Resource{},
+		AllocatableResources: &Resource{
+			AllowedPodNumber: 5,
+		},
+		ImageStates: make(map[string]*ImageStateSummary),
 	}
-
-	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(config)
-
-	cluster_list, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		fmt.Println("err")
-		return nil, err
+	for _, pod := range pods {
+		ni.AddPod(pod)
 	}
-
-	for _, hcpcluster := range cluster_list.Items {
-		if hcpcluster.Spec.JoinStatus == "JOIN" {
-			joinCluster_list = append(joinCluster_list, hcpcluster)
-		}
-	}
-
-	return joinCluster_list, nil
+	return ni
 }
 
 func GetNodeInfo(clusterName string) []*NodeInfo {
@@ -128,6 +78,28 @@ func GetNodeInfo(clusterName string) []*NodeInfo {
 	}
 
 	return nodeInfo
+}
+
+func (n *NodeInfo) VolumeLimits() map[v1.ResourceName]int64 {
+	volumeLimits := map[v1.ResourceName]int64{}
+	for k, v := range n.AllocatableResource().ScalarResources {
+		if IsAttachableVolumeResourceName(k) {
+			volumeLimits[k] = v
+		}
+	}
+	return volumeLimits
+}
+
+func IsAttachableVolumeResourceName(name v1.ResourceName) bool {
+	return strings.HasPrefix(string(name), v1.ResourceAttachableVolumesPrefix)
+}
+
+// AllocatableResource returns allocatable resources on a given node.
+func (n *NodeInfo) AllocatableResource() Resource {
+	if n == nil {
+		return Resource{}
+	}
+	return *n.AllocatableResources
 }
 
 func NodeMetrics(clusterName string) {
@@ -168,26 +140,4 @@ func GetNodeImageStates(node *v1.Node, imageExistenceMap map[string]sets.String)
 		}
 	}
 	return imageStates
-}
-
-// createImageExistenceMap returns a map recording on which nodes the images exist, keyed by the images' names.
-func CreateImageExistenceMap(clusterinfoList *ClusterInfoList) map[string]sets.String {
-	imageExistenceMap := make(map[string]sets.String)
-
-	for _, cluster := range *clusterinfoList {
-		nodes := cluster.Nodes
-		for _, node := range nodes {
-			for _, image := range node.Node.Status.Images {
-				for _, name := range image.Names {
-					if _, ok := imageExistenceMap[name]; !ok {
-						imageExistenceMap[name] = sets.NewString(node.Node.Name)
-					} else {
-						imageExistenceMap[name].Insert(node.Node.Name)
-					}
-				}
-			}
-		}
-	}
-	fmt.Println()
-	return imageExistenceMap
 }
