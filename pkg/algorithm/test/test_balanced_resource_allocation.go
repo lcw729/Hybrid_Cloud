@@ -1,9 +1,7 @@
-package priorities
+package test
 
 import (
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
-
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -12,13 +10,13 @@ import (
 
 func CreateTestClusterNodeResourcesBalancedAllocation(clusterinfo_list *resourceinfo.ClusterInfoList) {
 	node_list_1 := []*v1.Node{makeNode("machine1", 4000, 10000), makeNode("machine2", 4000, 10000)}
-	test.CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
+	CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
 
 	node_list_2 := []*v1.Node{makeNode("machine1", 4000, 10000), makeNode("machine2", 6000, 10000)}
-	test.CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
+	CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
 
 	node_list_3 := []*v1.Node{makeNode("machine1", 0, 0), makeNode("machine2", 0, 0)}
-	test.CreateTestClusters(clusterinfo_list, node_list_3, "test_cluster_3")
+	CreateTestClusters(clusterinfo_list, node_list_3, "test_cluster_3")
 }
 
 var TestPodsNodeResourcesBalancedAllocation []*v1.Pod = []*v1.Pod{

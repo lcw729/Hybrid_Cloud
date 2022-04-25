@@ -1,7 +1,6 @@
-package priorities
+package test
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"strconv"
 
@@ -18,19 +17,19 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 		node []*v1.Node
 	}{
 		{
-			test.PodWithTolerations([]v1.Toleration{{
+			PodWithTolerations([]v1.Toleration{{
 				Key:      "foo",
 				Operator: v1.TolerationOpEqual,
 				Value:    "bar",
 				Effect:   v1.TaintEffectPreferNoSchedule,
 			}}),
 			[]*v1.Node{
-				test.NodeWithTaints("nodeA", []v1.Taint{{
+				NodeWithTaints("nodeA", []v1.Taint{{
 					Key:    "foo",
 					Value:  "bar",
 					Effect: v1.TaintEffectPreferNoSchedule,
 				}}),
-				test.NodeWithTaints("nodeB", []v1.Taint{
+				NodeWithTaints("nodeB", []v1.Taint{
 					{
 						Key:    "foo",
 						Value:  "bar",
@@ -44,7 +43,7 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 		},
 
 		{ // the count of taints that are tolerated by pod, does not matter.
-			test.PodWithTolerations([]v1.Toleration{
+			PodWithTolerations([]v1.Toleration{
 				// {
 				// 	Key:      "cpu-type",
 				// 	Operator: v1.TolerationOpEqual,
@@ -59,15 +58,15 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 				},
 			}),
 			[]*v1.Node{
-				test.NodeWithTaints("nodeA", []v1.Taint{}),
-				test.NodeWithTaints("nodeB", []v1.Taint{
+				NodeWithTaints("nodeA", []v1.Taint{}),
+				NodeWithTaints("nodeB", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
 						Effect: v1.TaintEffectPreferNoSchedule,
 					},
 				}),
-				test.NodeWithTaints("nodeC", []v1.Taint{
+				NodeWithTaints("nodeC", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
@@ -81,22 +80,22 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 			},
 		},
 		{ // the count of taints on a node that are not tolerated by pod, matters.
-			test.PodWithTolerations([]v1.Toleration{{
+			PodWithTolerations([]v1.Toleration{{
 				Key:      "foo",
 				Operator: v1.TolerationOpEqual,
 				Value:    "bar",
 				Effect:   v1.TaintEffectPreferNoSchedule,
 			}}),
 			[]*v1.Node{
-				test.NodeWithTaints("nodeA", []v1.Taint{}),
-				test.NodeWithTaints("nodeB", []v1.Taint{
+				NodeWithTaints("nodeA", []v1.Taint{}),
+				NodeWithTaints("nodeB", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
 						Effect: v1.TaintEffectPreferNoSchedule,
 					},
 				}),
-				test.NodeWithTaints("nodeC", []v1.Taint{
+				NodeWithTaints("nodeC", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
@@ -110,7 +109,7 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 			},
 		},
 		{ // taints-tolerations priority only takes care about the taints and tolerations that have effect PreferNoSchedule
-			test.PodWithTolerations([]v1.Toleration{
+			PodWithTolerations([]v1.Toleration{
 				{
 					Key:      "cpu-type",
 					Operator: v1.TolerationOpEqual,
@@ -124,15 +123,15 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 				},
 			}),
 			[]*v1.Node{
-				test.NodeWithTaints("nodeA", []v1.Taint{}),
-				test.NodeWithTaints("nodeB", []v1.Taint{
+				NodeWithTaints("nodeA", []v1.Taint{}),
+				NodeWithTaints("nodeB", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
 						Effect: v1.TaintEffectNoSchedule,
 					},
 				}),
-				test.NodeWithTaints("nodeC", []v1.Taint{
+				NodeWithTaints("nodeC", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
@@ -146,11 +145,11 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 			},
 		},
 		{
-			test.PodWithTolerations([]v1.Toleration{}),
+			PodWithTolerations([]v1.Toleration{}),
 			[]*v1.Node{
 				//Node without taints
-				test.NodeWithTaints("nodeA", []v1.Taint{}),
-				test.NodeWithTaints("nodeB", []v1.Taint{
+				NodeWithTaints("nodeA", []v1.Taint{}),
+				NodeWithTaints("nodeB", []v1.Taint{
 					{
 						Key:    "cpu-type",
 						Value:  "arm64",
@@ -164,7 +163,7 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 	for i, testdata := range testdatas {
 		nodes_list := testdata.node
 		cluster_name := "test_cluster" + strconv.Itoa(i+1)
-		test.CreateTestClusters(clusterinfo_list, nodes_list, cluster_name)
+		CreateTestClusters(clusterinfo_list, nodes_list, cluster_name)
 	}
 
 	/*
@@ -182,7 +181,7 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 					Replicas: &rep,
 					Template: v1.PodTemplateSpec{
 						Spec: v1.PodSpec{
-							Tolerations: test.Spec.Tolerations,
+							Tolerations: Spec.Tolerations,
 						},
 					},
 				},

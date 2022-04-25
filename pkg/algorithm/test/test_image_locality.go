@@ -1,11 +1,18 @@
-package priorities
+package test
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// The two thresholds are used as bounds for the image score range. They correspond to a reasonable size range for
+// container images compressed and stored in registries; 90%ile of images on dockerhub drops into this range.
+const (
+	mb           int64 = 1024 * 1024
+	minThreshold int64 = 23 * mb
+	maxThreshold int64 = 1000 * mb
 )
 
 func CreateTestClusterImageLocality(clusterinfo_list *resourceinfo.ClusterInfoList) {
@@ -56,10 +63,10 @@ func CreateTestClusterImageLocality(clusterinfo_list *resourceinfo.ClusterInfoLi
 	nodeWithNoImages := v1.NodeStatus{}
 
 	node_list_1 := []*v1.Node{makeImageNode("machine1", node403002000), makeImageNode("machine2", node25010)}
-	test.CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
+	CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
 
 	node_list_2 := []*v1.Node{makeImageNode("machine1", node403002000), makeImageNode("machine2", node25010), makeImageNode("machine3", nodeWithNoImages)}
-	test.CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
+	CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
 }
 
 var TestPodsImageLocality []*v1.Pod = []*v1.Pod{

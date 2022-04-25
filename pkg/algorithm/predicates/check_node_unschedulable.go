@@ -28,7 +28,11 @@ func CheckNodeUnschedulable(pod *v1.Pod, clusterInfo *resourceinfo.ClusterInfo) 
 			if i < len(clusterInfo.Nodes)-1 {
 				clusterInfo.Nodes = append(clusterInfo.Nodes[:i], clusterInfo.Nodes[i+1:]...)
 			} else {
-				clusterInfo.Nodes = clusterInfo.Nodes[:i-1]
+				if len(clusterInfo.Nodes) == 1 {
+					clusterInfo.Nodes = nil
+				} else {
+					clusterInfo.Nodes = clusterInfo.Nodes[:i-1]
+				}
 			}
 		}
 	}

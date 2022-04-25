@@ -1,7 +1,6 @@
-package priorities
+package test
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 
 	v1 "k8s.io/api/core/v1"
@@ -22,14 +21,14 @@ func CreateTestClusterNodeAffinity(clusterinfo_list *resourceinfo.ClusterInfoLis
 		{ObjectMeta: metav1.ObjectMeta{Name: "machine3", Labels: label3}},
 	}
 
-	test.CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
+	CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
 
 	node_list_2 := []*v1.Node{
 		{ObjectMeta: metav1.ObjectMeta{Name: "machine4", Labels: label1}},
 		{ObjectMeta: metav1.ObjectMeta{Name: "machine5", Labels: label4}},
 		{ObjectMeta: metav1.ObjectMeta{Name: "machine6", Labels: label3}},
 	}
-	test.CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
+	CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
 
 	/*Test - NodeAffinity*/
 	/*

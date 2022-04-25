@@ -1,34 +1,14 @@
-package predicates
+package test
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
-	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
+	"Hybrid_Cloud/hcp-scheduler/pkg/scheduler"
 	"strconv"
+	"testing"
 
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func NodeWithTaints(nodeName string, taints []v1.Taint) *v1.Node {
-	return &v1.Node{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: nodeName,
-		},
-		Spec: v1.NodeSpec{
-			Taints: taints,
-		},
-	}
-}
-
-func PodWithTolerations(tolerations []v1.Toleration) *v1.Pod {
-	return &v1.Pod{
-		Spec: v1.PodSpec{
-			Tolerations: tolerations,
-		},
-	}
-}
-
-func CreateTestClusterUnschedulable(clusterinfo_list *resourceinfo.ClusterInfoList) {
+func TestClusterUnschedulable(t *testing.T) {
 	testdatas := []struct {
 		node []*v1.Node
 	}{
@@ -108,21 +88,18 @@ func CreateTestClusterUnschedulable(clusterinfo_list *resourceinfo.ClusterInfoLi
 			},
 		},
 	}
-
+	sched := scheduler.NewScheduler()
+	sched.SchedulingResource = &v1.Pod{
+		Spec: v1.PodSpec{
+			Tolerations: []v1.Toleration{},
+		},
+	}
 	for i, testdata := range testdatas {
 		nodes_list := testdata.node
 		cluster_name := "test_cluster" + strconv.Itoa(i+1)
-		test.CreateTestClusters(clusterinfo_list, nodes_list, cluster_name)
+		CreateTestClusters(&sched.ClusterInfoList, nodes_list, cluster_name)
 	}
 
-	/*
-		sched.SchedulingResource = &v1.Pod{
-			Spec: v1.PodSpec{
-				Tolerations: []v1.Toleration{},
-			},
-		}
+	sched.Filtering("CheckNodeUnschedulable")
 
-		predicates.CreateTestClusterUnschedulable(&sched.ClusterInfoList)
-		sched.Filtering("CheckNodeUnschedulable")
-	*/
 }
