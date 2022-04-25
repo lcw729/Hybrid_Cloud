@@ -12,6 +12,7 @@ func CreateResourceToValueMapPO(pod *v1.Pod) ResourceToValueMap {
 	var resourceMap = make(ResourceToValueMap)
 	resourceMap[v1.ResourceCPU] = getMilliCPU(pod)
 	resourceMap[v1.ResourceMemory] = getMilliMemory(pod)
+	resourceMap[v1.ResourceEphemeralStorage] = getMilliEphemeralStorage(pod)
 
 	return resourceMap
 }
@@ -63,6 +64,16 @@ func getMilliMemoryLimit(pod *v1.Pod) int64 {
 	}
 
 	return mem_limit
+}
+
+func getMilliEphemeralStorage(pod *v1.Pod) int64 {
+	var total int64 = 0
+	containers := pod.Spec.Containers
+	for _, c := range containers {
+		total += c.Resources.Requests.StorageEphemeral().MilliValue()
+	}
+
+	return total
 }
 
 func getAllocableCPU(node *v1.Node) int64 {
