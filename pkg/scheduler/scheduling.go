@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
+	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
 	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/priorities"
 	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
@@ -49,8 +50,6 @@ func NewScheduler() *Scheduler {
 	cm, _ := clusterManager.NewClusterManager()
 
 	clusterInfoList := *resourceinfo.NewClusterInfoList()
-	priorities.CreateTestClusterImageLocality(&clusterInfoList)
-	//nodeInfoMap := resourceinfo.CreateNodeInfoMap(&clusterInfoList)
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(&clusterInfoList)
 	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
 	algorithm, err := policy.GetAlgorithm()
@@ -107,6 +106,7 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 
 	fmt.Println("=> algorithm :", schedule_type)
 	//replicas := *deployment.Spec.RealDeploymentSpec.Replicas
+
 	var scheduling_result []v1alpha1.Target
 	var cnt int32 = 0
 
@@ -171,6 +171,7 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 		fmt.Println("Scheduling failed")
 		return nil
 	}
+
 }
 
 func (sched *Scheduler) getMaxScoreCluster() string {
@@ -247,6 +248,21 @@ func (sched *Scheduler) getTotalNumNodes() int {
 	return cnt
 }
 
+func (sched *Scheduler) Filtering(algorithm string) {
+	var pod = &sched.SchedulingResource
+	switch algorithm {
+	case "CheckNodeUnschedulable":
+		for i, _ := range sched.ClusterInfoList {
+			fmt.Println(sched.ClusterInfoList[i].ClusterName)
+			fmt.Println("==before filtering==")
+			fmt.Println(sched.ClusterInfoList[i].Nodes)
+			predicates.CheckNodeUnschedulable(*pod, &sched.ClusterInfoList[i])
+			fmt.Println("==after filtering==")
+			fmt.Println(&sched.ClusterInfoList[i].Nodes)
+		}
+	}
+}
+
 func (sched *Scheduler) Scoring(algorithm string) {
 
 	fmt.Println("[scoring start]")
@@ -261,7 +277,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 		for _, clusterinfo := range sched.ClusterInfoList {
 			fmt.Println("==>", clusterinfo.ClusterName)
 			score = 0
-			for _, node := range (*clusterinfo).Nodes {
+			for _, node := range clusterinfo.Nodes {
 				var node_score int32 = priorities.NodeAffinity(*pod, node.Node)
 				if node_score == -1 {
 					fmt.Println("fail to scoring node")
@@ -281,7 +297,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 
 		// Get intolerable taints count
 		for _, clusterinfo := range sched.ClusterInfoList {
-			for _, node := range (*clusterinfo).Nodes {
+			for _, node := range clusterinfo.Nodes {
 				node_score = priorities.TaintToleration(*pod, node.Node)
 				if node_score == -1 {
 					fmt.Println("fail to scoring node")
@@ -304,7 +320,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 		for _, clusterinfo := range sched.ClusterInfoList {
 			fmt.Println("==>", clusterinfo.ClusterName)
 			score = 0
-			for _, node := range (*clusterinfo).Nodes {
+			for _, node := range clusterinfo.Nodes {
 				if node.NodeScore == 0 {
 					node.NodeScore = int32(scoretable.MaxNodeScore)
 				} else {
@@ -314,7 +330,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 				fmt.Println("===>", node.NodeName, node.NodeScore)
 			}
 
-			if int32(len((*clusterinfo).Nodes)) > 0 {
+			if int32(len(clusterinfo.Nodes)) > 0 {
 				// clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score / int32(len((*clusterinfo).Nodes))
 				sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
 				fmt.Println("*", clusterinfo.ClusterName, "total score :", sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore)
@@ -328,7 +344,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 		for _, clusterinfo := range sched.ClusterInfoList {
 			fmt.Println("==>", clusterinfo.ClusterName)
 			score = 0
-			for _, node := range (*clusterinfo).Nodes {
+			for _, node := range clusterinfo.Nodes {
 				var node_score int32 = int32(priorities.NodeResourcesBalancedAllocation(*pod, node.Node))
 				if node_score == -1 {
 					fmt.Println("fail to scoring node")
@@ -347,7 +363,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 		for _, clusterinfo := range sched.ClusterInfoList {
 			fmt.Println("==>", clusterinfo.ClusterName)
 			score = 0
-			for _, node := range (*clusterinfo).Nodes {
+			for _, node := range clusterinfo.Nodes {
 				fmt.Println(node.ImageStates)
 				var node_score int32 = int32(priorities.ImageLocality(*pod, node, sched.getTotalNumNodes()))
 				if node_score == -1 {
