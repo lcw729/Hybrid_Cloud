@@ -1,4 +1,4 @@
-package algorithm
+package test
 
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"

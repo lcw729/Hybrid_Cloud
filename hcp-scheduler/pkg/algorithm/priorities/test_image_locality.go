@@ -1,6 +1,7 @@
 package priorities
 
 import (
+	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 
 	v1 "k8s.io/api/core/v1"
@@ -55,10 +56,10 @@ func CreateTestClusterImageLocality(clusterinfo_list *resourceinfo.ClusterInfoLi
 	nodeWithNoImages := v1.NodeStatus{}
 
 	node_list_1 := []*v1.Node{makeImageNode("machine1", node403002000), makeImageNode("machine2", node25010)}
-	CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
+	test.CreateTestClusters(clusterinfo_list, node_list_1, "test_cluster_1")
 
 	node_list_2 := []*v1.Node{makeImageNode("machine1", node403002000), makeImageNode("machine2", node25010), makeImageNode("machine3", nodeWithNoImages)}
-	CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
+	test.CreateTestClusters(clusterinfo_list, node_list_2, "test_cluster_2")
 }
 
 var TestPodsImageLocality []*v1.Pod = []*v1.Pod{
