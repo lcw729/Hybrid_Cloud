@@ -39,9 +39,6 @@ func TestNodeResourceFit(t *testing.T) {
 	clusterinfo.Nodes = append(clusterinfo.Nodes, nodeList...)
 
 	fmt.Println("===before NodeResourceFit Filtering===")
-	for _, node := range clusterinfo.Nodes {
-		fmt.Println((*node).NodeName)
-	}
 	predicates.NodeResourcesFit(pod, &clusterinfo)
 	fmt.Println("===after NodeResourceFit Filtering===")
 	for _, node := range clusterinfo.Nodes {

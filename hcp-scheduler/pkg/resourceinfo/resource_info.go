@@ -51,7 +51,9 @@ func NewNodeInfo(name string, pods ...*v1.Pod) *NodeInfo {
 		NodeName:           name,
 		RequestedResources: &Resource{},
 		AllocatableResources: &Resource{
-			AllowedPodNumber: 5,
+			AllowedPodNumber: 1,
+			MilliCPU:         5,
+			Memory:           25,
 		},
 		ImageStates: make(map[string]*ImageStateSummary),
 	}
