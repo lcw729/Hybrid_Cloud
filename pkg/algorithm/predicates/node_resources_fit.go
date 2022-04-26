@@ -14,9 +14,28 @@ import (
 func NodeResourcesFit(pod *v1.Pod, clusterInfo *resourceinfo.ClusterInfo) {
 	var temp []*resourceinfo.NodeInfo
 	for _, nodeInfo := range clusterInfo.Nodes {
-		fmt.Println(nodeInfo.NodeName)
+		fmt.Println("=============================")
+		fmt.Println("<<", nodeInfo.NodeName, ">>")
 		insufficientResources := fitsRequest(pod, nodeInfo)
-		fmt.Println(insufficientResources)
+		if len(insufficientResources) == 0 {
+			fmt.Println("All resources is sufficient")
+		} else {
+			for _, insufficientResource := range insufficientResources {
+				reason := insufficientResource.Reason
+				fmt.Printf("Reason: %s\n", reason)
+				if reason == "Too many pods" {
+					fmt.Printf("Current Pod Number: %d\n", insufficientResource.Used)
+					fmt.Printf("Allowed Pod Number: %d\n", insufficientResource.Capacity)
+					fmt.Println()
+				} else {
+					fmt.Printf("%s RequestedResources: %d\n", insufficientResource.ResourceName, insufficientResource.RequestedResources)
+					fmt.Printf("%s Used: %d\n", insufficientResource.ResourceName, insufficientResource.Used)
+					fmt.Printf("%s Capacity: %d\n", insufficientResource.ResourceName, insufficientResource.Capacity)
+				}
+			}
+
+		}
+		//fmt.Println("=============================")
 		if insufficientResources == nil {
 			temp = append(temp, nodeInfo)
 		}
@@ -39,7 +58,6 @@ func fitsRequest(pod *v1.Pod, nodeInfo *resourceinfo.NodeInfo) []InsufficientRes
 	insufficientResources := make([]InsufficientResource, 0, 4)
 
 	allowedPodNumber := nodeInfo.AllocatableResources.AllowedPodNumber
-	fmt.Println(allowedPodNumber)
 	if len(nodeInfo.Pods)+1 > allowedPodNumber {
 		insufficientResources = append(insufficientResources, InsufficientResource{
 			v1.ResourcePods,
@@ -57,7 +75,6 @@ func fitsRequest(pod *v1.Pod, nodeInfo *resourceinfo.NodeInfo) []InsufficientRes
 		return insufficientResources
 	}
 
-	fmt.Println("here")
 	if podRequest[v1.ResourceCPU] > (nodeInfo.AllocatableResources.MilliCPU - nodeInfo.RequestedResources.MilliCPU) {
 		insufficientResources = append(insufficientResources, InsufficientResource{
 			v1.ResourceCPU,
