@@ -1,10 +1,14 @@
 package main
 
 import (
-	resource "Hybrid_Cloud/hcp-analytic-engine/pkg/autoscaling"
+	resource "Hybrid_Cloud/hcp-analytic-engine/pkg/autoscaler"
 	"Hybrid_Cloud/hcp-analytic-engine/pkg/backup/algorithm"
+	cm "Hybrid_Cloud/util/clusterManager"
+	"context"
 	"fmt"
-	"time"
+
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // policy "Hybrid_Cloud/hcp-analytic-engine/pkg/policy"
@@ -77,6 +81,7 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 	}, nil
 }
 */
+
 func main() {
 
 	//algorithm.Affinity()
@@ -92,22 +97,26 @@ func main() {
 	*/
 
 	// HPA/VPA 함수 사용 예시
-
+	var pod *v1.Pod
 	cluster := "aks-master"
-	pod := "nginx-deploy-6d4c4cc4b8-98zrr"
+	test_pod_name := "nginx-deploy-6d4c4cc4b8-98zrr"
 	ns := "default"
 
-	var min int32 = 1
-	minReplicas := &min
-	var maxReplicas int32 = 5
+	clustermanager, err := cm.NewClusterManager()
+	clientset := clustermanager.Cluster_kubeClients[cluster]
+	deployment, _ := clientset.AppsV1().Pods(ns).Get(context.TODO(), test_pod_name, metav1.GetOptions{})
 
-	watching_level := algorithm.WatchingLevelCalculator()
-	fmt.Printf("%s Pod watching level is %d\n", pod, watching_level)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		autoscaler := resource.NewAutoScaler(cluster, pod, ns)
+		resource.AutoscalerMap[cluster] = autoscaler
 
-	resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
-	time.Sleep(20)
-	resource.UpdateHPA(cluster, pod, ns)
-	resource.CreateVPA(cluster, pod, ns, "Auto")
+		if bol, _ := algorithm.WatchingLevelCalculator(); bol {
+			autoscaler.WarningCountPlusOne(pod)
+			autoscaler.AutoScaling(pod)
+		}
+	}
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
