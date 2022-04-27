@@ -3,6 +3,7 @@ package algorithm
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
 	"fmt"
+	"strconv"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
@@ -14,7 +15,7 @@ var AlgorithmMap = map[string]func() bool{
 
 var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
 
-func WatchingLevelCalculator() int {
+func WatchingLevelCalculator() (bool, error) {
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 1] Get Policy - watching level & warning level")
 	fmt.Println("< Watching Level >")
@@ -23,9 +24,12 @@ func WatchingLevelCalculator() int {
 		fmt.Printf("watching level %s : %s\n", level.Type, level.Value)
 	}
 	// 각 클러스터의 watching level 계산하고 warning level 초과 시 targetCluster에 추가
-	warning_level := policy.GetWarningLevel()
+	warning_level, err := strconv.Atoi(policy.GetWarningLevel().Value)
+	if err != nil {
+		return false, err
+	}
 	fmt.Println("< Warning  Level >")
-	fmt.Printf("warning level: %s\n", warning_level.Value)
+	fmt.Printf("warning level: %d\n", warning_level)
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
@@ -33,7 +37,12 @@ func WatchingLevelCalculator() int {
 	result := 3
 	fmt.Printf("Result ===> %d level\n", result)
 
-	return result
+	if result >= warning_level {
+		return true, nil // 초과  -- HPA, VPA 수행
+	} else {
+		return false, nil
+	}
+
 }
 
 // func appendTargetCluster(cluster *util.ClusterInfo) bool {
