@@ -7,6 +7,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func NewResourcePod(usage ...resourceinfo.Resource) *v1.Pod {
+	var containers []v1.Container
+	for _, req := range usage {
+		containers = append(containers, v1.Container{
+			Resources: v1.ResourceRequirements{Requests: req.ResourceList()},
+		})
+	}
+	return &v1.Pod{
+		Spec: v1.PodSpec{
+			Containers: containers,
+		},
+	}
+}
+
 func NodeWithTaints(nodeName string, taints []v1.Taint) *v1.Node {
 	return &v1.Node{
 		ObjectMeta: metav1.ObjectMeta{

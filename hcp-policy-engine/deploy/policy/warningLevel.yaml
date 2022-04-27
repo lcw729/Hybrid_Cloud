@@ -8,6 +8,5 @@ spec:
     spec:
       policies:
         - type: level
-          value:
-            - "3"
+          value: "3"
   policyStatus: Enabled
