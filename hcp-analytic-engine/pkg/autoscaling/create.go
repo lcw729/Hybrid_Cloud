@@ -63,7 +63,7 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 	// 3. hpaTemplate -> HCPHybridAutoScaler 생성
 	instance := &resourcev1alpha1.HCPHybridAutoScaler{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa",
+			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name,
 		},
 		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
 			TargetCluster: cluster,
@@ -139,27 +139,41 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 		},
 	}
 
-	instance := &resourcev1alpha1.HCPHybridAutoScaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa2",
-		},
-		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			TargetCluster: cluster,
-			WarningCount:  2,
-			ScalingOptions: resourcev1alpha1.ScalingOptions{
-				HpaTemplate: nhpa,
-			},
-		},
-		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
-			ResourceStatus: "WAITING",
-		},
+	has_name := cluster + "-" + d.Name
+	has, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), has_name, metav1.GetOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
-	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
+
+	has.Status.LastSpec = has.Spec
+	has.Spec.WarningCount = 2
+	has.Spec.ScalingOptions = resourcev1alpha1.ScalingOptions{HpaTemplate: nhpa}
+	has.Status = resourcev1alpha1.HCPHybridAutoScalerStatus{ResourceStatus: "WAITING"}
+
+	/*
+		instance := &resourcev1alpha1.HCPHybridAutoScaler{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: cluster + "-" + hpa.Spec.ScaleTargetRef.Name + "-hpa2",
+			},
+			Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
+				TargetCluster: cluster,
+				WarningCount:  2,
+				ScalingOptions: resourcev1alpha1.ScalingOptions{
+					HpaTemplate: nhpa,
+				},
+			},
+			Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+				ResourceStatus: "WAITING",
+			},
+		}
+	*/
+	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Update(context.TODO(), has, metav1.UpdateOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
 	} else {
-		fmt.Printf("create %s Done\n", newhas.Name)
+		fmt.Printf("update %s Done\n", newhas.Name)
 		return nil
 	}
 }
@@ -211,28 +225,43 @@ func CreateVPA(cluster string, pod string, namespace string, updateMode string) 
 		},
 	}
 
-	// 3. vpaTemplate -> HCPHybridAutoScaler 생성
-	instance := &resourcev1alpha1.HCPHybridAutoScaler{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: cluster + "-" + vpa.Name + "-vpa",
-		},
-		Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
-			TargetCluster: cluster,
-			WarningCount:  3,
-			ScalingOptions: resourcev1alpha1.ScalingOptions{
-				VpaTemplate: vpa,
-			},
-		},
-		Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
-			ResourceStatus: "WAITING",
-		},
+	has_name := cluster + "-" + d.Name
+	has, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), has_name, metav1.GetOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
-	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), instance, metav1.CreateOptions{})
+
+	// 3. vpaTemplate -> HCPHybridAutoScaler 생성
+	has.Status.LastSpec = has.Spec
+	has.Spec.WarningCount = 3
+	has.Spec.ScalingOptions = resourcev1alpha1.ScalingOptions{VpaTemplate: vpa}
+	has.Status = resourcev1alpha1.HCPHybridAutoScalerStatus{ResourceStatus: "WAITING"}
+
+	/*
+
+		instance := &resourcev1alpha1.HCPHybridAutoScaler{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: cluster + "-" + vpa.Name + "-vpa",
+			},
+			Spec: resourcev1alpha1.HCPHybridAutoScalerSpec{
+				TargetCluster: cluster,
+				WarningCount:  3,
+				ScalingOptions: resourcev1alpha1.ScalingOptions{
+					VpaTemplate: vpa,
+				},
+			},
+			Status: resourcev1alpha1.HCPHybridAutoScalerStatus{
+				ResourceStatus: "WAITING",
+			},
+		}
+	*/
+	newhas, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Update(context.TODO(), has, metav1.UpdateOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
 	} else {
-		fmt.Printf("create %s Done\n", newhas.Name)
+		fmt.Printf("update %s Done\n", newhas.Name)
 		return nil
 	}
 }

@@ -8,18 +8,13 @@ spec:
     spec:
       policies:
         - type: "1"
-          value:
-            - "20"
+          value: "20"
         - type: "2"
-          value:
-            - "30"
+          value: "30"
         - type: "3"
-          value:
-            - "50"
+          value: "50"
         - type: "4"
-          value:
-            - "70"
+          value: "70"
         - type: "5"
-          value:
-            - "90"                                         
+          value: "90"                                         
   policyStatus: Enabled

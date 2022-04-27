@@ -36,7 +36,7 @@ func NodeResourcesFit(pod *v1.Pod, clusterInfo *resourceinfo.ClusterInfo) {
 
 		}
 		//fmt.Println("=============================")
-		if insufficientResources == nil {
+		if len(insufficientResources) == 0 {
 			temp = append(temp, nodeInfo)
 		}
 	}

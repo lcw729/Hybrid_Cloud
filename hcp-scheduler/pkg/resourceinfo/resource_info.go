@@ -51,12 +51,23 @@ func NewNodeInfo(name string, pods ...*v1.Pod) *NodeInfo {
 		NodeName:           name,
 		RequestedResources: &Resource{},
 		AllocatableResources: &Resource{
-			AllowedPodNumber: 1,
-			MilliCPU:         5,
+			AllowedPodNumber: 3,
+			MilliCPU:         30,
 			Memory:           25,
 		},
 		ImageStates: make(map[string]*ImageStateSummary),
 	}
+	(*ni).Node = &v1.Node{
+		Spec: v1.NodeSpec{
+			Taints: []v1.Taint{
+				{
+					Key:    v1.TaintNodeUnschedulable,
+					Effect: v1.TaintEffectNoSchedule,
+				},
+			},
+		},
+	}
+
 	for _, pod := range pods {
 		ni.AddPod(pod)
 	}
