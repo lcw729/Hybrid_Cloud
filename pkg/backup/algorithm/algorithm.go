@@ -2,7 +2,6 @@ package algorithm
 
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
-	clusterManager "Hybrid_Cloud/util/clusterManager"
 	"fmt"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
@@ -15,47 +14,26 @@ var AlgorithmMap = map[string]func() bool{
 
 var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
 
-func WatchingLevelCalculator() {
+func WatchingLevelCalculator() int {
 	fmt.Println("-----------------------------------------")
-	fmt.Println("[step 2] Get Policy - watching level & warning level")
+	fmt.Println("[step 1] Get Policy - watching level & warning level")
+	fmt.Println("< Watching Level >")
 	watching_level := policy.GetWatchingLevel()
-	fmt.Println("< Watching Level > \n", watching_level)
+	for _, level := range watching_level.Levels {
+		fmt.Printf("watching level %s : %s\n", level.Type, level.Value)
+	}
 	// 각 클러스터의 watching level 계산하고 warning level 초과 시 targetCluster에 추가
 	warning_level := policy.GetWarningLevel()
-	fmt.Println("< Warning  Level > \n", warning_level)
+	fmt.Println("< Warning  Level >")
+	fmt.Printf("warning level: %s\n", warning_level.Value)
 	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 3] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 4] Calculate watching level")
+	result := 3
+	fmt.Printf("Result ===> %d level\n", result)
 
-	cm, err := clusterManager.NewClusterManager()
-	if err != nil {
-		return
-	}
-	for _, cluster := range cm.Cluster_list.Items {
-		fmt.Println(cluster.Name)
-		TargetCluster[cluster.Name] = &cluster
-	}
-	fmt.Println(TargetCluster)
-	// cluster := &util.ClusterInfo{
-	// 	ClusterId:   1,
-	// 	ClusterName: "cluster1",
-	// }
-	// if !appendTargetCluster(cluster) {
-	// 	fmt.Printf("%d exist already\n", cluster.ClusterId)
-	// } else {
-	// 	fmt.Println("ok")
-	// }
-
-	// cluster = &util.ClusterInfo{
-	// 	ClusterId:   2,
-	// 	ClusterName: "cluster2",
-	// }
-	// if !appendTargetCluster(cluster) {
-	// 	fmt.Printf("%d exist already\n", cluster.ClusterId)
-	// } else {
-	// 	fmt.Println("ok")
-	// }
+	return result
 }
 
 // func appendTargetCluster(cluster *util.ClusterInfo) bool {
