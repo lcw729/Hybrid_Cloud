@@ -36,6 +36,7 @@ func GetBearer() bearerToken {
 	if err != nil {
 		klog.Error(err)
 	}
+
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	response, err := http.DefaultClient.Do(req)
@@ -44,7 +45,6 @@ func GetBearer() bearerToken {
 	}
 	defer response.Body.Close()
 	bytes, _ := ioutil.ReadAll(response.Body)
-	fmt.Println(string(bytes))
 	token := bearerToken{}
 	json.Unmarshal(bytes, &token)
 
@@ -54,6 +54,8 @@ func GetBearer() bearerToken {
 func AuthorizationAndHTTP(method string, hosturl string, input interface{}) (*http.Response, error) {
 
 	var request *http.Request
+	var err error
+	fmt.Println(GetBearer().Access_token)
 	switch method {
 	case "POST":
 		params := url.Values{}
@@ -63,6 +65,7 @@ func AuthorizationAndHTTP(method string, hosturl string, input interface{}) (*ht
 		break
 	case "GET":
 		request, _ = http.NewRequest(method, hosturl, nil)
+		break
 	case "DELETE":
 		request, _ = http.NewRequest(method, hosturl, nil)
 		break
@@ -72,7 +75,6 @@ func AuthorizationAndHTTP(method string, hosturl string, input interface{}) (*ht
 		break
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	fmt.Println(GetBearer().Access_token)
 	request.Header.Add("Authorization", "Bearer "+GetBearer().Access_token)
 
 	client := &http.Client{}
