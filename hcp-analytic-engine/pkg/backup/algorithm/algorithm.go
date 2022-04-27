@@ -27,9 +27,9 @@ func WatchingLevelCalculator() int {
 	fmt.Println("< Warning  Level >")
 	fmt.Printf("warning level: %s\n", warning_level.Value)
 	fmt.Println("-----------------------------------------")
-	fmt.Println("[step 3] Get MultiMetric")
+	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
-	fmt.Println("[step 4] Calculate watching level")
+	fmt.Println("[step 3] Calculate watching level")
 	result := 3
 	fmt.Printf("Result ===> %d level\n", result)
 

@@ -87,7 +87,7 @@ func CreateHPA(cluster string, pod string, namespace string, minReplicas *int32,
 	}
 }
 
-func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32, maxReplicas int32) error {
+func UpdateHPA(cluster string, pod string, namespace string) error {
 	cm, err := cm.NewClusterManager()
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func CreateHPA2(cluster string, pod string, namespace string, minReplicas *int32
 		ObjectMeta: hpa.ObjectMeta,
 		Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
 			MinReplicas:    hpa.Spec.MinReplicas,
-			MaxReplicas:    maxReplicas,
+			MaxReplicas:    hpa.Spec.MaxReplicas * 2,
 			ScaleTargetRef: hpa.Spec.ScaleTargetRef,
 		},
 	}

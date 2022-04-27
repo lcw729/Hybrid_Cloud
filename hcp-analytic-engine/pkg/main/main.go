@@ -106,8 +106,8 @@ func main() {
 
 	resource.CreateHPA(cluster, pod, ns, minReplicas, maxReplicas)
 	time.Sleep(20)
-	//resource.CreateHPA2(cluster, pod, ns, minReplicas, maxReplicas*2)
-	//resource.CreateVPA(cluster, pod, ns, "Auto")
+	resource.UpdateHPA(cluster, pod, ns)
+	resource.CreateVPA(cluster, pod, ns, "Auto")
 
 	/*
 		lis, err := net.Listen("tcp", ":"+portNumber)
