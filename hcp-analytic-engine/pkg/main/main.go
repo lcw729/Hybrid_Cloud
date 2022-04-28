@@ -109,21 +109,25 @@ func main() {
 			fmt.Println(err)
 		} else {
 			if bol, _ := algorithm.WatchingLevelCalculator(); bol {
-				fmt.Println(bol)
 				if resource.AutoscalerMap[cluster] == nil {
-					fmt.Println("no autoscaler")
-					autoscaler := resource.NewAutoScaler(cluster, deployment, ns)
+					fmt.Println("===========no autoscaler===========")
+					autoscaler := resource.NewAutoScaler(cluster)
+					autoscaler.RegisterDeploymentToAutoScaler(deployment, deployment.Namespace)
 					resource.AutoscalerMap[cluster] = autoscaler
-					fmt.Println(resource.AutoscalerMap[cluster].GetWarningCount(deployment))
+					fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster].GetWarningCount(deployment))
+					fmt.Println("===================================")
 				} else {
 					autoscaler := resource.AutoscalerMap[cluster]
-					fmt.Println(resource.AutoscalerMap[cluster].GetWarningCount(deployment))
+					if !autoscaler.ExistDeployment(deployment, ns) {
+						autoscaler.RegisterDeploymentToAutoScaler(deployment, ns)
+					}
 					autoscaler.WarningCountPlusOne(deployment)
 					autoscaler.AutoScaling(deployment)
-
+					fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster].GetWarningCount(deployment))
 				}
 			}
 		}
+		fmt.Println()
 	}
 
 	/*

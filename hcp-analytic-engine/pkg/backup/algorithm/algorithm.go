@@ -30,16 +30,18 @@ func WatchingLevelCalculator() (bool, error) {
 	}
 	fmt.Println("< Warning  Level >")
 	fmt.Printf("warning level: %d\n", warning_level)
-	fmt.Println("-----------------------------------------")
 	fmt.Println("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
 	fmt.Println("[step 3] Calculate watching level")
 	result := 3
-	fmt.Printf("Result ===> %d level\n", result)
+	fmt.Printf(">>> Result <<< %d level\n", result)
 
 	if result >= warning_level {
+		fmt.Println("watching level is over warning level!!!!!!!")
+		fmt.Println("-----------------------------------------")
 		return true, nil // 초과  -- HPA, VPA 수행
 	} else {
+		fmt.Println("-----------------------------------------")
 		return false, nil
 	}
 
