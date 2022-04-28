@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -97,24 +96,33 @@ func main() {
 	*/
 
 	// HPA/VPA 함수 사용 예시
-	var pod *v1.Pod
 	cluster := "aks-master"
-	test_pod_name := "nginx-deploy-6d4c4cc4b8-98zrr"
+	test_dep_name := "nginx-deploy"
 	ns := "default"
 
 	clustermanager, err := cm.NewClusterManager()
 	clientset := clustermanager.Cluster_kubeClients[cluster]
-	deployment, _ := clientset.AppsV1().Pods(ns).Get(context.TODO(), test_pod_name, metav1.GetOptions{})
+	deployment, _ := clientset.AppsV1().Deployments(ns).Get(context.TODO(), test_dep_name, metav1.GetOptions{})
 
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		autoscaler := resource.NewAutoScaler(cluster, pod, ns)
-		resource.AutoscalerMap[cluster] = autoscaler
+	for i := 0; i < 4; i++ {
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			if bol, _ := algorithm.WatchingLevelCalculator(); bol {
+				fmt.Println(bol)
+				if resource.AutoscalerMap[cluster] == nil {
+					fmt.Println("no autoscaler")
+					autoscaler := resource.NewAutoScaler(cluster, deployment, ns)
+					resource.AutoscalerMap[cluster] = autoscaler
+					fmt.Println(resource.AutoscalerMap[cluster].GetWarningCount(deployment))
+				} else {
+					autoscaler := resource.AutoscalerMap[cluster]
+					fmt.Println(resource.AutoscalerMap[cluster].GetWarningCount(deployment))
+					autoscaler.WarningCountPlusOne(deployment)
+					autoscaler.AutoScaling(deployment)
 
-		if bol, _ := algorithm.WatchingLevelCalculator(); bol {
-			autoscaler.WarningCountPlusOne(pod)
-			autoscaler.AutoScaling(pod)
+				}
+			}
 		}
 	}
 

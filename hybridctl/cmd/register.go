@@ -78,7 +78,7 @@ var registerCmd = &cobra.Command{
 			}
 
 			var arguments []string
-			arguments = append(arguments, "bash/sh", platform, clustername)
+			arguments = append(arguments, "bin/bash", platform, clustername)
 
 			switch platform {
 			case "aks":
@@ -94,7 +94,7 @@ var registerCmd = &cobra.Command{
 				fallthrough
 			case "gke":
 				command := &exec.Cmd{
-					Path:   "/root/go/src/Hybrid_Cloud/hybridctl/cmd/register",
+					Path:   "/root/go/src/Hybrid_Cloud/hybridctl/cmd/register/register",
 					Args:   arguments,
 					Stdout: os.Stdout,
 					Stderr: os.Stderr,
