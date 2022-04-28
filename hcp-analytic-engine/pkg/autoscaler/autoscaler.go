@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/backup/resource"
 	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	hasv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	cm "Hybrid_Cloud/util/clusterManager"
@@ -11,26 +10,25 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscaling "k8s.io/api/autoscaling/v1"
 	hpav2beta1 "k8s.io/api/autoscaling/v2beta1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	vpav1beta2 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1beta2"
 	"k8s.io/client-go/kubernetes"
 )
 
-var AutoscalerMap map[string]*autoscaler
+var AutoscalerMap map[string]*autoscaler = make(map[string]*autoscaler)
 
 // cluster 단위
 type autoscaler struct {
-	clustermanager  *cm.ClusterManager
-	cluster         string
-	deployment      map[*v1.Pod]*appsv1.Deployment
-	has_name        map[*v1.Pod]string
-	warningcount    map[*v1.Pod]int
+	clustermanager *cm.ClusterManager
+	cluster        string
+	//deployment      *appsv1.Deployment
+	has_name        *map[*appsv1.Deployment]string
+	warningcount    *map[*appsv1.Deployment]int
 	hasclientset    *hasv1alpha1.Clientset
 	targetclientset *kubernetes.Clientset
 }
 
-func NewAutoScaler(cluster string, pod *v1.Pod, namespace string) *autoscaler {
+func NewAutoScaler(cluster string, deployment *appsv1.Deployment, namespace string) *autoscaler {
 	var hcpautoscaler autoscaler
 
 	hcpautoscaler.cluster = cluster
@@ -43,64 +41,51 @@ func NewAutoScaler(cluster string, pod *v1.Pod, namespace string) *autoscaler {
 	hcpautoscaler.hasclientset = hasv1alpha1clientset
 	hcpautoscaler.targetclientset = ncm.Cluster_kubeClients[cluster]
 
-	// 1. Pod 정보 -> Deployment 정보 얻기
-	//p, _ := resource.GetPod(cluster, pod, namespace)
-	d, _ := resource.GetDeployment(cluster, pod)
-	hcpautoscaler.deployment[pod] = d
-	hcpautoscaler.has_name[pod] = cluster + "-" + d.Name
+	//hcpautoscaler.deployment = deployment
+	name := make(map[*appsv1.Deployment]string)
+	hcpautoscaler.has_name = &name
+	(*hcpautoscaler.has_name)[deployment] = cluster + "-" + deployment.Name
 
-	has, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), hcpautoscaler.has_name[pod], metav1.GetOptions{})
+	has, err := hasv1alpha1clientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*hcpautoscaler.has_name)[deployment], metav1.GetOptions{})
 	if err != nil {
-		fmt.Println(err)
-		hcpautoscaler.warningcount[pod] = 0
+		temp := make(map[*appsv1.Deployment]int)
+		hcpautoscaler.warningcount = &temp
+		(*hcpautoscaler.warningcount)[deployment] = 0
 	} else {
-		hcpautoscaler.warningcount[pod] = int(has.Spec.WarningCount)
+		temp := make(map[*appsv1.Deployment]int)
+		hcpautoscaler.warningcount = &temp
+		(*hcpautoscaler.warningcount)[deployment] = int(has.Spec.WarningCount)
 	}
 
 	return &hcpautoscaler
 }
 
-func (a *autoscaler) WarningCountPlusOne(pod *v1.Pod) {
-	a.warningcount[pod] += 1
+func (a *autoscaler) WarningCountPlusOne(deployment *appsv1.Deployment) {
+	(*a.warningcount)[deployment] += 1
 }
 
-func (a *autoscaler) AutoScaling(pod *v1.Pod) error {
+func (a *autoscaler) GetWarningCount(deployment *appsv1.Deployment) int {
+	return (*a.warningcount)[deployment]
+}
+
+func (a *autoscaler) AutoScaling(deployment *appsv1.Deployment) error {
 	// 2. HCPHybridAutoScalers 정보 얻기
-	switch a.warningcount[pod] {
+	switch (*a.warningcount)[deployment] {
 	case 1:
 		var min int32 = 1
 		minReplicas := &min
 		var maxReplicas int32 = 5
-		return a.CreateHPA(pod, minReplicas, maxReplicas)
+		return a.CreateHPA(deployment, minReplicas, maxReplicas)
 	case 2:
-		return a.UpdateHPA(pod)
+		return a.UpdateHPA(deployment)
 	case 3:
-		return a.CreateVPA(pod, "Auto")
+		return a.CreateVPA(deployment, "Auto")
 	}
 
 	return nil
 }
 
-func (a *autoscaler) CreateHPA(pod *v1.Pod, minReplicas *int32, maxReplicas int32) error {
-	// cm := a.clustermanager
-	// config := cm.Host_config
-	// hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-
-	// // 1. Pod 정보 -> Deployment 정보 얻기
-	// p, err := resource.GetPod(cluster, pod, namespace)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-	// d, err := resource.GetDeployment(cluster, p)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
+func (a *autoscaler) CreateHPA(deployment *appsv1.Deployment, minReplicas *int32, maxReplicas int32) error {
 
 	// 2. hapTemplate 생성
 	hpa := &hpav2beta1.HorizontalPodAutoscaler{
@@ -109,8 +94,8 @@ func (a *autoscaler) CreateHPA(pod *v1.Pod, minReplicas *int32, maxReplicas int3
 			APIVersion: "autoscaling/v2beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.deployment[pod].Name,
-			Namespace: a.deployment[pod].Namespace,
+			Name:      deployment.Name,
+			Namespace: deployment.Namespace,
 		},
 		Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
 			MinReplicas: minReplicas,
@@ -118,7 +103,7 @@ func (a *autoscaler) CreateHPA(pod *v1.Pod, minReplicas *int32, maxReplicas int3
 			ScaleTargetRef: hpav2beta1.CrossVersionObjectReference{
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
-				Name:       a.deployment[pod].Name,
+				Name:       deployment.Name,
 			},
 		},
 	}
@@ -150,24 +135,8 @@ func (a *autoscaler) CreateHPA(pod *v1.Pod, minReplicas *int32, maxReplicas int3
 	}
 }
 
-func (a *autoscaler) UpdateHPA(pod *v1.Pod) error {
-	// cm := a.clustermanager
-	// config := cm.Host_config
-	// hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-
-	// // 2. hapTemplate (warningCount 1) 정보 얻기
-	// target_cluster := a.clustermanager.Cluster_configs[a.cluster]
-	// target_clientset, err := kubernetes.NewForConfig(target_cluster)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-
-	hpa, err := a.targetclientset.AutoscalingV2beta1().HorizontalPodAutoscalers(a.deployment[pod].Namespace).Get(context.TODO(), a.deployment[pod].Name, metav1.GetOptions{})
+func (a *autoscaler) UpdateHPA(deployment *appsv1.Deployment) error {
+	hpa, err := a.targetclientset.AutoscalingV2beta1().HorizontalPodAutoscalers(deployment.Namespace).Get(context.TODO(), deployment.Name, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -188,7 +157,7 @@ func (a *autoscaler) UpdateHPA(pod *v1.Pod) error {
 	}
 
 	// has_name := a.cluster + "-" + a.deployment.Name
-	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), a.has_name[pod], metav1.GetOptions{})
+	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*a.has_name)[deployment], metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -226,29 +195,7 @@ func (a *autoscaler) UpdateHPA(pod *v1.Pod) error {
 	}
 }
 
-func (a *autoscaler) CreateVPA(pod *v1.Pod, updateMode string) error {
-	// cm, err := cm.NewClusterManager()
-	// if err != nil {
-	// 	return err
-	// }
-	// config := cm.Host_config
-	// hasv1alpha1clientset, err := hasv1alpha1.NewForConfig(config)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-
-	// // 1. Pod 정보 -> Deployment 정보 얻기
-	// p, err := resource.GetPod(cluster, pod, namespace)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-	// d, err := resource.GetDeployment(cluster, p)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
+func (a *autoscaler) CreateVPA(deployment *appsv1.Deployment, updateMode string) error {
 
 	// 2. vpaTemplate 생성
 	// updateMode := vpav1beta2.UpdateModeAuto
@@ -258,14 +205,14 @@ func (a *autoscaler) CreateVPA(pod *v1.Pod, updateMode string) error {
 			Kind:       "VerticalPodAutoscaler",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      a.deployment[pod].Name,
-			Namespace: a.deployment[pod].Namespace,
+			Name:      deployment.Name,
+			Namespace: deployment.Namespace,
 		},
 		Spec: vpav1beta2.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscaling.CrossVersionObjectReference{
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
-				Name:       a.deployment[pod].Name,
+				Name:       deployment.Name,
 			},
 			UpdatePolicy: &vpav1beta2.PodUpdatePolicy{
 				UpdateMode: (*vpav1beta2.UpdateMode)(&updateMode),
@@ -274,7 +221,7 @@ func (a *autoscaler) CreateVPA(pod *v1.Pod, updateMode string) error {
 	}
 
 	// has_name := a.cluster + "-" + a.deployment.Name
-	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), a.has_name[pod], metav1.GetOptions{})
+	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*a.has_name)[deployment], metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
