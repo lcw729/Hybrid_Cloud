@@ -108,7 +108,7 @@ func (a *autoscaler) AutoScaling(deployment *appsv1.Deployment) error {
 }
 
 func (a *autoscaler) CreateHPA(deployment *appsv1.Deployment, minReplicas *int32, maxReplicas int32) error {
-	fmt.Printf("===> create new HPA %s\n", deployment.Name)
+	fmt.Printf("===> create new HPA %s\n", (*deployment).Name)
 	// 2. hapTemplate 생성
 	hpa := &hpav2beta1.HorizontalPodAutoscaler{
 		TypeMeta: metav1.TypeMeta{
@@ -116,8 +116,8 @@ func (a *autoscaler) CreateHPA(deployment *appsv1.Deployment, minReplicas *int32
 			APIVersion: "autoscaling/v2beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      deployment.Name,
-			Namespace: deployment.Namespace,
+			Name:      (*deployment).Name,
+			Namespace: (*deployment).Namespace,
 		},
 		Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
 			MinReplicas: minReplicas,
@@ -125,7 +125,7 @@ func (a *autoscaler) CreateHPA(deployment *appsv1.Deployment, minReplicas *int32
 			ScaleTargetRef: hpav2beta1.CrossVersionObjectReference{
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
-				Name:       deployment.Name,
+				Name:       (*deployment).Name,
 			},
 		},
 	}
@@ -158,8 +158,8 @@ func (a *autoscaler) CreateHPA(deployment *appsv1.Deployment, minReplicas *int32
 }
 
 func (a *autoscaler) UpdateHPA(deployment *appsv1.Deployment) error {
-	fmt.Printf("===> update HPA %s MaxReplicas\n", deployment.Name)
-	hpa, err := a.targetclientset.AutoscalingV2beta1().HorizontalPodAutoscalers(deployment.Namespace).Get(context.TODO(), deployment.Name, metav1.GetOptions{})
+	fmt.Printf("===> update HPA %s MaxReplicas\n", (*deployment).Name)
+	hpa, err := a.targetclientset.AutoscalingV2beta1().HorizontalPodAutoscalers((*deployment).Namespace).Get(context.TODO(), (*deployment).Name, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -201,7 +201,7 @@ func (a *autoscaler) UpdateHPA(deployment *appsv1.Deployment) error {
 }
 
 func (a *autoscaler) CreateVPA(deployment *appsv1.Deployment, updateMode string) error {
-	fmt.Printf("===> create new VPA %s\n", deployment.Name)
+	fmt.Printf("===> create new VPA %s\n", (*deployment).Name)
 	// 2. vpaTemplate 생성
 	// updateMode := vpav1beta2.UpdateModeAuto
 	vpa := vpav1beta2.VerticalPodAutoscaler{
@@ -210,14 +210,14 @@ func (a *autoscaler) CreateVPA(deployment *appsv1.Deployment, updateMode string)
 			Kind:       "VerticalPodAutoscaler",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      deployment.Name,
-			Namespace: deployment.Namespace,
+			Name:      (*deployment).Name,
+			Namespace: (*deployment).Namespace,
 		},
 		Spec: vpav1beta2.VerticalPodAutoscalerSpec{
 			TargetRef: &autoscaling.CrossVersionObjectReference{
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
-				Name:       deployment.Name,
+				Name:       (*deployment).Name,
 			},
 			UpdatePolicy: &vpav1beta2.PodUpdatePolicy{
 				UpdateMode: (*vpav1beta2.UpdateMode)(&updateMode),

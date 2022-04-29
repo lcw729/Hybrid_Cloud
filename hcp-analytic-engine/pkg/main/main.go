@@ -3,11 +3,11 @@ package main
 import (
 	resource "Hybrid_Cloud/hcp-analytic-engine/pkg/autoscaler"
 	"Hybrid_Cloud/hcp-analytic-engine/pkg/backup/algorithm"
-	cm "Hybrid_Cloud/util/clusterManager"
-	"context"
+	kuberesourcedeploy "Hybrid_Cloud/kube-resource/deployment"
+	kuberesourcepo "Hybrid_Cloud/kube-resource/pod"
 	"fmt"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os/exec"
+	"time"
 )
 
 // policy "Hybrid_Cloud/hcp-analytic-engine/pkg/policy"
@@ -96,38 +96,71 @@ func main() {
 	*/
 
 	// HPA/VPA 함수 사용 예시
-	cluster := "aks-master"
-	test_dep_name := "nginx-deploy"
-	ns := "default"
+	// cluster := "aks-master"
+	// test_dep_name := "nginx-deploy"
+	// ns := "default"
 
-	clustermanager, err := cm.NewClusterManager()
-	clientset := clustermanager.Cluster_kubeClients[cluster]
-	deployment, _ := clientset.AppsV1().Deployments(ns).Get(context.TODO(), test_dep_name, metav1.GetOptions{})
+	//clustermanager, err := cm.NewClusterManager()
+	//clientset := clustermanager.Cluster_kubeClients[cluster]
+	//deployment, _ := clientset.AppsV1().Deployments(ns).Get(context.TODO(), test_dep_name, metav1.GetOptions{})
 
-	for i := 0; i < 4; i++ {
+	// var jsonarray PodMetric
+	var cluster_list = []string{"gke-cluster"}
+	// cluster_list 생성 우선 gke-cluster, aks-cluster, eks-cluster 가 저장되어있다고 가정
+	var podNum = []int{22}
+
+	for {
+		// cmd := exec.Command("kubectl", "config", "get-contexts", "--output='name'", ">", "cluster_list.txt")
+		cmd := exec.Command("kubectl", "version", ">", "kubectl_version.txt")
+		cmd.Dir = "usr/local/bin"
+		output, err := cmd.Output()
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			if bol, _ := algorithm.WatchingLevelCalculator(); bol {
-				if resource.AutoscalerMap[cluster] == nil {
-					fmt.Println("===========no autoscaler===========")
-					autoscaler := resource.NewAutoScaler(cluster)
-					autoscaler.RegisterDeploymentToAutoScaler(deployment, deployment.Namespace)
-					resource.AutoscalerMap[cluster] = autoscaler
-					fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster].GetWarningCount(deployment))
-					fmt.Println("===================================")
-				} else {
-					autoscaler := resource.AutoscalerMap[cluster]
-					if !autoscaler.ExistDeployment(deployment, ns) {
-						autoscaler.RegisterDeploymentToAutoScaler(deployment, ns)
+			fmt.Println(string(output))
+		}
+		// clusterList, err := ioutil.ReadFile("usr/local/bin/cluster_list1.txt")
+		// clusterList, err := ioutil.ReadFile("~/../usr/local/bin/kubectl_version.txt")
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// fmt.Println(string(clusterList))
+
+		for i := 0; i < len(cluster_list); i++ {
+			// bol, pod, namespace, _ := algorithm.Calculate_WatchingLevel(podNum[i], cluster_list[i])
+			// fmt.Println(bol, pod, namespace)
+
+			fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+			if bol, pod, namespace, _ := algorithm.Calculate_WatchingLevel(podNum[i], cluster_list[i]); bol {
+				// 1. autoscalerMap에 cluster 등록되어있는지 확인
+				po, _ := kuberesourcepo.GetPod(cluster_list[i], pod, namespace)
+				deployment, err := kuberesourcedeploy.GetDeployment(cluster_list[i], po)
+				if deployment != nil && deployment.ObjectMeta.Name == "php-apache" {
+					fmt.Println(deployment.ObjectMeta.Name)
+					if resource.AutoscalerMap[cluster_list[i]] == nil {
+						fmt.Println("===========no autoscaler===========")
+						// autoscalerMap에 cluster autoscaler 저장
+						autoscaler := resource.NewAutoScaler(cluster_list[i])
+						autoscaler.RegisterDeploymentToAutoScaler(deployment, deployment.Namespace)
+						resource.AutoscalerMap[cluster_list[i]] = autoscaler
+						fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster_list[i]].GetWarningCount(deployment))
+						fmt.Println("===================================")
+					} else {
+						autoscaler := resource.AutoscalerMap[cluster_list[i]]
+						if !autoscaler.ExistDeployment(deployment, namespace) {
+							autoscaler.RegisterDeploymentToAutoScaler(deployment, namespace)
+						}
+						autoscaler.WarningCountPlusOne(deployment)
+						autoscaler.AutoScaling(deployment)
+						fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster_list[i]].GetWarningCount(deployment))
 					}
-					autoscaler.WarningCountPlusOne(deployment)
-					autoscaler.AutoScaling(deployment)
-					fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster].GetWarningCount(deployment))
+				} else {
+					fmt.Println(err)
 				}
 			}
+			time.Sleep(10 * time.Second)
+			fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 		}
-		fmt.Println()
 	}
 
 	/*

@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -149,11 +148,4 @@ func main() {
 
 	fmt.Println("start server")
 	http.ListenAndServe(":8080", handlerRequests())
-}
-
-func init() {
-	os.Setenv("ClientId", "9bd853b8-04d5-4c24-8d07-f0e7cd0a680e")
-	os.Setenv("ClientSecret", "Q9r7Q~9ypO-BmymfM8vHOq22tjW6kJaRHz~4y")
-	os.Setenv("SubscriptionId", "ccfc0c6c-d3c6-4de2-9a6c-c09ca498ff73")
-	os.Setenv("TenantId", "c8ea91b5-6aac-4c5c-ae34-9717a872159f")
 }
