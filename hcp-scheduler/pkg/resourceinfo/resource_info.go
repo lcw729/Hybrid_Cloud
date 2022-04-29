@@ -45,6 +45,8 @@ func CreateNodeInfoMap(clusters *ClusterInfoList) map[string]*NodeInfo {
 	return nodeNameToInfo
 }
 */
+// DefaultBindAllHostIP defines the default ip address used to bind to all host.
+const DefaultBindAllHostIP = "0.0.0.0"
 
 func NewNodeInfo(name string, pods ...*v1.Pod) *NodeInfo {
 	ni := &NodeInfo{
@@ -55,6 +57,7 @@ func NewNodeInfo(name string, pods ...*v1.Pod) *NodeInfo {
 			MilliCPU:         30,
 			Memory:           25,
 		},
+		UsedPorts:   make(HostPortInfo),
 		ImageStates: make(map[string]*ImageStateSummary),
 	}
 	(*ni).Node = &v1.Node{
@@ -153,4 +156,111 @@ func GetNodeImageStates(node *v1.Node, imageExistenceMap map[string]sets.String)
 		}
 	}
 	return imageStates
+}
+
+// usedPort
+// updateUsedPorts updates the UsedPorts of NodeInfo.
+func (n *NodeInfo) updateUsedPorts(pod *v1.Pod, add bool) {
+	for _, container := range pod.Spec.Containers {
+		for _, podPort := range container.Ports {
+			if add {
+				n.UsedPorts.Add(podPort.HostIP, string(podPort.Protocol), podPort.HostPort)
+			} else {
+				n.UsedPorts.Remove(podPort.HostIP, string(podPort.Protocol), podPort.HostPort)
+			}
+		}
+	}
+}
+
+// Add adds (ip, protocol, port) to HostPortInfo
+func (h HostPortInfo) Add(ip, protocol string, port int32) {
+	if port <= 0 {
+		return
+	}
+
+	h.sanitize(&ip, &protocol)
+
+	pp := NewProtocolPort(protocol, port)
+	if _, ok := h[ip]; !ok {
+		h[ip] = map[ProtocolPort]struct{}{
+			*pp: {},
+		}
+		return
+	}
+
+	h[ip][*pp] = struct{}{}
+}
+
+// Remove removes (ip, protocol, port) from HostPortInfo
+func (h HostPortInfo) Remove(ip, protocol string, port int32) {
+	if port <= 0 {
+		return
+	}
+
+	h.sanitize(&ip, &protocol)
+
+	pp := NewProtocolPort(protocol, port)
+	if m, ok := h[ip]; ok {
+		delete(m, *pp)
+		if len(h[ip]) == 0 {
+			delete(h, ip)
+		}
+	}
+}
+
+// CheckConflict checks if the input (ip, protocol, port) conflicts with the existing
+// ones in HostPortInfo.
+func (h HostPortInfo) CheckConflict(ip, protocol string, port int32) bool {
+	if port <= 0 {
+		return false
+	}
+
+	h.sanitize(&ip, &protocol)
+
+	pp := NewProtocolPort(protocol, port)
+
+	// If ip is 0.0.0.0 check all IP's (protocol, port) pair
+	if ip == DefaultBindAllHostIP {
+		for _, m := range h {
+			if _, ok := m[*pp]; ok {
+				return true
+			}
+		}
+		return false
+	}
+
+	// If ip isn't 0.0.0.0, only check IP and 0.0.0.0's (protocol, port) pair
+	for _, key := range []string{DefaultBindAllHostIP, ip} {
+		if m, ok := h[key]; ok {
+			if _, ok2 := m[*pp]; ok2 {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// NewProtocolPort creates a ProtocolPort instance.
+func NewProtocolPort(protocol string, port int32) *ProtocolPort {
+	pp := &ProtocolPort{
+		Protocol: protocol,
+		Port:     port,
+	}
+
+	if len(pp.Protocol) == 0 {
+		pp.Protocol = string(v1.ProtocolTCP)
+	}
+
+	return pp
+}
+
+// sanitize the parameters
+func (h HostPortInfo) sanitize(ip, protocol *string) {
+	if len(*ip) == 0 {
+		*ip = DefaultBindAllHostIP
+	}
+	if len(*protocol) == 0 {
+		*protocol = string(v1.ProtocolTCP)
+	}
 }

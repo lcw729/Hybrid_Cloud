@@ -17,6 +17,15 @@ type ClusterInfo struct {
 	CapacityResources  *Resources
 }
 
+// ProtocolPort represents a protocol port pair, e.g. tcp:80.
+type ProtocolPort struct {
+	Protocol string
+	Port     int32
+}
+
+// HostPortInfo stores mapping from ip to a set of ProtocolPort
+type HostPortInfo map[string]map[ProtocolPort]struct{}
+
 // NodeInfo is node level aggregated information.
 type NodeInfo struct {
 	ClusterName string
@@ -24,6 +33,8 @@ type NodeInfo struct {
 	// Overall node information.
 	Node      *v1.Node
 	NodeScore int32
+	// Ports allocated on the node.
+	UsedPorts HostPortInfo
 
 	// Pods running on the node.
 	Pods []*PodInfo
