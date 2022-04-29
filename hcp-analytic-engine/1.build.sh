@@ -1,21 +1,12 @@
-registry="ketidevit"
-imagename="hcp-analytic-engine"
-version="v1.0"
+#!/bin/bash
+docker_id="ketidevit2"
+controller_name="hcp-analytic-engine"
 
-#실행파일 생성
-go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo . && \
+export GO111MODULE=on
+go mod vendor
 
-# make image
-docker build -t $imagename:$version .
+go build -o build/_output/bin/$controller_name -gcflags all=-trimpath=`pwd` -asmflags all=-trimpath=`pwd` -mod=vendor Hybrid_Cloud/hcp-analytic-engine/pkg/main && \
 
-# add tag
-# docker image에 나의 registry tag를 붙여야 push 가능
-docker tag $imagename:$version $registry/$imagename:$version
+docker build -t $docker_id/$controller_name:v0.0.1 build && \
+docker push $docker_id/$controller_name:v0.0.1
 
-# login
-# Docker에 push하기 위해 login
-docker login && \
-
-
-# push image
-docker push $registry/$imagename:$version

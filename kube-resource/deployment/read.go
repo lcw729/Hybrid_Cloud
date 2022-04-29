@@ -21,14 +21,15 @@ func GetDeploymentName(pod *corev1.Pod) string {
 }
 
 func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
+	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/mnt/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
 	deploymentName := GetDeploymentName(pod)
+	fmt.Println(deploymentName)
 	d, err := cluster_client.AppsV1().Deployments(pod.Namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return d, err
 	} else {
 		fmt.Printf("success to get deployment %s in cluster %s [replicas : %d]\n", d.Name, cluster, *d.Spec.Replicas)
+		return nil, err
 	}
-	return d, err
 }
