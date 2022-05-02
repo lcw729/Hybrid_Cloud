@@ -225,7 +225,7 @@ func (c *Controller) syncHandler(key string) error {
 	vpa_namespace := vpa_template.ObjectMeta.Namespace
 
 	// create target_cluster clientset
-	config, err := cobrautil.BuildConfigFromFlags(target_cluster, "/root/.kube/config")
+	config, err := cobrautil.BuildConfigFromFlags(target_cluster, "/mnt/config")
 	if err != nil {
 		fmt.Println(err)
 		return err

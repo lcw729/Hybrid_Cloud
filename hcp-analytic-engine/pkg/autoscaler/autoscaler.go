@@ -22,7 +22,7 @@ var AutoscalerMap map[string]*autoscaler = make(map[string]*autoscaler)
 type autoscaler struct {
 	clustermanager  *cm.ClusterManager
 	cluster         string
-	deployList      *[]*appsv1.Deployment
+	deployList      []*appsv1.Deployment
 	has_name        *map[*appsv1.Deployment]string
 	warningcount    *map[*appsv1.Deployment]int
 	hasclientset    *hasv1alpha1.Clientset
@@ -42,22 +42,20 @@ func NewAutoScaler(cluster string) *autoscaler {
 	hasv1alpha1clientset, _ := hasv1alpha1.NewForConfig(config)
 	hcpautoscaler.hasclientset = hasv1alpha1clientset
 	hcpautoscaler.targetclientset = ncm.Cluster_kubeClients[cluster]
+	temp := make(map[*appsv1.Deployment]string)
+	hcpautoscaler.has_name = &temp
+	temp2 := make(map[*appsv1.Deployment]int)
+	hcpautoscaler.warningcount = &temp2
 
-	name := make(map[*appsv1.Deployment]string)
-	hcpautoscaler.has_name = &name
-
-	temp := make(map[*appsv1.Deployment]int)
-	hcpautoscaler.warningcount = &temp
-
-	var list []*appsv1.Deployment
-	hcpautoscaler.deployList = &list
+	// var list []*appsv1.Deployment
+	// hcpautoscaler.deployList = list
 
 	return &hcpautoscaler
 }
 
 // autoscaler에 해당 deployment 존재 여부 확인
-func (a *autoscaler) ExistDeployment(deployment *appsv1.Deployment, namespace string) bool {
-	for _, dep := range *a.deployList {
+func (a *autoscaler) ExistDeployment(deployment *appsv1.Deployment) bool {
+	for _, dep := range a.deployList {
 		if dep == deployment {
 			return true
 		} else {
@@ -68,10 +66,11 @@ func (a *autoscaler) ExistDeployment(deployment *appsv1.Deployment, namespace st
 }
 
 // autoscaler에 해당 deployment 등록
-func (a *autoscaler) RegisterDeploymentToAutoScaler(deployment *appsv1.Deployment, namespace string) {
+func (a *autoscaler) RegisterDeploymentToAutoScaler(deployment *appsv1.Deployment) {
 	fmt.Println("=> register deployment to autoscaler")
-	(*a.deployList) = append((*a.deployList), deployment)
-	(*a.has_name)[deployment] = a.cluster + "-" + deployment.Name
+	a.deployList = append(a.deployList, deployment)
+	fmt.Println(deployment.ObjectMeta.Name)
+	(*a.has_name)[deployment] = a.cluster + "-" + deployment.ObjectMeta.Name
 	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*a.has_name)[deployment], metav1.GetOptions{})
 	if err != nil {
 		(*a.warningcount)[deployment] = 0

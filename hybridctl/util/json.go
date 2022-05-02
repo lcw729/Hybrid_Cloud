@@ -31,7 +31,7 @@ func PrintOutput(bytes []byte) error {
 		fmt.Print(string(output.Stdout))
 	}
 	if output.Stderr != nil {
-		fmt.Print("thistiserr:", string(output.Stderr))
+		fmt.Print(string(output.Stderr))
 	}
 	return err
 }

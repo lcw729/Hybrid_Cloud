@@ -30,9 +30,7 @@ require (
 	k8s.io/autoscaler/vertical-pod-autoscaler v0.10.0
 	k8s.io/client-go v0.23.4
 	k8s.io/code-generator v0.23.4
-	k8s.io/csi-translation-lib v0.23.4 // indirect
 	k8s.io/gengo v0.0.0-20210813121822-485abfe95c7c
-	k8s.io/klog v1.0.0 // indirect
 	k8s.io/klog/v2 v2.30.0
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
 	k8s.io/kubernetes v1.23.5

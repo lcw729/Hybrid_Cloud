@@ -30,6 +30,6 @@ func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
 		return d, err
 	} else {
 		fmt.Printf("success to get deployment %s in cluster %s [replicas : %d]\n", d.Name, cluster, *d.Spec.Replicas)
-		return nil, err
+		return d, err
 	}
 }

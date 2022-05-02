@@ -244,7 +244,7 @@ func (c *Controller) syncHandler(key string) error {
 			}
 
 		} else {
-			klog.Info("fail to join %s", clustername)
+			klog.Info("fail to join ", clustername)
 		}
 
 	} else if joinstatus == "UNJOINING" {
@@ -264,7 +264,7 @@ func (c *Controller) syncHandler(key string) error {
 				klog.Info("success to unjoin %s", clustername)
 			}
 		} else {
-			klog.Info("fail to unjoin %s", clustername)
+			klog.Info("fail to unjoin", clustername)
 		}
 	} else if joinstatus == "UNREADY" {
 		// UNREADY -- JOIN UNSTABLE
@@ -272,12 +272,12 @@ func (c *Controller) syncHandler(key string) error {
 			if JoinCluster(clustername, master_config, join_cluster_config, hcp_cluster) {
 				hcpcluster.Spec.JoinStatus = "JOIN"
 				hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
-				klog.Infof("success to join %s", clustername)
+				klog.Infof("success to join", clustername)
 			} else {
-				klog.Infof("fail to join %s", clustername)
+				klog.Infof("fail to join", clustername)
 			}
 		} else {
-			klog.Infof("fail to unjoin %s", clustername)
+			klog.Infof("fail to unjoin", clustername)
 		}
 	} else {
 		// JOIN/UNJOIN Cluster 상태 확인
@@ -559,7 +559,7 @@ func UnJoinCluster(clustername string,
 		log.Println(err_sa)
 		return false
 	} else {
-		klog.Info("< Step 2 > Delete Namespace Resource [" + sa + "] in " + clustername)
+		klog.Info("< Step 1 > Delete ServiceAccount Resource [" + sa + "] in " + clustername)
 	}
 
 	// 3. DELETE cluster role
@@ -570,7 +570,7 @@ func UnJoinCluster(clustername string,
 		log.Println(err_cr)
 		return false
 	} else {
-		klog.Info("< Step 3 > Delete ClusterRole Resource [" + cr + "] in " + clustername)
+		klog.Info("< Step 2 > Delete ClusterRole Resource [" + cr + "] in " + clustername)
 	}
 
 	// 4. DELETE Cluster Role Binding
@@ -581,7 +581,7 @@ func UnJoinCluster(clustername string,
 		log.Println(err_crb)
 		return false
 	} else {
-		klog.Info("< Step 4 >  Delete ClusterRoleBinding Resource [" + crb + "] in " + clustername)
+		klog.Info("< Step 3 >  Delete ClusterRoleBinding Resource [" + crb + "] in " + clustername)
 	}
 
 	time.Sleep(1 * time.Second)
@@ -602,7 +602,7 @@ func UnJoinCluster(clustername string,
 		log.Println(err)
 		return false
 	} else {
-		klog.Info("< Step 6 >  Delete KubefedCluster Resource [" + clustername + "] in hcp")
+		klog.Info("< Step 4 >  Delete KubefedCluster Resource [" + clustername + "] in hcp")
 	}
 
 	// 6. GET & DELETE secret (in hcp)
@@ -621,7 +621,7 @@ func UnJoinCluster(clustername string,
 		log.Println(err)
 		return false
 	} else {
-		klog.Info("< Step 7 >  Delete Secret Resource [" + secret_instance.Name + "] in " + "master")
+		klog.Info("< Step 5 >  Delete Secret Resource [" + secret_instance.Name + "] in " + "master")
 	}
 
 	return true

@@ -4,7 +4,7 @@ import (
 	// "Hybrid_Cloud/hcp-analytic-engine/influx"
 	// "Hybrid_Cloud/omcplog"
 
-	"Hybrid_Cloud/test/influx"
+	"Hybrid_Cloud/hcp-analytic-engine/influx"
 	"bytes"
 	"encoding/json"
 	"os"
@@ -71,7 +71,7 @@ type NetworkMetric struct {
 // 	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!")
 // }
 
-func GetResource(podNum int, ns, clusterName string) []byte {
+func GetResource(podNum int, clusterName string) []byte {
 	INFLUX_IP := os.Getenv("INFLUX_IP")
 	INFLUX_PORT := os.Getenv("INFLUX_PORT")
 	INFLUX_USERNAME := os.Getenv("INFLUX_USERNAME")
@@ -84,7 +84,7 @@ func GetResource(podNum int, ns, clusterName string) []byte {
 
 	if objectType == "pods" {
 
-		results := inf.GetPodData(podNum, ns, clusterName)
+		results := inf.GetPodData(podNum, clusterName)
 
 		pm := setPodMetric(results)
 		// fmt.Print("results: ", results)
