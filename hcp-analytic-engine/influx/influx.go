@@ -33,11 +33,11 @@ func InfluxDBClient(INFLUX_IP, INFLUX_PORT, username, password string) client.Cl
 	return c
 }
 
-func (in *Influx) GetPodData(podNum int, ns, clusterName string) []client.Result {
+func (in *Influx) GetPodData(podNum int, clusterName string) []client.Result {
 	// omcplog.V(4).Info("Func GetPodData Called")
 	// omcplog.V(5).Info("timeStart=", timeStart, ", timeEnd=", timeEnd)
-	pod_Num := fmt.Sprint(podNum)
-	q := client.NewQuery("SELECT * FROM Pods WHERE cluster = '"+clusterName+"' ORDER BY DESC LIMIT "+pod_Num+" ", "Metrics", "")
+	//pod_Num := fmt.Sprint(podNum)
+	q := client.NewQuery("SELECT * FROM Pods WHERE cluster = '"+clusterName+"' AND namespace = 'default' ORDER BY DESC LIMIT 2", "Metrics", "")
 
 	response, err := in.inClient.Query(q)
 
@@ -51,7 +51,7 @@ func (in *Influx) GetNodeData(clusterName string) []client.Result {
 	// omcplog.V(4).Info("Func GetNodeData Called")
 	// omcplog.V(5).Info("timeStart=", timeStart, ", timeEnd=", timeEnd)
 
-	q := client.NewQuery("SELECT * FROM Nodes WHERE cluster = '"+clusterName+"' ORDER BY DESC LIMIT 1", "Metrics", "")
+	q := client.NewQuery("SELECT * FROM Nodes WHERE cluster = '"+clusterName+"' ORDER BY DESC LIMIT 3", "Metrics", "")
 
 	response, err := in.inClient.Query(q)
 

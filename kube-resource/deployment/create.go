@@ -13,7 +13,7 @@ import (
 )
 
 func CreateDeployment(cluster string, node string, deployment *v1.Deployment) error {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
+	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/mnt/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
 	deployment.Spec.Template.Spec.NodeName = node
 	deployment.ResourceVersion = ""

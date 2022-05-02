@@ -847,8 +847,6 @@ k8s.io/component-base/featuregate
 # k8s.io/component-helpers v0.23.4 => k8s.io/component-helpers v0.23.4
 k8s.io/component-helpers/scheduling/corev1
 k8s.io/component-helpers/scheduling/corev1/nodeaffinity
-# k8s.io/csi-translation-lib v0.23.4 => k8s.io/csi-translation-lib v0.23.4
-## explicit
 # k8s.io/gengo v0.0.0-20210813121822-485abfe95c7c
 ## explicit
 k8s.io/gengo/args
@@ -861,8 +859,6 @@ k8s.io/gengo/generator
 k8s.io/gengo/namer
 k8s.io/gengo/parser
 k8s.io/gengo/types
-# k8s.io/klog v1.0.0
-## explicit
 # k8s.io/klog/v2 v2.30.0 => k8s.io/klog/v2 v2.9.0
 ## explicit
 k8s.io/klog/v2
