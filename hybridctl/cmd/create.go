@@ -41,7 +41,6 @@ var ResourceCmd = &cobra.Command{
 
 func CreateResource() {
 
-	fmt.Println("1")
 	yaml, err := ReadFile()
 	if err != nil {
 		println(err)
@@ -57,7 +56,7 @@ func CreateResource() {
 }
 
 func ReadFile() ([]byte, error) {
-	fmt.Println("2")
+
 	file_name := cobrautil.Option_file
 
 	if file_name == "" {
@@ -75,7 +74,7 @@ func ReadFile() ([]byte, error) {
 }
 
 func GetObject(yaml []byte) (runtime.Object, *schema.GroupVersionKind, error) {
-	fmt.Println("3")
+
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	obj, gvk, err := decode([]byte(yaml), nil, nil)

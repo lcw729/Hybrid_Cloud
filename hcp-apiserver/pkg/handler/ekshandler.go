@@ -2,7 +2,7 @@ package handler
 
 import (
 	cobrautil "Hybrid_Cloud/hybridctl/util"
-	clusterRegister "Hybrid_Cloud/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"context"
 	"fmt"
 	"log"
@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // addon
@@ -23,14 +23,15 @@ func checkErr(err error) {
 
 func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	clusterRegisterClientSet, err := clusterRegister.NewForConfig(master_config)
-	checkErr(err)
-	clusterRegisters, err := clusterRegisterClientSet.ClusterRegisters("eks").Get(context.TODO(), *clusterName, v1.GetOptions{})
+	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(master_config)
+
+	_, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), *clusterName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
+
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(clusterRegisters.Spec.Region),
+		Region: aws.String("us-east-2"),
 	}))
 	eksSvc := eks.New(sess)
 	return eksSvc, nil

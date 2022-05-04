@@ -21,7 +21,7 @@ func GetResponseBody(method string, httpPostUrl string, input interface{}) ([]by
 	if err != nil {
 		fmt.Println(err, "GetResponseBody Func")
 	}
-	defer response.Body.Close()
+	//	defer response.Body.Close()
 	bytes, err := ioutil.ReadAll(response.Body)
 	return bytes, err
 }
