@@ -39,7 +39,7 @@ func NewClusterInfoList() *ClusterInfoList {
 func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
 
 	fmt.Println("[1-1] create clusterInfoMap")
-	ClusterNameToInfo := make(map[string]*ClusterInfo)
+	ClusterNameToInfo := make(map[string]*ClusterInfo, len(*clusters))
 	for _, cluster := range *clusters {
 		clusterName := cluster.ClusterName
 		if _, ok := ClusterNameToInfo[clusterName]; !ok {

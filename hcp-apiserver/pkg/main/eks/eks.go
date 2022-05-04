@@ -4,6 +4,7 @@ import (
 	"Hybrid_Cloud/hcp-apiserver/pkg/handler"
 	"Hybrid_Cloud/hcp-apiserver/pkg/util"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/service/eks"
@@ -79,6 +80,7 @@ func ListAddon(w http.ResponseWriter, req *http.Request) {
 	var listAddonInput eks.ListAddonsInput
 
 	util.Parser(req, &listAddonInput)
+	fmt.Println(listAddonInput)
 	out, err := handler.EKSListAddon(listAddonInput)
 	var jsonData []byte
 	if err != nil {

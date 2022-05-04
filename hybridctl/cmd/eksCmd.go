@@ -222,7 +222,7 @@ var EKSListAddonCmd = &cobra.Command{
 			listAddonInput.NextToken = &nextToken
 		}
 
-		httpPostUrl := "/eks/addon/list"
+		httpPostUrl := "http://localhost:8080/eks/addon/list"
 		bytes := util.HTTPPostRequest(listAddonInput, httpPostUrl)
 		var output eks.ListAddonsOutput
 		json.Unmarshal(bytes, &output)

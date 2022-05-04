@@ -41,7 +41,7 @@ var registerCmd = &cobra.Command{
 
 	DESCRIPTION
 		
-	>> cluster register PLATFORM CLUSTER <<
+	>> hybridctl register PLATFORM CLUSTERNAME <<
 
 	* This command registers the cluster you want to manage, 
 	For each platform, you must fill in the information below.
@@ -57,7 +57,7 @@ var registerCmd = &cobra.Command{
 	  hybridctl register eks CLUSTER_NAME
 
 	- gke   google kuberntes engine
-	  hybridctl egister gke CLUSTER_NAME 
+	  hybridctl register gke CLUSTER_NAME 
 
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
