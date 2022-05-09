@@ -158,25 +158,6 @@ func (a *autoscaler) CreateHPA(deployment *appsv1.Deployment, minReplicas *int32
 
 func (a *autoscaler) UpdateHPA(deployment *appsv1.Deployment) error {
 	fmt.Printf("===> update HPA %s MaxReplicas\n", (*deployment).Name)
-	hpa, err := a.targetclientset.AutoscalingV2beta1().HorizontalPodAutoscalers((*deployment).Namespace).Get(context.TODO(), (*deployment).Name, metav1.GetOptions{})
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	// 2-1. hpa max값 설정
-	nhpa := hpav2beta1.HorizontalPodAutoscaler{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "HorizontalPodAutoscaler",
-			APIVersion: "autoscaling/v2beta1",
-		},
-		ObjectMeta: hpa.ObjectMeta,
-		Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
-			MinReplicas:    hpa.Spec.MinReplicas,
-			MaxReplicas:    hpa.Spec.MaxReplicas * 2,
-			ScaleTargetRef: hpa.Spec.ScaleTargetRef,
-		},
-	}
 
 	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*a.has_name)[deployment], metav1.GetOptions{})
 	if err != nil {
@@ -184,45 +165,48 @@ func (a *autoscaler) UpdateHPA(deployment *appsv1.Deployment) error {
 		return err
 	}
 
-	has.Status.LastSpec = has.Spec
-	has.Spec.WarningCount = 2
-	has.Spec.ScalingOptions = resourcev1alpha1.ScalingOptions{HpaTemplate: nhpa}
-	has.Status = resourcev1alpha1.HCPHybridAutoScalerStatus{ResourceStatus: "WAITING"}
+	if has.Status.ResourceStatus == "DONE" {
+		hpa, err := a.targetclientset.AutoscalingV2beta1().HorizontalPodAutoscalers((*deployment).Namespace).Get(context.TODO(), (*deployment).Name, metav1.GetOptions{})
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 
-	newhas, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Update(context.TODO(), has, metav1.UpdateOptions{})
-	if err != nil {
-		fmt.Println(err)
-		return err
+		// 2-1. hpa max값 설정
+		nhpa := hpav2beta1.HorizontalPodAutoscaler{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "HorizontalPodAutoscaler",
+				APIVersion: "autoscaling/v2beta1",
+			},
+			ObjectMeta: hpa.ObjectMeta,
+			Spec: hpav2beta1.HorizontalPodAutoscalerSpec{
+				MinReplicas:    hpa.Spec.MinReplicas,
+				MaxReplicas:    hpa.Spec.MaxReplicas * 2,
+				ScaleTargetRef: hpa.Spec.ScaleTargetRef,
+			},
+		}
+
+		has.Status.LastSpec = has.Spec
+		has.Spec.WarningCount = 2
+		has.Spec.ScalingOptions = resourcev1alpha1.ScalingOptions{HpaTemplate: nhpa}
+		has.Status = resourcev1alpha1.HCPHybridAutoScalerStatus{ResourceStatus: "WAITING"}
+
+		newhas, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Update(context.TODO(), has, metav1.UpdateOptions{})
+		if err != nil {
+			fmt.Println(err)
+			return err
+		} else {
+			fmt.Printf("=====> update %s Done\n", newhas.Name)
+			return nil
+		}
 	} else {
-		fmt.Printf("=====> update %s Done\n", newhas.Name)
-		return nil
+		fmt.Printf("HCPHybridAutoScaler ResourceStatus is not DONE : %s\n", has.Status.ResourceStatus)
+		return fmt.Errorf("HCPHybridAutoScaler ResourceStatus is not DONE : %s\n", has.Status.ResourceStatus)
 	}
 }
 
 func (a *autoscaler) CreateVPA(deployment *appsv1.Deployment, updateMode string) error {
 	fmt.Printf("===> create new VPA %s\n", (*deployment).Name)
-	// 2. vpaTemplate 생성
-	// updateMode := vpav1beta2.UpdateModeAuto
-	vpa := vpav1beta2.VerticalPodAutoscaler{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "autoscaling.k8s.io/v1",
-			Kind:       "VerticalPodAutoscaler",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      (*deployment).Name,
-			Namespace: (*deployment).Namespace,
-		},
-		Spec: vpav1beta2.VerticalPodAutoscalerSpec{
-			TargetRef: &autoscaling.CrossVersionObjectReference{
-				APIVersion: "apps/v1",
-				Kind:       "Deployment",
-				Name:       (*deployment).Name,
-			},
-			UpdatePolicy: &vpav1beta2.PodUpdatePolicy{
-				UpdateMode: (*vpav1beta2.UpdateMode)(&updateMode),
-			},
-		},
-	}
 
 	has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*a.has_name)[deployment], metav1.GetOptions{})
 	if err != nil {
@@ -230,18 +214,52 @@ func (a *autoscaler) CreateVPA(deployment *appsv1.Deployment, updateMode string)
 		return err
 	}
 
-	// 3. vpaTemplate -> HCPHybridAutoScaler 생성
-	has.Status.LastSpec = has.Spec
-	has.Spec.WarningCount = 3
-	has.Spec.ScalingOptions = resourcev1alpha1.ScalingOptions{VpaTemplate: vpa}
-	has.Status = resourcev1alpha1.HCPHybridAutoScalerStatus{ResourceStatus: "WAITING"}
+	if has.Status.ResourceStatus == "DONE" {
+		// 2. vpaTemplate 생성
+		// updateMode := vpav1beta2.UpdateModeAuto
+		vpa := vpav1beta2.VerticalPodAutoscaler{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "autoscaling.k8s.io/v1",
+				Kind:       "VerticalPodAutoscaler",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      (*deployment).Name,
+				Namespace: (*deployment).Namespace,
+			},
+			Spec: vpav1beta2.VerticalPodAutoscalerSpec{
+				TargetRef: &autoscaling.CrossVersionObjectReference{
+					APIVersion: "apps/v1",
+					Kind:       "Deployment",
+					Name:       (*deployment).Name,
+				},
+				UpdatePolicy: &vpav1beta2.PodUpdatePolicy{
+					UpdateMode: (*vpav1beta2.UpdateMode)(&updateMode),
+				},
+			},
+		}
 
-	newhas, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Update(context.TODO(), has, metav1.UpdateOptions{})
-	if err != nil {
-		fmt.Println(err)
-		return err
+		has, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), (*a.has_name)[deployment], metav1.GetOptions{})
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		// 3. vpaTemplate -> HCPHybridAutoScaler 생성
+		has.Status.LastSpec = has.Spec
+		has.Spec.WarningCount = 3
+		has.Spec.ScalingOptions = resourcev1alpha1.ScalingOptions{VpaTemplate: vpa}
+		has.Status = resourcev1alpha1.HCPHybridAutoScalerStatus{ResourceStatus: "WAITING"}
+
+		newhas, err := a.hasclientset.HcpV1alpha1().HCPHybridAutoScalers("hcp").Update(context.TODO(), has, metav1.UpdateOptions{})
+		if err != nil {
+			fmt.Println(err)
+			return err
+		} else {
+			fmt.Printf("=====> update %s Done\n", newhas.Name)
+			return nil
+		}
 	} else {
-		fmt.Printf("=====> update %s Done\n", newhas.Name)
-		return nil
+		fmt.Printf("HCPHybridAutoScaler ResourceStatus is not DONE : %s\n", has.Status.ResourceStatus)
+		return fmt.Errorf("HCPHybridAutoScaler ResourceStatus is not DONE : %s\n", has.Status.ResourceStatus)
 	}
 }
