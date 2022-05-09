@@ -99,7 +99,7 @@ type AKS_Cluster_API struct {
 }
 
 func main() {
-	url := "https://management.azure.com/subscriptions/ccfc0c6c-d3c6-4de2-9a6c-c09ca498ff73/providers/Microsoft.ContainerService/managedClusters?api-version=2021-05-01"
+	url := "https://management.azure.com/subscriptions/{subscriptionsId}/providers/Microsoft.ContainerService/managedClusters?api-version=2021-05-01"
 	resp, _ := util.AuthorizationAndHTTP("GET", url, nil)
 	defer resp.Body.Close()
 	bytes, _ := ioutil.ReadAll(resp.Body)
