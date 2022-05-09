@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 )
 
 type AKS_Cluster_API struct {
@@ -117,11 +116,4 @@ func main() {
 	for i := 0; i < len(data.Value); i++ {
 		fmt.Println("[", i+1, "]", data.Value[i].Name)
 	}
-}
-
-func init() {
-	os.Setenv("ClientId", "9bd853b8-04d5-4c24-8d07-f0e7cd0a680e")
-	os.Setenv("ClientSecret", "Q9r7Q~9ypO-BmymfM8vHOq22tjW6kJaRHz~4y")
-	os.Setenv("SubscriptionId", "ccfc0c6c-d3c6-4de2-9a6c-c09ca498ff73")
-	os.Setenv("TenantId", "c8ea91b5-6aac-4c5c-ae34-9717a872159f")
 }
