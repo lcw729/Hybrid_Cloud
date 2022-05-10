@@ -20,7 +20,6 @@ spec:
       containers:
         - name: hcp-monitoring-engine
           image: ketidevit/hcp-monitoring-engine:v1.0
-          image: ketidevit/hcp-analytic-engine:v1.0
           command: [ "/bin/bash", "-c", "--" ]  
           args: [ "while true; do sleep 30; done;" ]
           volumeMounts:
