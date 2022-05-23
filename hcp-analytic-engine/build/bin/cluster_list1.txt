@@ -1,0 +1,4 @@
+aks-cluster-admin
+arn:aws:eks:us-east-2:741566967679:cluster/eks-cluster
+gke_keti-container_us-central1-a_gke-cluster
+master

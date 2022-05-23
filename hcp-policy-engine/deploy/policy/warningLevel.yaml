@@ -1,0 +1,12 @@
+apiVersion: hcp.crd.com/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: warning-level
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: level
+          value: "3"
+  policyStatus: Enabled

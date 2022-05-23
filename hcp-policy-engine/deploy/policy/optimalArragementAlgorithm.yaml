@@ -1,0 +1,14 @@
+apiVersion: hcp.crd.com/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: optimal-arrangement-algorithm
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: Algorithm
+          value: Affinity
+  rangeOfApplication: All
+  policyStatus: Disabled
+

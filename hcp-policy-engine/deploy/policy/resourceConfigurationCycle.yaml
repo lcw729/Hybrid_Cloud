@@ -1,0 +1,13 @@
+apiVersion: hcp.crd.com/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: resource-configuration-cycle
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: cycle
+          value:
+            - "6"                                       
+  policyStatus: Enabled
