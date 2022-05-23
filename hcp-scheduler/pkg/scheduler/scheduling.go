@@ -49,11 +49,17 @@ func ListTargetClusters() []string {
 
 func NewScheduler() *Scheduler {
 	cm, _ := clusterManager.NewClusterManager()
+<<<<<<< HEAD
+	clusterInfoList := resourceinfo.NewClusterInfoList()
+	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
+
+=======
 
 	//	clusterInfoList := *resourceinfo.NewClusterInfoList()
 	clusterInfoList := &resourceinfo.ClusterInfoList{}
 	test.CreateTestClusterNodeResourcesBalancedAllocation(clusterInfoList)
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
+>>>>>>> 1406358e2b9c55b3f02fa2123dc952a922191688
 	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
 	algorithm, err := policy.GetAlgorithm()
 	var schedPolicy string
@@ -66,9 +72,14 @@ func NewScheduler() *Scheduler {
 	schd := Scheduler{
 		ClusterClients:  cm.Cluster_kubeClients,
 		ClusterInfoList: *clusterInfoList,
+<<<<<<< HEAD
+		ClusterInfoMap:  clusterInfoMap,
+		SchedPolicy:     schedPolicy,
+=======
 		//NodeInfoMap:     nodeInfoMap,
 		ClusterInfoMap: clusterInfoMap,
 		SchedPolicy:    schedPolicy,
+>>>>>>> 1406358e2b9c55b3f02fa2123dc952a922191688
 	}
 
 	return &schd
@@ -105,7 +116,10 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 
 	fmt.Println("[scheduling start]")
 	schedule_type := sched.SchedPolicy
+<<<<<<< HEAD
+=======
 	schedule_type = "NodeResourcesBalancedAllocation"
+>>>>>>> 1406358e2b9c55b3f02fa2123dc952a922191688
 
 	fmt.Println("=> algorithm :", schedule_type)
 	var num int32 = 2
@@ -123,6 +137,10 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 		sched.Scoring(schedule_type)
 		best_cluster := sched.getMaxScoreCluster()
 		fmt.Println(best_cluster)
+<<<<<<< HEAD
+
+=======
+>>>>>>> 1406358e2b9c55b3f02fa2123dc952a922191688
 		if best_cluster != "" {
 			// if target !=  {
 			if sched.updateSchedulingResult(best_cluster) {
@@ -339,6 +357,10 @@ func (sched *Scheduler) Scoring(algorithm string) {
 			(*sched.ClusterInfoMap[clusterinfo.ClusterName]).ClusterScore = score
 			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
 			fmt.Println()
+<<<<<<< HEAD
+
+=======
+>>>>>>> 1406358e2b9c55b3f02fa2123dc952a922191688
 		}
 	case "ImageLocality":
 		for _, clusterinfo := range sched.ClusterInfoList {
