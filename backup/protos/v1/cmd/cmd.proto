@@ -1,0 +1,39 @@
+// protos/v1/cmd/cmd.proto
+syntax = "proto3";
+
+option go_package = "Hybrid_Cloud/proto/v1/cmd";
+
+package v1.cmd;
+
+service Cmd {
+    rpc ListAddon(ListAddonRequest) returns (ListAddonResponse);
+}
+
+message Output {
+    string message = 1;
+}
+
+message AKSAddon{
+    string ResourceGroupName = 1;
+    string ClusterName = 2;
+    string Addon = 3;
+    string AppgwID = 4;
+    string AppgwName = 5;
+    string AppgwSubnetCidr = 6;
+    string AppgwSubnetID = 7;
+    string AppgwSubnetPrefix = 8;
+    string AppgwWatchNamespace = 9;
+    bool EnableMsiAuthForMonitoring = 10;
+    bool EnableSecretRotation = 11;
+    bool EnableSgxquotehelper = 12;
+    string SubnetName = 13;
+    string WorkspaceResourceID = 14;
+}
+
+message ListAddonRequest{
+    AKSAddon aks_addon = 1;
+}
+
+message ListAddonResponse{
+    Output output = 1;
+}

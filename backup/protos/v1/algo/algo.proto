@@ -1,0 +1,52 @@
+// protos/v1/algo/algo.proto
+syntax = "proto3";
+
+option go_package = "Hybrid_Cloud/protos/v1/algo";
+
+package v1.algo;
+
+service Algo {
+    rpc ClusterWeightCalculator(ClusterWeightCalculatorRequest) returns (ClusterWeightCalculatorResponse);
+    rpc OptimalArrangement(OptimalArrangementRequest) returns (OptimalArrangementResponse);
+}
+
+message WeightResult {
+    int32 cluster_id = 1;
+    string cluster_name = 2;
+    int32 cluster_weight = 3;
+}
+
+
+message ClusterInfo {
+    int32 cluster_id = 1;
+    string cluster_name = 2;
+}
+
+message NodeScore {
+    int32 node_id = 1;
+    int32 score = 2;
+}
+
+message Cluster {
+    ClusterInfo cluster_info = 1;
+    repeated NodeScore node_score = 2;
+}
+
+// client - scheduler
+message ClusterWeightCalculatorRequest {}
+
+// server - AnalyticEngine
+message ClusterWeightCalculatorResponse{
+   repeated WeightResult weight_result = 1;
+}
+
+// client - scheduler
+message OptimalArrangementRequest {
+}
+
+// server - AnalyticEngine
+message OptimalArrangementResponse{
+   bool status = 1;
+   Cluster cluster = 2;
+   NodeScore node = 3;
+}
