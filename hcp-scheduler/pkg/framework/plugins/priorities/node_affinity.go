@@ -17,6 +17,8 @@ limitations under the License.
 package priorities
 
 import (
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
+	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -24,43 +26,48 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 )
 
+type NodeAffinity struct{}
+
+func (pl *NodeAffinity) Name() string {
+	return plugins.NodeAffinity
+}
+
 // CalculateNodeAffinityPriorityMap prioritizes nodes according to node affinity scheduling preferences
 // indicated in PreferredDuringSchedulingIgnoredDuringExecution. Each time a node match a preferredSchedulingTerm,
 // it will a get an add of preferredSchedulingTerm.Weight. Thus, the more preferredSchedulingTerms
 // the node satisfies and the more the preferredSchedulingTerm that is satisfied weights, the higher
 // score the node gets.
-func NodeAffinity(pod *v1.Pod, node *v1.Node) int32 {
-
-	// default is the podspec.
-	affinity := pod.Spec.Affinity
+func (pl *NodeAffinity) Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64 {
 	var count int32
-	// A nil element of PreferredDuringSchedulingIgnoredDuringExecution matches no objects.
-	// An element of PreferredDuringSchedulingIgnoredDuringExecution that refers to an
-	// empty PreferredSchedulingTerm matches all objects.
-	if affinity != nil && affinity.NodeAffinity != nil && affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution != nil {
-		// Match PreferredDuringSchedulingIgnoredDuringExecution term by term.
-		for i := range affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+	for _, node := range clusterInfo.Nodes {
+		// default is the podspec.
+		affinity := pod.Spec.Affinity
+		// A nil element of PreferredDuringSchedulingIgnoredDuringExecution matches no objects.
+		// An element of PreferredDuringSchedulingIgnoredDuringExecution that refers to an
+		// empty PreferredSchedulingTerm matches all objects.
+		if affinity != nil && affinity.NodeAffinity != nil && affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution != nil {
+			// Match PreferredDuringSchedulingIgnoredDuringExecution term by term.
+			for i := range affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
 
-			preferredSchedulingTerm := &affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution[i]
-			if preferredSchedulingTerm.Weight == 0 {
-				continue
-			}
+				preferredSchedulingTerm := &affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution[i]
+				if preferredSchedulingTerm.Weight == 0 {
+					continue
+				}
 
-			// TODO: Avoid computing it for all nodes if this becomes a performance problem.
-			nodeSelector, err := NodeSelectorRequirementsAsSelector(preferredSchedulingTerm.Preference.MatchExpressions)
-			if err != nil {
-				fmt.Println(err)
-				return -1
-			}
+				// TODO: Avoid computing it for all nodes if this becomes a performance problem.
+				nodeSelector, err := NodeSelectorRequirementsAsSelector(preferredSchedulingTerm.Preference.MatchExpressions)
+				if err != nil {
+					fmt.Println(err)
+					return -1
+				}
 
-			if nodeSelector.Matches(labels.Set((*node).Labels)) {
-				count += preferredSchedulingTerm.Weight
+				if nodeSelector.Matches(labels.Set((*node.Node).Labels)) {
+					count += preferredSchedulingTerm.Weight
+				}
 			}
 		}
-
 	}
-
-	return count
+	return int64(count)
 }
 
 // NodeSelectorRequirementsAsSelector converts the []NodeSelectorRequirement api type into a struct that implements

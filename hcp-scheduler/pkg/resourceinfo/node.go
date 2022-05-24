@@ -158,20 +158,6 @@ func GetNodeImageStates(node *v1.Node, imageExistenceMap map[string]sets.String)
 	return imageStates
 }
 
-// usedPort
-// updateUsedPorts updates the UsedPorts of NodeInfo.
-func (n *NodeInfo) updateUsedPorts(pod *v1.Pod, add bool) {
-	for _, container := range pod.Spec.Containers {
-		for _, podPort := range container.Ports {
-			if add {
-				n.UsedPorts.Add(podPort.HostIP, string(podPort.Protocol), podPort.HostPort)
-			} else {
-				n.UsedPorts.Remove(podPort.HostIP, string(podPort.Protocol), podPort.HostPort)
-			}
-		}
-	}
-}
-
 // Add adds (ip, protocol, port) to HostPortInfo
 func (h HostPortInfo) Add(ip, protocol string, port int32) {
 	if port <= 0 {

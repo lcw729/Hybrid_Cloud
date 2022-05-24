@@ -1,7 +1,7 @@
 package predicates
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 
@@ -14,11 +14,11 @@ type TaintToleration struct {
 }
 
 func (pl *TaintToleration) Name() string {
-	return v1alpha1.TaintToleration
+	return plugins.TaintToleration
 }
 
 // ComputeTaintTolerationPriorityMap prepares the priority list for all the nodes based on the number of intolerable taints on the node
-func (pl *TaintToleration) Filter(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
+func (pl *TaintToleration) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
 	for _, node := range clusterInfo.Nodes {
 		if node.Node == nil {
 			continue

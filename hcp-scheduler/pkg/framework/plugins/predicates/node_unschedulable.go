@@ -1,7 +1,7 @@
 package predicates
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 
@@ -11,11 +11,11 @@ import (
 type NodeUnschedulable struct{}
 
 func (pl *NodeUnschedulable) Name() string {
-	return v1alpha1.NodeUnschedulable
+	return plugins.NodeUnschedulable
 }
 
 // CheckNodeUnschedulablePredicate checks if a pod can be scheduled on a node with Unschedulable spec.
-func (pl *NodeUnschedulable) Filter(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
+func (pl *NodeUnschedulable) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
 	for _, nodeInfo := range clusterInfo.Nodes {
 		// If pod tolerate unschedulable taint, it's also tolerate `node.Spec.Unschedulable`.
 		podToleratesUnschedulable := TolerationsTolerateTaint(pod.Spec.Tolerations, &v1.Taint{

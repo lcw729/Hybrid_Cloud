@@ -1,20 +1,12 @@
 package v1alpha1
 
 import (
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins/predicates"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins/priorities"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
-)
-
-const (
-	NodeName          = "NodeName"
-	NodePorts         = "NodePorts"
-	NodeResourcesFit  = "NodeResourcesFit"
-	NodeUnschedulable = "NodeUnschedulable"
-	BalanceAllocation = "BalancedAllocation"
-	ImageLocality     = "ImageLocality"
-	TaintToleration   = "TaintToleration"
 )
 
 type hcpFramework struct {
@@ -24,13 +16,23 @@ type hcpFramework struct {
 
 func NewFramework() hcpFramework {
 	framework := &hcpFramework{
-		filterPlugins: []HCPFilterPlugin{},
-		scorePlugins:  []HCPScorePlugin{},
+		filterPlugins: []HCPFilterPlugin{
+			&predicates.NodeName{},
+			&predicates.NodePorts{},
+			&predicates.NodeResourcesFit{},
+			&predicates.NodeUnschedulable{},
+			&predicates.TaintToleration{},
+		},
+		scorePlugins: []HCPScorePlugin{
+			&priorities.BalanceAllocation{},
+			&priorities.ImageLocality{},
+			&priorities.NodeAffinity{},
+		},
 	}
 	return *framework
 }
 
-func (f *hcpFramework) RunFilterPluginsOnClusters(pod *v1.Pod, status *CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
+func (f *hcpFramework) RunFilterPluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
 	result := make(map[string]bool)
 	var isFiltered bool
 	for _, cluster := range *clusterInfoList {
@@ -51,7 +53,7 @@ func (f *hcpFramework) RunFilterPluginsOnClusters(pod *v1.Pod, status *CycleStat
 	}
 }
 
-func (f *hcpFramework) RunScorePluginsOnClusters(pod *v1.Pod, status *CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
+func (f *hcpFramework) RunScorePluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
 	result := make(map[string]int64)
 	var score int64
 	for _, cluster := range *clusterInfoList {

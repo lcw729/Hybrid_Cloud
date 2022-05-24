@@ -1,7 +1,7 @@
 package predicates
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"Hybrid_Cloud/hcp-scheduler/pkg/util"
 	"fmt"
@@ -12,13 +12,13 @@ import (
 type NodeResourcesFit struct{}
 
 func (pl *NodeResourcesFit) Name() string {
-	return v1alpha1.NodeResourcesFit
+	return plugins.NodeResourcesFit
 }
 
 // Filter invoked at the filter extension point.
 // Checks if a node has sufficient resources, such as cpu, memory, gpu, opaque int resources etc to run a pod.
 // It returns a list of insufficient resources, if empty, then the node has all the resources requested by the pod.
-func (p1 *NodeResourcesFit) Filter(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
+func (p1 *NodeResourcesFit) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
 	for _, nodeInfo := range clusterInfo.Nodes {
 		insufficientResources := fitsRequest(pod, nodeInfo)
 		if len(insufficientResources) == 0 {

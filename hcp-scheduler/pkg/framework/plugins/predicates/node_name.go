@@ -1,7 +1,7 @@
 package predicates
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 
@@ -11,11 +11,11 @@ import (
 type NodeName struct{}
 
 func (pl *NodeName) Name() string {
-	return v1alpha1.NodeName
+	return plugins.NodeName
 }
 
 // Filter invoked at the filter extension point.
-func (pl *NodeName) Filter(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
+func (pl *NodeName) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
 	for _, nodeInfo := range clusterInfo.Nodes {
 		if nodeInfo.Node == nil {
 			fmt.Println("node not found")

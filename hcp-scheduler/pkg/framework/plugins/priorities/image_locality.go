@@ -1,7 +1,7 @@
 package priorities
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"strings"
@@ -20,7 +20,7 @@ const (
 type ImageLocality struct{}
 
 func (pl *ImageLocality) Name() string {
-	return v1alpha1.ImageLocality
+	return plugins.ImageLocality
 }
 
 // ImageLocalityPriorityMap is a priority function that favors nodes that already have requested pod container's images.
@@ -28,7 +28,7 @@ func (pl *ImageLocality) Name() string {
 // based on the total size of those images.
 // - If none of the images are present, this node will be given the lowest priority.
 // - If some of the images are present on a node, the larger their sizes' sum, the higher the node's priority.
-func (pl *ImageLocality) Score(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64 {
+func (pl *ImageLocality) Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64 {
 	var score int64 = 0
 	for _, node := range clusterInfo.Nodes {
 		if node == nil {

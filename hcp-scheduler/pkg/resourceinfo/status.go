@@ -1,4 +1,4 @@
-package v1alpha1
+package resourceinfo
 
 // 전체 스케줄링 레이어에 대한 기록
 type CycleStatus struct {

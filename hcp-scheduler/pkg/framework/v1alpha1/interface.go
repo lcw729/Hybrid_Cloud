@@ -7,8 +7,8 @@ import (
 )
 
 type HCPFramework interface {
-	RunFilterPluginsOnClusters(pod *v1.Pod, status *CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
-	RunScorePluginsOnClusters(pod *v1.Pod, status *CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
+	RunFilterPluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
+	RunScorePluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 }
 
 type HCPPlugin interface {
@@ -17,17 +17,17 @@ type HCPPlugin interface {
 
 type HCPFilterPlugin interface {
 	HCPPlugin
-	Filter(pod *v1.Pod, status *CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool
+	Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool
 }
 
 type HCPPostFilterPlugin interface {
 	HCPPlugin
-	PostFilter(pod *v1.Pod, status *CycleStatus, clusterInfo *resourceinfo.ClusterInfo)
+	PostFilter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo)
 }
 
 type HCPScorePlugin interface {
 	HCPPlugin
-	Score(pod *v1.Pod, status *CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64
+	Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64
 }
 
 /*

@@ -1,7 +1,7 @@
 package predicates
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 
 	v1 "k8s.io/api/core/v1"
@@ -10,10 +10,10 @@ import (
 type NodePorts struct{}
 
 func (pl *NodePorts) Name() string {
-	return v1alpha1.NodePorts
+	return plugins.NodePorts
 }
 
-func (pl *NodePorts) Filter(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
+func (pl *NodePorts) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
 	for _, nodeInfo := range clusterInfo.Nodes {
 		fits := fitsPorts(getContainerPorts(pod), nodeInfo)
 		if fits {

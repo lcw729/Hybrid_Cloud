@@ -1,7 +1,7 @@
 package priorities
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"Hybrid_Cloud/hcp-scheduler/pkg/util"
@@ -14,10 +14,10 @@ import (
 type BalanceAllocation struct{}
 
 func (pl *BalanceAllocation) Name() string {
-	return v1alpha1.BalanceAllocation
+	return plugins.BalanceAllocation
 }
 
-func (pl *BalanceAllocation) Score(pod *v1.Pod, status *v1alpha1.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64 {
+func (pl *BalanceAllocation) Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64 {
 	var score int64 = 0
 	for _, node := range clusterInfo.Nodes {
 
