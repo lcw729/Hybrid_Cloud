@@ -54,3 +54,4 @@ go.work
 /code-generator/
 /old-code-generator/
 /main/main
+/.vscode/

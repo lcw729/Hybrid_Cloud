@@ -25,7 +25,7 @@ case "$1" in
         az aks get-credentials --resource-group "$3" --name "$2" --file ~/.kube/kubeconfig
         ;;
     "eks")
-        aws eks update-kubeconfig --name "$2"
+        aws eks update-kubeconfig --name "$2" --region "$3"
         ;;
     "gke")
         gcloud container clusters get-credentials "$2"

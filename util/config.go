@@ -134,3 +134,69 @@ func ChangeConfigClusterName(platform string, clustername string) error {
 	}
 	return nil
 }
+
+func DeleteConfig(platform string, clustername string) error {
+	cm, err := clusterManager.NewClusterManager()
+	if err != nil {
+		return err
+	}
+	master_config := cm.Host_config
+	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
+	if err != nil {
+		return err
+	}
+
+	cluster, err := hcp_cluster.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), clustername, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	hcpconfig, err := UnMarshalKubeConfig(cluster.Spec.KubeconfigInfo)
+	if err != nil {
+		return err
+	}
+
+	if len(hcpconfig.Clusters) > 0 && len(hcpconfig.Contexts) > 0 && len(hcpconfig.Users) > 0 {
+		bytes, err := ioutil.ReadFile("/root/.kube/config")
+		if err != nil {
+			return err
+		}
+		kubeconfig, err := UnMarshalKubeConfig(bytes)
+		if err != nil {
+			return err
+		}
+
+		for i, c := range kubeconfig.Clusters {
+			if c.Name == clustername {
+				kubeconfig.Clusters = append(kubeconfig.Clusters[:i], kubeconfig.Clusters[i+1:]...)
+				break
+			}
+		}
+
+		for i, c := range kubeconfig.Contexts {
+			if c.Name == clustername {
+				kubeconfig.Contexts = append(kubeconfig.Contexts[:i], kubeconfig.Contexts[i+1:]...)
+				break
+			}
+		}
+
+		for i, c := range kubeconfig.Users {
+			if c.Name == clustername {
+				kubeconfig.Users = append(kubeconfig.Users[:i], kubeconfig.Users[i+1:]...)
+				break
+			}
+		}
+
+		data, err := yaml.Marshal(&kubeconfig)
+		if err != nil {
+			return err
+		}
+		err = ioutil.WriteFile("/root/.kube/config", data, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		return nil
+	}
+
+	return nil
+}

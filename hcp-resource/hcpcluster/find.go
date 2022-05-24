@@ -9,14 +9,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func FindHCPClusterList(cluster string, platform string) bool {
+func FindHCPClusterList(cluster string) bool {
 	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	if err != nil {
 		fmt.Println("this error")
 	}
 	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(config)
 
-	cluster_list, err := cluster_client.HcpV1alpha1().HCPClusters(platform).List(context.TODO(), metav1.ListOptions{})
+	cluster_list, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		fmt.Println(err)
 	} else {

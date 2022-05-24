@@ -79,7 +79,7 @@ var registerCmd = &cobra.Command{
 
 			var arguments []string
 			arguments = append(arguments, "bin/bash", platform, clustername)
-
+			var region string
 			switch platform {
 			case "aks":
 				resource_group, _ := cmd.Flags().GetString("resource-group")
@@ -91,10 +91,17 @@ var registerCmd = &cobra.Command{
 				}
 				fallthrough
 			case "eks":
+				region, _ = cmd.Flags().GetString("region")
+				if region != "" {
+					arguments = append(arguments, region)
+				} else {
+					fmt.Println("ERROR: Enter region")
+					return
+				}
 				fallthrough
 			case "gke":
 				command := &exec.Cmd{
-					Path:   "/root/go/src/Hybrid_Cloud/hybridctl/cmd/register/register",
+					Path:   "/root/go/src/KETI-Hybrid_Cloud/hybridctl/cmd/register/register",
 					Args:   arguments,
 					Stdout: os.Stdout,
 					Stderr: os.Stderr,
@@ -113,7 +120,7 @@ var registerCmd = &cobra.Command{
 				}
 
 				resource.CreateNamespace("kube-master", HCP_NAMESPACE)
-				if CreateHCPCluster(platform, clustername) {
+				if CreateHCPCluster(platform, clustername, region) {
 					err := u.ChangeConfigClusterName(HCP_NAMESPACE, clustername)
 					if err != nil {
 						fmt.Println(err)
@@ -130,7 +137,7 @@ var registerCmd = &cobra.Command{
 	},
 }
 
-func CreateHCPCluster(platform string, clustername string) bool {
+func CreateHCPCluster(platform string, clustername string, region string) bool {
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 	if err != nil {
 		log.Println(err)
@@ -156,6 +163,7 @@ func CreateHCPCluster(platform string, clustername string) bool {
 		},
 		Spec: hcpclusterapis.HCPClusterSpec{
 			ClusterPlatform: platform,
+			Region:          region,
 			KubeconfigInfo:  data,
 			JoinStatus:      "UNJOIN",
 		},
@@ -174,4 +182,5 @@ func CreateHCPCluster(platform string, clustername string) bool {
 func init() {
 	RootCmd.AddCommand(registerCmd)
 	registerCmd.Flags().StringP("resource-group", "g", "", "")
+	registerCmd.Flags().StringP("region", "", "", "")
 }

@@ -16,6 +16,7 @@ type HCPCluster struct {
 
 type HCPClusterSpec struct {
 	ClusterPlatform string `json:"platform"`
+	Region          string
 	KubeconfigInfo  []byte `json:"kubeconfiginfo"`
 	JoinStatus      string `json:"joinstatus"`
 }
