@@ -1,0 +1,17 @@
+apiVersion: hcp.crd.com/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: scheduling-policy
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: algorithm
+          value: 
+            - NodeName
+            - NodeResourceFit
+            - NodeAffinity
+  rangeOfApplication: All
+  policyStatus: Disabled
+

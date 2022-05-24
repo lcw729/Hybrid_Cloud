@@ -1,17 +1,13 @@
 package scheduler
 
 import (
-	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/priorities"
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
-	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
+	p "Hybrid_Cloud/hcp-resource/hcppolicy"
+	f "Hybrid_Cloud/hcp-scheduler/pkg/framework/v1alpha1"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
-	"sort"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,106 +18,59 @@ import (
 // nodes that they fit on and writes bindings back to the api server.
 type Scheduler struct {
 	SchedulingResource *v1.Pod
+	HCPFramework       f.HCPFramework
 	ClusterClients     map[string]*kubernetes.Clientset
 	ClusterInfoList    resourceinfo.ClusterInfoList
-	//NodeInfoMap        map[string]*resourceinfo.NodeInfo
-	ClusterInfoMap   map[string]*resourceinfo.ClusterInfo
-	SchedulingResult []v1alpha1.Target
-	SchedPolicy      string
+	ClusterInfoMap     map[string]*resourceinfo.ClusterInfo
+	SchedulingResult   []v1alpha1.Target
+	//SchedPolicy        []string
 }
-
-var AlgorithmMap = map[string]func(*v1.Pod, *v1.Node) int32{
-	"Affinity":        priorities.NodeAffinity,
-	"TaintToleration": priorities.TaintToleration,
-}
-
-/*
-func ListTargetClusters() []string {
-	cm, _ := clusterManager.NewClusterManager()
-	kubefed_clusters := cm.Cluster_list.Items
-	var target_clusters []string
-	for _, i := range kubefed_clusters {
-		target_clusters = append(target_clusters, i.ObjectMeta.Name)
-	}
-	return target_clusters
-}
-*/
 
 func NewScheduler() *Scheduler {
 	cm, _ := clusterManager.NewClusterManager()
+	hcpFramework := f.NewFramework()
 	clusterInfoList := resourceinfo.NewClusterInfoList()
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
-
-	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
-	algorithm, err := policy.GetAlgorithm()
-	var schedPolicy string
-	if err == nil {
-		schedPolicy = algorithm
-	} else {
-		schedPolicy = "DEFAULT_SCHEDPOLICY"
-	}
+	//schedPolicy, _ := policy.GetAlgorithm()
+	// if schedPolicy == nil {
+	// 	// default algorithm
+	// }
 
 	schd := Scheduler{
 		ClusterClients:  cm.Cluster_kubeClients,
+		HCPFramework:    hcpFramework,
 		ClusterInfoList: *clusterInfoList,
-
-		ClusterInfoMap: clusterInfoMap,
-		SchedPolicy:    schedPolicy,
+		ClusterInfoMap:  clusterInfoMap,
+		//SchedPolicy:     schedPolicy,
 	}
 
 	return &schd
 }
 
-/*
-func (sched *Scheduler) NewScoreTable() *scoretable.ScoreTable {
-	var score_table scoretable.ScoreTable
-
-	for _, cluster_info := range *sched.ClusterInfoList {
-		var node_score_list scoretable.NodeScoreList
-
-		// create node_score_list
-		for _, node_info := range cluster_info.Nodes {
-			node_score := &scoretable.NodeScore{
-				Name:  node_info.NodeName,
-				Score: 0,
-			}
-			node_score_list = append(node_score_list, *node_score)
-		}
-		cluster_score := &scoretable.ClusterScore{
-			Cluster:       cluster_info.ClusterName,
-			NodeScoreList: node_score_list,
-			Score:         0,
-		}
-		score_table = append(score_table, *cluster_score)
-	}
-
-	return &score_table
-}
-*/
-
 func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha1.Target {
 
 	fmt.Println("[scheduling start]")
-	schedule_type := sched.SchedPolicy
+	schedPolicy, _ := p.GetHCPPolicy("scheduling-policy")
+	var filter []string
+	var score []string
+	for _, policy := range schedPolicy.Spec.Template.Spec.Policies {
+		if policy.Type == "filter" {
+			filter = append(filter, policy.Value...)
+		} else if policy.Type == "score" {
+			score = append(score, policy.Value...)
+		}
+	}
 
-	fmt.Println("=> algorithm :", schedule_type)
-	var num int32 = 2
-	replicas := num
-
-	var scheduling_result []v1alpha1.Target
 	var cnt int32 = 0
+	status := resourceinfo.NewCycleStatus(sched.getTotalNumNodes())
+	sched.SchedulingResource = newPodFromHCPDeployment(deployment)
+	replicas := *deployment.Spec.RealDeploymentSpec.Replicas
 
-	sched.SchedulingResource = test.TestPodsNodeResourcesBalancedAllocation[0]
-	// set schedulingResource
-	//sched.SchedulingResource = newPodFromHCPDeployment(deployment)
-
-	//sched.Filtering("CheckNodeUnschedulable")
 	for i := 0; i < int(replicas); i++ {
-		sched.Scoring(schedule_type)
+		sched.HCPFramework.RunFilterPluginsOnClusters(filter, sched.SchedulingResource, status, &sched.ClusterInfoList)
+		sched.HCPFramework.RunScorePluginsOnClusters(score, sched.SchedulingResource, status, &sched.ClusterInfoList)
 		best_cluster := sched.getMaxScoreCluster()
-		fmt.Println(best_cluster)
 		if best_cluster != "" {
-			// if target !=  {
 			if sched.updateSchedulingResult(best_cluster) {
 				cnt += 1
 				fmt.Printf("[Scheduling] %d/%d pod / TargetCluster : %s\n", i+1, replicas, best_cluster)
@@ -140,38 +89,12 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 	if cnt == replicas {
 		fmt.Println("Scheduling succeeded")
 		sched.printSchedulingResult()
-		return scheduling_result
+		return sched.SchedulingResult
 	} else {
 		fmt.Println("Scheduling failed")
 		return nil
 	}
 
-}
-
-func (sched *Scheduler) getMaxScoreCluster() string {
-	var max_score int32 = 0
-	var best_cluster string = ""
-	_ = best_cluster
-
-	for key, value := range sched.ClusterInfoMap {
-		//fmt.Println((*sched.ClusterInfoMap[key]).ClusterScore)
-		if (*sched.ClusterInfoMap[key]).ClusterScore >= int32(max_score) {
-			max_score = (*sched.ClusterInfoMap[key]).ClusterScore
-			best_cluster = value.ClusterName
-		}
-	}
-
-	return "test_cluster2"
-}
-
-func (sched *Scheduler) printSchedulingResult() {
-	fmt.Println("========scheduling result========")
-	targets := sched.SchedulingResult
-	for _, i := range targets {
-		fmt.Println("target cluster :", i.Cluster)
-		fmt.Println("replicas       :", *i.Replicas)
-		fmt.Println()
-	}
 }
 
 func newPodFromHCPDeployment(deployment *v1alpha1.HCPDeployment) *v1.Pod {
@@ -213,6 +136,16 @@ func (sched *Scheduler) updateSchedulingResult(cluster string) bool {
 	return true
 }
 
+func (sched *Scheduler) printSchedulingResult() {
+	fmt.Println("========scheduling result========")
+	targets := sched.SchedulingResult
+	for _, i := range targets {
+		fmt.Println("target cluster :", i.Cluster)
+		fmt.Println("replicas       :", *i.Replicas)
+		fmt.Println()
+	}
+}
+
 func (sched *Scheduler) getTotalNumNodes() int {
 	clusterinfoList := sched.ClusterInfoList
 	cnt := 0
@@ -224,6 +157,27 @@ func (sched *Scheduler) getTotalNumNodes() int {
 	return cnt
 }
 
+func (sched *Scheduler) getMaxScoreCluster() string {
+	var max_score int32 = 0
+	var best_cluster string = ""
+	_ = best_cluster
+
+	for key, value := range sched.ClusterInfoMap {
+		//fmt.Println((*sched.ClusterInfoMap[key]).ClusterScore)
+		if (*sched.ClusterInfoMap[key]).ClusterScore >= int32(max_score) {
+			max_score = (*sched.ClusterInfoMap[key]).ClusterScore
+			best_cluster = value.ClusterName
+		}
+	}
+
+	return best_cluster
+}
+
+func (sched *Scheduler) scheduleOne(ctx context.Context) {
+
+}
+
+/*
 func (sched *Scheduler) Filtering(algorithm string) {
 	var pod = &sched.SchedulingResource
 	switch algorithm {
@@ -359,7 +313,31 @@ func (sched *Scheduler) Scoring(algorithm string) {
 	}
 
 }
+*/
 
-func (sched *Scheduler) scheduleOne(ctx context.Context) {
+/*
+func (sched *Scheduler) NewScoreTable() *scoretable.ScoreTable {
+	var score_table scoretable.ScoreTable
 
+	for _, cluster_info := range *sched.ClusterInfoList {
+		var node_score_list scoretable.NodeScoreList
+
+		// create node_score_list
+		for _, node_info := range cluster_info.Nodes {
+			node_score := &scoretable.NodeScore{
+				Name:  node_info.NodeName,
+				Score: 0,
+			}
+			node_score_list = append(node_score_list, *node_score)
+		}
+		cluster_score := &scoretable.ClusterScore{
+			Cluster:       cluster_info.ClusterName,
+			NodeScoreList: node_score_list,
+			Score:         0,
+		}
+		score_table = append(score_table, *cluster_score)
+	}
+
+	return &score_table
 }
+*/

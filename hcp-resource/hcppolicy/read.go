@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"Hybrid_Cloud/hcp-analytic-engine/util"
 	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
 	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 	"Hybrid_Cloud/util/clusterManager"
@@ -42,6 +41,7 @@ func GetHCPPolicy(policy_name string) (*hcppolicyapis.HCPPolicy, error) {
 	return policy, nil
 }
 
+/*
 func GetInitialSettingValue(typ string) (int, string) {
 	policy, err := GetHCPPolicy("initial-setting")
 	if err != nil {
@@ -70,6 +70,7 @@ func GetInitialSettingValue(typ string) (int, string) {
 	fmt.Printf("ERROR: No Such Type %s\n", typ)
 	return -1, ""
 }
+*/
 
 func GetWatchingLevel() WatchingLevel {
 	hcppolicy, err := GetHCPPolicy("watching-level")
@@ -82,7 +83,7 @@ func GetWatchingLevel() WatchingLevel {
 	for i, policy := range hcppolicy.Spec.Template.Spec.Policies {
 		var level Level = Level{
 			Type:  policy.Type,
-			Value: policy.Value,
+			Value: policy.Value[0],
 		}
 		watchingLevel.Levels[i] = level
 	}
@@ -100,7 +101,7 @@ func GetWarningLevel() Level {
 	if len(policies) == 1 {
 		level := Level{
 			Type:  hcppolicy.Spec.Template.Spec.Policies[0].Type,
-			Value: hcppolicy.Spec.Template.Spec.Policies[0].Value,
+			Value: hcppolicy.Spec.Template.Spec.Policies[0].Value[0],
 		}
 		return level
 	} else {
@@ -111,8 +112,8 @@ func GetWarningLevel() Level {
 	}
 }
 
-func GetAlgorithm() (string, error) {
-	hcppolicy, err := GetHCPPolicy("optimal-arrangement-algorithm")
+func GetAlgorithm() ([]string, error) {
+	hcppolicy, err := GetHCPPolicy("scheduling-policy")
 	if err != nil {
 		klog.Info(err)
 	}
@@ -120,16 +121,11 @@ func GetAlgorithm() (string, error) {
 	policies := hcppolicy.Spec.Template.Spec.Policies
 	if len(policies) == 1 {
 		policy := policies[0]
-		if policy.Type == "Algorithm" {
-			algorithm := policy.Value
-			for _, algo := range util.AlgorithmList {
-				if algo == algorithm {
-					return algorithm, nil
-				}
-			}
+		if policy.Type == "algorithm" {
+			return policy.Value, nil
 		}
 	}
-	return "", err
+	return nil, err
 }
 
 func GetCycle() float64 {
@@ -140,7 +136,7 @@ func GetCycle() float64 {
 
 	for _, policy := range hcppolicy.Spec.Template.Spec.Policies {
 		if policy.Type == "cycle" && len(policy.Value) == 1 {
-			cycle, err := strconv.ParseFloat(policy.Value, 64)
+			cycle, err := strconv.ParseFloat(policy.Value[0], 64)
 			if err == nil && cycle > 0 {
 				fmt.Println("Policy Type : ", "cycle")
 				fmt.Println("Policy Value [cycle] : ", cycle)

@@ -106,27 +106,27 @@ DESCRIPTION
 			fmt.Printf("Enter the maximum service cost. : ")
 			fmt.Scanln(&cost)
 			polices[0].Type = "cost"
-			polices[0].Value = strconv.Itoa(cost)
+			polices[0].Value[0] = strconv.Itoa(cost)
 
 			fmt.Printf("Enter the maximum number of CPUs to allocate in the cluster.[NanoCores] : ")
 			fmt.Scanln(&max_cpu)
 			polices[1].Type = "max_cpu"
-			polices[1].Value = strconv.Itoa(max_cpu)
+			polices[1].Value[0] = strconv.Itoa(max_cpu)
 
 			fmt.Printf("Enter the maximum amount of memory to allocate in the cluster.. : ")
 			fmt.Scanln(&max_memory)
 			polices[2].Type = "max_memory"
-			polices[2].Value = strconv.Itoa(max_memory)
+			polices[2].Value[0] = strconv.Itoa(max_memory)
 
 			fmt.Printf("Enter the node option to use as default : ")
 			fmt.Scanln(&default_node_option)
 			polices[3].Type = "default_node_option"
-			polices[3].Value = default_node_option
+			polices[3].Value[0] = default_node_option
 
 			fmt.Printf("Enter the percentage of free resources to use when automatically creating a node. : ")
 			fmt.Scanln(&extra)
 			polices[4].Type = "extra"
-			polices[4].Value = strconv.Itoa(extra)
+			polices[4].Value[0] = strconv.Itoa(extra)
 
 			fmt.Println(polices)
 
@@ -156,27 +156,27 @@ DESCRIPTION
 				fmt.Printf("Enter the maximum service cost. : ")
 				fmt.Scanln(&cost)
 				polices[0].Type = "cost"
-				polices[0].Value = strconv.Itoa(cost)
+				polices[0].Value[0] = strconv.Itoa(cost)
 
 				fmt.Printf("Enter the maximum number of CPUs to allocate in the cluster.[NanoCores] : ")
 				fmt.Scanln(&max_cpu)
 				polices[1].Type = "max_cpu"
-				polices[1].Value = strconv.Itoa(max_cpu)
+				polices[1].Value[0] = strconv.Itoa(max_cpu)
 
 				fmt.Printf("Enter the maximum amount of memory to allocate in the cluster.. : ")
 				fmt.Scanln(&max_memory)
 				polices[2].Type = "max_memory"
-				polices[2].Value = strconv.Itoa(max_memory)
+				polices[2].Value[0] = strconv.Itoa(max_memory)
 
 				fmt.Printf("Enter the node option to use as default : ")
 				fmt.Scanln(&default_node_option)
 				polices[3].Type = "default_node_option"
-				polices[3].Value = default_node_option
+				polices[3].Value[0] = default_node_option
 
 				fmt.Printf("Enter the percentage of free resources to use when automatically creating a node. : ")
 				fmt.Scanln(&extra)
 				polices[4].Type = "extra"
-				polices[4].Value = strconv.Itoa(extra)
+				polices[4].Value[0] = strconv.Itoa(extra)
 
 				fmt.Println(polices)
 

@@ -1,7 +1,8 @@
 package test
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
+	// "Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
+	"Hybrid_Cloud/hcp-scheduler/pkg/framework/plugins/predicates"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 	"testing"

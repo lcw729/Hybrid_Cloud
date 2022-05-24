@@ -251,7 +251,7 @@ func (h HostPortInfo) sanitize(ip, protocol *string) {
 	}
 }
 
-//
-func (n *NodeInfo) FilterNode() {
-	n.IsFiltered = true
-}
+// //
+// func (n *NodeInfo) FilterNode() {
+// 	n.IsFiltered = true
+// }

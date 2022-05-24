@@ -79,7 +79,7 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 
 				// SchedulingStatus "Requested"
 				SchedulingStatus: "Requested",
-				SchedulingType:   algorithm,
+				SchedulingType:   algorithm[0],
 			},
 		}
 

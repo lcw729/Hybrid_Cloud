@@ -14,7 +14,7 @@ type hcpFramework struct {
 	scorePlugins  []HCPScorePlugin
 }
 
-func NewFramework() hcpFramework {
+func NewFramework() *hcpFramework {
 	framework := &hcpFramework{
 		filterPlugins: []HCPFilterPlugin{
 			&predicates.NodeName{},
@@ -29,39 +29,71 @@ func NewFramework() hcpFramework {
 			&priorities.NodeAffinity{},
 		},
 	}
-	return *framework
+	return framework
 }
 
-func (f *hcpFramework) RunFilterPluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
+func (f *hcpFramework) RunFilterPluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
 	result := make(map[string]bool)
 	var isFiltered bool
+
+	var plugins []HCPFilterPlugin
+	for _, i := range algorithms {
+		plugins = append(plugins, f.stringTOHCPFilterPlugin(i))
+	}
+
 	for _, cluster := range *clusterInfoList {
-		isFiltered = true
-		for _, plugin := range f.filterPlugins {
+		isFiltered = false
+		for _, plugin := range plugins {
 			fmt.Println(plugin.Name())
 			isFiltered = plugin.Filter(pod, status, &cluster)
 			/*
-			  result : true => pass
-			  result : false => fail
+			  result : true => 필터 O
+			  result : false => 필터 X
 			*/
-			result[cluster.ClusterName] = !isFiltered
-			// 하나의 plugin이라도 fail이면 다음 클러스터 필터링 시작
-			if !result[cluster.ClusterName] {
+			cluster.IsFiltered = isFiltered
+			result[cluster.ClusterName] = isFiltered
+			// 하나의 plugin이라도 true이면 다음 클러스터 필터링 시작
+			if result[cluster.ClusterName] {
 				break
 			}
 		}
 	}
 }
 
-func (f *hcpFramework) RunScorePluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
+func (f *hcpFramework) stringTOHCPFilterPlugin(name string) HCPFilterPlugin {
+	for _, p := range f.filterPlugins {
+		if p.Name() == name {
+			return p
+		}
+	}
+	return nil
+}
+
+func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
 	result := make(map[string]int64)
 	var score int64
+	var plugins []HCPScorePlugin
+
+	for _, i := range algorithms {
+		plugins = append(plugins, f.stringTOHCPScorePlugin(i))
+	}
+
 	for _, cluster := range *clusterInfoList {
 		score = 0
-		for _, plugin := range f.scorePlugins {
+		for _, plugin := range plugins {
 			fmt.Println(plugin.Name())
 			score = plugin.Score(pod, status, &cluster)
 			result[cluster.ClusterName] += score
 		}
+		cluster.ClusterScore = int32(result[cluster.ClusterName])
 	}
+}
+
+func (f *hcpFramework) stringTOHCPScorePlugin(name string) HCPScorePlugin {
+	for _, p := range f.scorePlugins {
+		if p.Name() == name {
+			return p
+		}
+	}
+	return nil
 }

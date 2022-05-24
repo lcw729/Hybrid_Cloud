@@ -7,8 +7,8 @@ import (
 )
 
 type HCPFramework interface {
-	RunFilterPluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
-	RunScorePluginsOnClusters(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
+	RunFilterPluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
+	RunScorePluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 }
 
 type HCPPlugin interface {

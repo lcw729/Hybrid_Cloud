@@ -25,13 +25,13 @@ func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(master_config)
 
-	_, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), *clusterName, metav1.GetOptions{})
+	cluster, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), *clusterName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("us-east-2"),
+		Region: aws.String(cluster.Spec.Region),
 	}))
 	eksSvc := eks.New(sess)
 	return eksSvc, nil
