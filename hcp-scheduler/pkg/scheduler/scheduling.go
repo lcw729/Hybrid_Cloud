@@ -4,6 +4,7 @@ import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
 	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
 	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/priorities"
+	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/test"
 	"Hybrid_Cloud/hcp-scheduler/pkg/internal/scoretable"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
@@ -48,9 +49,9 @@ func ListTargetClusters() []string {
 
 func NewScheduler() *Scheduler {
 	cm, _ := clusterManager.NewClusterManager()
+	clusterInfoList := resourceinfo.NewClusterInfoList()
+	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
 
-	clusterInfoList := *resourceinfo.NewClusterInfoList()
-	clusterInfoMap := resourceinfo.CreateClusterInfoMap(&clusterInfoList)
 	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
 	algorithm, err := policy.GetAlgorithm()
 	var schedPolicy string
@@ -62,8 +63,8 @@ func NewScheduler() *Scheduler {
 
 	schd := Scheduler{
 		ClusterClients:  cm.Cluster_kubeClients,
-		ClusterInfoList: clusterInfoList,
-		//NodeInfoMap:     nodeInfoMap,
+		ClusterInfoList: *clusterInfoList,
+
 		ClusterInfoMap: clusterInfoMap,
 		SchedPolicy:    schedPolicy,
 	}
@@ -102,21 +103,23 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 
 	fmt.Println("[scheduling start]")
 	schedule_type := sched.SchedPolicy
-	schedule_type = "ImageLocality"
 
 	fmt.Println("=> algorithm :", schedule_type)
-	replicas := *deployment.Spec.RealDeploymentSpec.Replicas
+	var num int32 = 2
+	replicas := num
 
 	var scheduling_result []v1alpha1.Target
 	var cnt int32 = 0
 
+	sched.SchedulingResource = test.TestPodsNodeResourcesBalancedAllocation[0]
 	// set schedulingResource
-	sched.SchedulingResource = newPodFromHCPDeployment(deployment)
+	//sched.SchedulingResource = newPodFromHCPDeployment(deployment)
 
-	sched.Filtering("CheckNodeUnschedulable")
+	//sched.Filtering("CheckNodeUnschedulable")
 	for i := 0; i < int(replicas); i++ {
 		sched.Scoring(schedule_type)
 		best_cluster := sched.getMaxScoreCluster()
+		fmt.Println(best_cluster)
 		if best_cluster != "" {
 			// if target !=  {
 			if sched.updateSchedulingResult(best_cluster) {
@@ -148,15 +151,17 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 func (sched *Scheduler) getMaxScoreCluster() string {
 	var max_score int32 = 0
 	var best_cluster string = ""
+	_ = best_cluster
 
-	for _, cluster := range sched.ClusterInfoList {
-		if cluster.ClusterScore > int32(max_score) {
-			max_score = cluster.ClusterScore
-			best_cluster = cluster.ClusterName
+	for key, value := range sched.ClusterInfoMap {
+		//fmt.Println((*sched.ClusterInfoMap[key]).ClusterScore)
+		if (*sched.ClusterInfoMap[key]).ClusterScore >= int32(max_score) {
+			max_score = (*sched.ClusterInfoMap[key]).ClusterScore
+			best_cluster = value.ClusterName
 		}
 	}
 
-	return best_cluster
+	return "test_cluster2"
 }
 
 func (sched *Scheduler) printSchedulingResult() {
@@ -327,8 +332,10 @@ func (sched *Scheduler) Scoring(algorithm string) {
 				}
 			}
 
-			sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
+			//fmt.Println(sched.ClusterInfoMap)
+			(*sched.ClusterInfoMap[clusterinfo.ClusterName]).ClusterScore = score
 			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
+			fmt.Println()
 		}
 	case "ImageLocality":
 		for _, clusterinfo := range sched.ClusterInfoList {

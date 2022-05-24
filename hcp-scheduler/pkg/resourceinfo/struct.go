@@ -9,12 +9,26 @@ import (
 type ClusterInfoList []ClusterInfo
 
 type ClusterInfo struct {
-	ClusterName        string
-	ClusterScore       int32
+	ClusterName    string
+	ClusterScore   int32
+	AvailableNodes int
+
 	Nodes              []*NodeInfo
 	RequestedResources *Resources
 	AllocableResources *Resources
 	CapacityResources  *Resources
+}
+
+func (c *ClusterInfo) MinusOneAvailableNodes() {
+	c.AvailableNodes--
+}
+
+func (c *ClusterInfo) IsAnyNodes() bool {
+	if c.AvailableNodes == 0 {
+		return false
+	} else {
+		return true
+	}
 }
 
 // ProtocolPort represents a protocol port pair, e.g. tcp:80.
@@ -30,6 +44,9 @@ type HostPortInfo map[string]map[ProtocolPort]struct{}
 type NodeInfo struct {
 	ClusterName string
 	NodeName    string
+
+	IsFiltered bool
+
 	// Overall node information.
 	Node      *v1.Node
 	NodeScore int32
