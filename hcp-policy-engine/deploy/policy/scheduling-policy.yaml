@@ -7,10 +7,12 @@ spec:
   template:
     spec:
       policies:
-        - type: algorithm
+        - type: filter
           value: 
             - NodeName
-            - NodeResourceFit
+            - NodeResourcesFit
+        - type: score
+          value:
             - NodeAffinity
   rangeOfApplication: All
   policyStatus: Disabled

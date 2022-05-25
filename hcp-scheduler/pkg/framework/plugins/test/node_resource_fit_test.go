@@ -1,7 +1,7 @@
 package test
 
 import (
-	"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
+	//"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
 	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestNodeResourceFit(t *testing.T) {
 
-	pod := NewResourcePod(resourceinfo.Resource{MilliCPU: 1, Memory: 1})
+	//	pod := NewResourcePod(resourceinfo.Resource{MilliCPU: 1, Memory: 1})
 
 	nodeList := []*resourceinfo.NodeInfo{
 		resourceinfo.NewNodeInfo("node1", NewResourcePod(resourceinfo.Resource{MilliCPU: 10, Memory: 20})),
@@ -23,14 +23,14 @@ func TestNodeResourceFit(t *testing.T) {
 	clusterinfo.Nodes = append(clusterinfo.Nodes, nodeList...)
 
 	fmt.Println("===before NodeResourceFit Filtering===")
-	predicates.NodeResourcesFit(pod, &clusterinfo)
+	//predicates.NodeResourcesFit(pod, &clusterinfo)
 	fmt.Println("===after NodeResourceFit Filtering===")
 	for _, node := range clusterinfo.Nodes {
 		fmt.Println((*node).NodeName)
 	}
 
 	fmt.Println("===before NodeUnschedulable Filtering===")
-	predicates.CheckNodeUnschedulable(pod, &clusterinfo)
+	//	predicates.CheckNodeUnschedulable(pod, &clusterinfo)
 	fmt.Println("===after NodeUnschedulable Filtering===")
 	for _, node := range clusterinfo.Nodes {
 		fmt.Println((*node).NodeName)

@@ -87,10 +87,23 @@ func GetNodeInfo(clusterName string) []*NodeInfo {
 
 	cluster_client := kubernetes.NewForConfigOrDie(config)
 
-	_, err = cluster_client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		fmt.Println(err)
-		return nil
+	nodes, _ := cluster_client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	pods, _ := cluster_client.CoreV1().Pods(metav1.NamespaceAll).List(context.TODO(), metav1.ListOptions{})
+
+	for _, node := range nodes.Items {
+		ni := &NodeInfo{
+			ClusterName: clusterName,
+			NodeName:    node.Name,
+			Node:        &node,
+			UsedPorts:   make(HostPortInfo),
+			ImageStates: make(map[string]*ImageStateSummary),
+		}
+
+		for _, pod := range pods.Items {
+			ni.AddPod(&pod)
+		}
+
+		nodeInfo = append(nodeInfo, ni)
 	}
 
 	return nodeInfo

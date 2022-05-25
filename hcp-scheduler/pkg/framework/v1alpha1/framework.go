@@ -38,21 +38,28 @@ func (f *hcpFramework) RunFilterPluginsOnClusters(algorithms []string, pod *v1.P
 
 	var plugins []HCPFilterPlugin
 	for _, i := range algorithms {
-		plugins = append(plugins, f.stringTOHCPFilterPlugin(i))
+		plugin := f.stringTOHCPFilterPlugin(i)
+		if plugin != nil {
+			plugins = append(plugins, plugin)
+		} else {
+			fmt.Println(i, " : no such filter algorithm")
+		}
 	}
 
 	for _, cluster := range *clusterInfoList {
+		fmt.Println(">>", cluster.ClusterName)
 		isFiltered = false
 		for _, plugin := range plugins {
-			fmt.Println(plugin.Name())
-			isFiltered = plugin.Filter(pod, status, &cluster)
+			fmt.Println("[plugin]", plugin.Name())
+			//isFiltered = plugin.Filter(pod, status, &cluster)
 			/*
 			  result : true => 필터 O
 			  result : false => 필터 X
 			*/
-			cluster.IsFiltered = isFiltered
+			isFiltered = true
+			(*cluster).IsFiltered = isFiltered
 			result[cluster.ClusterName] = isFiltered
-			// 하나의 plugin이라도 true이면 다음 클러스터 필터링 시작
+			//하나의 plugin이라도 true이면 다음 클러스터 필터링 시작
 			if result[cluster.ClusterName] {
 				break
 			}
@@ -75,17 +82,27 @@ func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Po
 	var plugins []HCPScorePlugin
 
 	for _, i := range algorithms {
-		plugins = append(plugins, f.stringTOHCPScorePlugin(i))
+		plugin := f.stringTOHCPScorePlugin(i)
+		if plugin != nil {
+			plugins = append(plugins, plugin)
+		} else {
+			fmt.Println(i, " : no such filter algorithm")
+		}
 	}
 
 	for _, cluster := range *clusterInfoList {
 		score = 0
-		for _, plugin := range plugins {
-			fmt.Println(plugin.Name())
-			score = plugin.Score(pod, status, &cluster)
-			result[cluster.ClusterName] += score
+		fmt.Println(">>", cluster.ClusterName)
+		if cluster.IsFiltered {
+			fmt.Println(cluster.ClusterName, "is already filtered")
+		} else {
+			for _, plugin := range plugins {
+				fmt.Println("[plugin]", plugin.Name())
+				//score = plugin.Score(pod, status, &cluster)
+				result[cluster.ClusterName] += score
+			}
 		}
-		cluster.ClusterScore = int32(result[cluster.ClusterName])
+		(*cluster).ClusterScore = int32(result[cluster.ClusterName])
 	}
 }
 
