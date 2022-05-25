@@ -209,7 +209,6 @@ func (c *Controller) syncHandler(key string) error {
 	// 스케줄링되지 않은 파드 감지
 	if hcpdeployment.Spec.SchedulingStatus == "Requested" {
 		fmt.Println("[Scheduling Start]")
-
 		sched := scheduler.NewScheduler()
 		target := sched.Scheduling(hcpdeployment)
 		if target != nil {

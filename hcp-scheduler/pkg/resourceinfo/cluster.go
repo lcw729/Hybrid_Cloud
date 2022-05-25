@@ -22,13 +22,12 @@ func NewClusterInfoList() *ClusterInfoList {
 
 	for _, hcpcluster := range joinCluster_list {
 		cluster_name := hcpcluster.Name
-		clusterInfo := ClusterInfo{
+		clusterInfo := &ClusterInfo{
 			ClusterName:  cluster_name,
 			ClusterScore: 0,
 			Nodes:        GetNodeInfo(cluster_name),
 		}
 		clusterInfo_list = append(clusterInfo_list, clusterInfo)
-
 	}
 
 	return &clusterInfo_list
@@ -37,13 +36,11 @@ func NewClusterInfoList() *ClusterInfoList {
 // CreateNodeInfoMap obtains a list of pods and pivots that list into a map where the keys are node names
 // and the values are the aggregated information for that node.
 func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
-
-	fmt.Println("[1-1] create clusterInfoMap")
 	ClusterNameToInfo := make(map[string]*ClusterInfo, len(*clusters))
 	for _, cluster := range *clusters {
 		clusterName := cluster.ClusterName
 		if _, ok := ClusterNameToInfo[clusterName]; !ok {
-			ClusterNameToInfo[clusterName] = &cluster
+			ClusterNameToInfo[clusterName] = cluster
 		}
 	}
 
@@ -51,7 +48,6 @@ func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
 }
 
 func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
-
 	var joinCluster_list []v1alpha1.HCPCluster
 	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
 	if err != nil {

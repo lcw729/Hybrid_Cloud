@@ -55,5 +55,5 @@ func CreateTestClusters(clusterinfo_list *resourceinfo.ClusterInfoList, node_lis
 		cluster_info.Nodes = append(cluster_info.Nodes, &new_node)
 	}
 
-	(*clusterinfo_list) = append((*clusterinfo_list), cluster_info)
+	(*clusterinfo_list) = append((*clusterinfo_list), &cluster_info)
 }

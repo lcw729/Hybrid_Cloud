@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 
-type ClusterInfoList []ClusterInfo
+type ClusterInfoList []*ClusterInfo
 
 type ClusterInfo struct {
 	ClusterName  string
@@ -47,8 +47,7 @@ type NodeInfo struct {
 	ClusterName string
 	NodeName    string
 	// Overall node information.
-	Node      *v1.Node
-	NodeScore int32
+	Node *v1.Node
 	// Ports allocated on the node.
 	UsedPorts HostPortInfo
 

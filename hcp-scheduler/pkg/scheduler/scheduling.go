@@ -55,8 +55,10 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 	var score []string
 	for _, policy := range schedPolicy.Spec.Template.Spec.Policies {
 		if policy.Type == "filter" {
+			fmt.Println(policy.Value)
 			filter = append(filter, policy.Value...)
 		} else if policy.Type == "score" {
+			fmt.Println(policy.Value)
 			score = append(score, policy.Value...)
 		}
 	}
@@ -94,7 +96,6 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 		fmt.Println("Scheduling failed")
 		return nil
 	}
-
 }
 
 func newPodFromHCPDeployment(deployment *v1alpha1.HCPDeployment) *v1.Pod {

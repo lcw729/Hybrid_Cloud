@@ -10,8 +10,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
-
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,13 +39,15 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, _ := json.Marshal(resource.RealResource)
 	json.Unmarshal(bytes, &real_resource)
 
-	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
-	algorithm, err := policy.GetAlgorithm()
-	fmt.Println(algorithm)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	/*
+		// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
+		algorithm, err := policy.GetAlgorithm()
+		fmt.Println(algorithm)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	*/
 
 	// TargetCluster가 지정되지 않은 경우
 	if resource.TargetCluster == "undefined" {
@@ -79,7 +79,7 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 
 				// SchedulingStatus "Requested"
 				SchedulingStatus: "Requested",
-				SchedulingType:   algorithm[0],
+				//SchedulingType:   algorithm[0],
 			},
 		}
 
