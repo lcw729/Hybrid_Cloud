@@ -12,4 +12,5 @@ const (
 	JoinCheck           = "JoinCheck"
 	NodePreferAvoidPods = "NodePreferAvoidPods"
 	VolumeRestrictions  = "VolumeRestrictions"
+	SelectorSpread      = "SelectorSpread"
 )
