@@ -34,49 +34,46 @@ var EKSCreateAddonCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates an Amazon EKS add-on.",
 	Long: `	
-	- create
-		hybridctl addon create
+
+	hybridctl eks addon create
 
 	- flags
+		--cluster-name <value>
+		--addon-name <value>
 		[--addon-version <value>]
 		[--service-account-role-arn <value>]
 		[--resolve-conflicts <value>]
 		[--client-request-token <value>]
-		[--tags <value>]
-
-	- platform
-		- eks (elastic kubernetes service)`,
+		[--tags <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
-		addonName, err := cmd.Flags().GetString("addon-name")
-		util.CheckERR(err)
-		addonVersion, err := cmd.Flags().GetString("addon-version")
-		util.CheckERR(err)
-		serviceAccountRoleArn, err := cmd.Flags().GetString("service-account-role-arn")
-		util.CheckERR(err)
-		resolveConflicts, err := cmd.Flags().GetString("resolve-conflicts")
-		util.CheckERR(err)
-		clientRequestToken, err := cmd.Flags().GetString("client-request-token")
-		util.CheckERR(err)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		createAddonInput.ClusterName = &clusterName
+
+		addonName, _ := cmd.Flags().GetString("addon-name")
 		createAddonInput.AddonName = &addonName
+
+		addonVersion, _ := cmd.Flags().GetString("addon-version")
 		if addonVersion != "" {
 			createAddonInput.AddonVersion = &addonVersion
 		}
+
+		serviceAccountRoleArn, _ := cmd.Flags().GetString("service-account-role-arn")
 		if serviceAccountRoleArn != "" {
 			createAddonInput.ServiceAccountRoleArn = &serviceAccountRoleArn
 		}
+
+		resolveConflicts, _ := cmd.Flags().GetString("resolve-conflicts")
 		if resolveConflicts != "" {
 			createAddonInput.ResolveConflicts = &resolveConflicts
 		}
+
+		clientRequestToken, _ := cmd.Flags().GetString("client-request-token")
 		if clientRequestToken != "" {
 			createAddonInput.ClientRequestToken = &clientRequestToken
 		}
-		tags, err := cmd.Flags().GetString("tags")
-		util.CheckERR(err)
+
+		tags, _ := cmd.Flags().GetString("tags")
 		var tagsMap map[string]*string
 		if tags != "" {
 			byteValue := util.OpenAndReadJsonFile(tags)
@@ -84,9 +81,9 @@ var EKSCreateAddonCmd = &cobra.Command{
 			createAddonInput.Tags = tagsMap
 		}
 
+		var output eks.CreateAddonOutput
 		httpPostUrl := "/eks/addon/create"
 		bytes := util.HTTPPostRequest(createAddonInput, httpPostUrl)
-		var output eks.CreateAddonOutput
 		EKSCommonPrintOption(output, bytes)
 	},
 }
@@ -95,93 +92,92 @@ var EKSDeleteAddonCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete an Amazon EKS add-on.",
 	Long: `	
-	- delete
-		hybridctl delete addon 
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	hybridctl eks addon delete 
+
+	- flags
+		--cluster-name <value>
+		--addon-name <value>`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
-		addonName, err := cmd.Flags().GetString("addon-name")
-		util.CheckERR(err)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		deleteAddonInput.ClusterName = &clusterName
+
+		addonName, _ := cmd.Flags().GetString("addon-name")
 		deleteAddonInput.AddonName = &addonName
 
+		var output eks.DeleteAddonOutput
 		httpPostUrl := "/eks/addon/delete"
 		bytes := util.HTTPPostRequest(deleteAddonInput, httpPostUrl)
-		var output eks.DeleteAddonOutput
 		EKSCommonPrintOption(output, bytes)
-
 	},
 }
 
 var EKSDescribeAddonCmd = &cobra.Command{
 	Use:   "describe",
-	Short: "A brief description of your command",
+	Short: "Describes an Amazon EKS add-on.",
 	Long: `	
-	- describe
-		hybridctl addon describe <clusterName> <addonName> 
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	hybridctl eks addon describe
+
+	-flags
+		--cluster-name <value>
+		--addon-name <value>`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
-		addonName, err := cmd.Flags().GetString("addon-name")
-		util.CheckERR(err)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		describeAddonInput.ClusterName = &clusterName
+
+		addonName, _ := cmd.Flags().GetString("addon-name")
 		describeAddonInput.AddonName = &addonName
 
+		var output eks.DescribeAddonOutput
 		httpPostUrl := "/eks/addon/describe"
 		bytes := util.HTTPPostRequest(describeAddonInput, httpPostUrl)
-		var output eks.DescribeAddonOutput
 		EKSCommonPrintOption(output, bytes)
 
 	},
 }
 
 var EKSDescribeAddonVersionsCmd = &cobra.Command{
-	Use:   "describe-addon-versions",
-	Short: "A brief description of your command",
+	Use:   "describe-versions",
+	Short: "Describes the Kubernetes versions that the add-on can be used with.",
 	Long: `	
-	- describe-addon-versions
-		hybridctl describe-addon-versions 
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	hybridctl eks addon describe-versions
+
+	- flags
+		[--kubernetes-version <value>]
+		[--addon-name <value>]
+		[--next-token <value>]
+		[--max-results <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		addonName, err := cmd.Flags().GetString("addon-name")
-		util.CheckERR(err)
-		kubernetesVersion, err := cmd.Flags().GetString("kubernetes-version")
-		util.CheckERR(err)
-		maxResults, err := cmd.Flags().GetInt64("max-result")
-		util.CheckERR(err)
-		nextToken, err := cmd.Flags().GetString("next-token")
-		util.CheckERR(err)
+		addonName, _ := cmd.Flags().GetString("addon-name")
 		if addonName != "" {
 			describeAddonVersionsInput.AddonName = &addonName
 			fmt.Println(addonName)
 		}
+
+		kubernetesVersion, _ := cmd.Flags().GetString("kubernetes-version")
 		if kubernetesVersion != "" {
 			describeAddonVersionsInput.KubernetesVersion = &kubernetesVersion
 		}
+
+		maxResults, _ := cmd.Flags().GetInt64("max-results")
 		if maxResults != 0 {
 			describeAddonVersionsInput.MaxResults = &maxResults
 		}
+		nextToken, _ := cmd.Flags().GetString("next-token")
 		if nextToken != "" {
 			describeAddonVersionsInput.NextToken = &nextToken
 		}
 
+		var output eks.DescribeAddonVersionsOutput
 		httpPostUrl := "/eks/addon/describe-versions"
 		bytes := util.HTTPPostRequest(describeAddonVersionsInput, httpPostUrl)
-		var output eks.DescribeAddonVersionsOutput
 		json.Unmarshal(bytes, &output)
 		if output.Addons == nil {
 			util.PrintErrMsg(bytes)
@@ -192,24 +188,23 @@ var EKSDescribeAddonVersionsCmd = &cobra.Command{
 }
 
 var EKSListAddonCmd = &cobra.Command{
-	Use:   "list-addon",
-	Short: "A brief description of your command",
+	Use:   "list",
+	Short: "Lists the available add-ons.",
 	Long: `	
-	- list-addon
-		hybridctl eks list-addon 
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	hybridctl eks addon list
+
+	- flags
+		--cluster-name <value>
+		[--max-results <value>]
+		[--next-token <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
-		maxResults, err := cmd.Flags().GetInt64("max-result")
-		util.CheckERR(err)
-		nextToken, err := cmd.Flags().GetString("next-token")
-		util.CheckERR(err)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		listAddonInput.ClusterName = &clusterName
+
+		maxResults, _ := cmd.Flags().GetInt64("max-results")
 		if maxResults != 0 {
 			if maxResults < 1 || maxResults > 100 {
 				fmt.Println("MaxResults can be between 1 and 100.")
@@ -218,13 +213,15 @@ var EKSListAddonCmd = &cobra.Command{
 				listAddonInput.MaxResults = &maxResults
 			}
 		}
+
+		nextToken, _ := cmd.Flags().GetString("next-token")
 		if nextToken != "" {
 			listAddonInput.NextToken = &nextToken
 		}
 
-		httpPostUrl := "http://localhost:8080/eks/addon/list"
-		bytes := util.HTTPPostRequest(listAddonInput, httpPostUrl)
 		var output eks.ListAddonsOutput
+		httpPostUrl := "/eks/addon/list"
+		bytes := util.HTTPPostRequest(listAddonInput, httpPostUrl)
 		json.Unmarshal(bytes, &output)
 		if output.Addons == nil {
 			util.PrintErrMsg(bytes)
@@ -234,36 +231,93 @@ var EKSListAddonCmd = &cobra.Command{
 	},
 }
 
-var associateIdentityProviderConfigCmd = &cobra.Command{
-	Use:   "associate-identity-provider-config",
-	Short: "A brief description of your command",
+var EKSUpdateAddonCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Updates an Amazon EKS add-on.",
 	Long: `	
-	- associate-identity-provider-config
-		hybridctl associate-identity-provider-config 
+	
+	hybridctl eks addon update 
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	- flags
+		--cluster-name <value>
+		--addon-name <value>
+		[--addon-version <value>]
+		[--service-account-role-arn <value>]
+		[--resolve-conflicts <value>]
+		[--client-request-token <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
+		name, _ := cmd.Flags().GetString("name")
+		updateAddonInput.ClusterName = &name
+
+		addonName, _ := cmd.Flags().GetString("addon-name")
+		updateAddonInput.AddonName = &addonName
+
+		addonVersion, _ := cmd.Flags().GetString("addon-version")
+		if addonVersion != "" {
+			updateAddonInput.AddonVersion = &addonVersion
+		}
+
+		serviceAccountRoleArn, _ := cmd.Flags().GetString("service-account-role-arn")
+		if serviceAccountRoleArn != "" {
+			updateAddonInput.ServiceAccountRoleArn = &serviceAccountRoleArn
+		}
+
+		resolveConflicts, _ := cmd.Flags().GetString("resolve-conflicts")
+		if resolveConflicts != "" {
+			updateAddonInput.ResolveConflicts = &resolveConflicts
+		}
+
+		clientRequestToken, _ := cmd.Flags().GetString("client-request-token")
+		if clientRequestToken != "" {
+			updateAddonInput.ClientRequestToken = &clientRequestToken
+		}
+
+		var output eks.UpdateAddonOutput
+		httpPostUrl := "/eks/addon/update"
+		bytes := util.HTTPPostRequest(updateAddonInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+
+	},
+}
+
+var EKSIdentityProviderConfigCmd = &cobra.Command{
+	Use:   "identity-provider-config",
+	Short: "",
+	Long:  "",
+}
+
+var EKSAssociateIdentityProviderConfigCmd = &cobra.Command{
+	Use:   "associate",
+	Short: "Associate an identity provider configuration to a cluster.",
+	Long: `	
+
+	hybridctl eks identity-provider-config associate
+
+	- flags
+		--cluster-name <value>
+		--oidc <value>
+		[--tags <value>]
+		[--client-request-token <value>]`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		associateIdentityProviderConfigInput.ClusterName = &clusterName
+
 		// json parsing
-		oidc, err := cmd.Flags().GetString("oidc")
-		util.CheckERR(err)
+		oidc, _ := cmd.Flags().GetString("oidc")
 		byteValue := util.OpenAndReadJsonFile(oidc)
 		json.Unmarshal(byteValue, &oidcRequest)
 		associateIdentityProviderConfigInput.Oidc = &oidcRequest
 
-		clientRequestToken, err := cmd.Flags().GetString("client-request-token")
-		util.CheckERR(err)
+		clientRequestToken, _ := cmd.Flags().GetString("client-request-token")
 		if clientRequestToken != "" {
 			associateIdentityProviderConfigInput.ClientRequestToken = &clientRequestToken
 		}
 
-		tags, err := cmd.Flags().GetString("tags")
-		util.CheckERR(err)
+		tags, _ := cmd.Flags().GetString("tags")
 		var tagsMap map[string]*string
 		if tags != "" {
 			byteValue := util.OpenAndReadJsonFile(tags)
@@ -271,9 +325,9 @@ var associateIdentityProviderConfigCmd = &cobra.Command{
 			associateIdentityProviderConfigInput.Tags = tagsMap
 		}
 
+		var output eks.AssociateIdentityProviderConfigOutput
 		httpPostUrl := "/eks/identity-provider-config/associate"
 		bytes := util.HTTPPostRequest(associateIdentityProviderConfigInput, httpPostUrl)
-		var output eks.AssociateIdentityProviderConfigOutput
 		json.Unmarshal(bytes, &output)
 		if output.Tags == nil {
 			util.PrintErrMsg(bytes)
@@ -284,27 +338,25 @@ var associateIdentityProviderConfigCmd = &cobra.Command{
 	},
 }
 
-var disassociateIdentityProviderConfigCmd = &cobra.Command{
-	Use:   "disassociate-identity-provider-config",
-	Short: "A brief description of your command",
+var EKSDisassociateIdentityProviderConfigCmd = &cobra.Command{
+	Use:   "disassociate",
+	Short: "Disassociates an identity provider configuration from a cluster.",
 	Long: `	
-	- disassociate-identity-provider-config
-		hybridctl disassociate-identity-provider-config <clusterName> <oidc> 
+	
+	hybridctl eks identity-provider-config disassociate
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	- flags
+		--cluster-name <value>
+		--identity-provider-config <value>
+		[--client-request-token <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
-
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		disassociateIdentityProviderConfigInput.ClusterName = &clusterName
 
 		// json parsing
 		var IdentityProviderConfig eks.IdentityProviderConfig
-		jsonFileName, err := cmd.Flags().GetString("identity-provider-config")
-		util.CheckERR(err)
+		jsonFileName, _ := cmd.Flags().GetString("identity-provider-config")
 		byteValue := util.OpenAndReadJsonFile(jsonFileName)
 		json.Unmarshal(byteValue, &IdentityProviderConfig)
 		if (IdentityProviderConfig == eks.IdentityProviderConfig{}) {
@@ -313,23 +365,22 @@ var disassociateIdentityProviderConfigCmd = &cobra.Command{
 		}
 		disassociateIdentityProviderConfigInput.IdentityProviderConfig = &IdentityProviderConfig
 
-		clientRequestToken, err := cmd.Flags().GetString("client-request-token")
-		util.CheckERR(err)
+		clientRequestToken, _ := cmd.Flags().GetString("client-request-token")
 		if clientRequestToken != "" {
 			disassociateIdentityProviderConfigInput.ClientRequestToken = &clientRequestToken
 		}
 
+		var output eks.DisassociateIdentityProviderConfigOutput
 		httpPostUrl := "/eks/identity-provider-config/disassociate"
 		bytes := util.HTTPPostRequest(disassociateIdentityProviderConfigInput, httpPostUrl)
-		var output eks.DisassociateIdentityProviderConfigOutput
 		EKSCommonPrintOption(output, bytes)
 
 	},
 }
 
-var listIdentityProviderConfigsCmd = &cobra.Command{
-	Use:   "list-identity-provider-configs",
-	Short: "A brief description of your command",
+var EKSListIdentityProviderConfigsCmd = &cobra.Command{
+	Use:   "list",
+	Short: "A list of identity provider configurations.",
 	Long: `	
 	- list-identity-provider-configs
 		hybridctl list-identity-provider-configs --cluster-name
@@ -365,9 +416,9 @@ var listIdentityProviderConfigsCmd = &cobra.Command{
 	},
 }
 
-var describeIdentityProviderConfigCmd = &cobra.Command{
-	Use:   "describe-identity-provider-config",
-	Short: "A brief description of your command",
+var EKSDescribeIdentityProviderConfigCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Returns descriptive information about an identity provider configuration.",
 	Long: `	
 	- describe-identity-provider-config
 		hybridctl describe-identity-provider-config <clusterName> <oidc> 
@@ -402,62 +453,66 @@ var describeIdentityProviderConfigCmd = &cobra.Command{
 	},
 }
 
-var associateEncryptionConfigCmd = &cobra.Command{
-	Use:   "associate-encryption-config",
-	Short: "A brief description of your command",
+var EKSEncryptionConfigCmd = &cobra.Command{
+	Use:   "encryption-config",
+	Short: "Associate encryption configuration to an existing cluster.",
 	Long: `	
-	- associate-encryption-config
-		hybridctl associate-encryption-config <clusterName> --encryption-config <jsonfile>
+	You can use this API to enable encryption on existing clusters which do not have encryption already enabled. 
+	This allows you to implement a defense-in-depth security strategy without migrating applications to new Amazon EKS clusters.`,
+}
 
-	- platform
-		- eks (elastic kubernetes service)`,
+var EKSAssociateEncryptionConfigCmd = &cobra.Command{
+	Use:   "associate",
+	Short: "Associate encryption configuration to an existing cluster.",
+	Long: `	
+
+	hybridctl eks encryption-config associate <clusterName> --encryption-config <jsonfile>
+
+	- flags
+		--cluster-name <value>
+		--encryption-config <jsonfile>
+		[--client-request-token <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Work your own magic here
+		clientRequestToken, _ := cmd.Flags().GetString("client-request-token")
+		if clientRequestToken != "" {
+			associateEncryptionConfigInput.ClientRequestToken = &clientRequestToken
+		}
 
-		clusterName, err := cmd.Flags().GetString("cluster-name")
-		util.CheckERR(err)
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
 		associateEncryptionConfigInput.ClusterName = &clusterName
 
 		// json parsing
-		jsonFileName, err := cmd.Flags().GetString("encryption-config")
-		util.CheckERR(err)
+		jsonFileName, _ := cmd.Flags().GetString("encryption-config")
 		var encryptionConfig []*eks.EncryptionConfig
 		byteValue := util.OpenAndReadJsonFile(jsonFileName)
 		json.Unmarshal(byteValue, &encryptionConfig)
 		associateEncryptionConfigInput.EncryptionConfig = encryptionConfig
 
-		clientRequestToken, err := cmd.Flags().GetString("client-request-token")
-		util.CheckERR(err)
-		if clientRequestToken != "" {
-			associateEncryptionConfigInput.ClientRequestToken = &clientRequestToken
-		}
-
+		var output eks.AssociateEncryptionConfigOutput
 		httpPostUrl := "/eks/encryption-config/associate"
 		bytes := util.HTTPPostRequest(associateEncryptionConfigInput, httpPostUrl)
-		var output eks.AssociateEncryptionConfigOutput
 		EKSCommonPrintOption(output, bytes)
 	},
 }
 
-var listTagsForResourceCmd = &cobra.Command{
-	Use:   "list-tags-for-resource",
-	Short: "A brief description of your command",
+var EKSListTagsForResourceCmd = &cobra.Command{
+	Use:   "list-tags",
+	Short: "List the tags for an Amazon EKS resource.",
 	Long: `	
-	- list-tags-for-resource
-		hybridctl list-tags-for-resource --resource-arn
+	
+	hybridctl eks resource list-tags
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	- flags
+		--resource-arn <value>`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		resourceArn, err := cmd.Flags().GetString("resource-arn")
-		util.CheckERR(err)
+		resourceArn, _ := cmd.Flags().GetString("resource-arn")
 		listTagsForResourceInput.ResourceArn = &resourceArn
 
-		httpPostUrl := "/eks/resource/list"
-		bytes := util.HTTPPostRequest(listTagsForResourceInput, httpPostUrl)
 		var output eks.ListTagsForResourceOutput
+		httpPostUrl := "/eks/resource/list-tags"
+		bytes := util.HTTPPostRequest(listTagsForResourceInput, httpPostUrl)
 		json.Unmarshal(bytes, &output)
 		if output.Tags == nil {
 			util.PrintErrMsg(bytes)
@@ -467,15 +522,22 @@ var listTagsForResourceCmd = &cobra.Command{
 	},
 }
 
-var tagResourceCmd = &cobra.Command{
-	Use:   "tag-resource",
-	Short: "A brief description of your command",
-	Long: `	
-	- tage-resource
-		hybridctl tag-resource --resource-arn <value> --tags <jsonfile>
+var EKSResourceCmd = &cobra.Command{
+	Use:   "resource",
+	Short: "",
+	Long:  "",
+}
 
-	- platform
-		- eks (elastic kubernetes service)`,
+var EKSTagResourceCmd = &cobra.Command{
+	Use:   "tag",
+	Short: "Associates the specified tags to a resource with the specified resourceArn.",
+	Long: `	
+	
+	hybridctl eks resource tag
+
+	- flags
+		--resource-arn <value>
+		--tags <value>`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		var tagResourceInput eks.TagResourceInput
@@ -501,15 +563,16 @@ var tagResourceCmd = &cobra.Command{
 	},
 }
 
-var untagResourceCmd = &cobra.Command{
-	Use:   "untag-resource",
-	Short: "A brief description of your command",
+var EKSUntagResourceCmd = &cobra.Command{
+	Use:   "untag",
+	Short: "Deletes specified tags from a resource.",
 	Long: `	
-	- untage-resource
-		hybridctl untag-resource --resource-arn <value> --tag-keys <key,key>
+	
+	hybridctl eks resource untag
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	- flags
+		--resource-arn <value>
+		--tag-keys <value>`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -537,7 +600,7 @@ var untagResourceCmd = &cobra.Command{
 		util.PrintErrMsg(bytes)
 	},
 }
-var describeUpdateCmd = &cobra.Command{
+var EKSDescribeUpdateCmd = &cobra.Command{
 	Use:   "describe-update",
 	Short: "A brief description of your command",
 	Long: `	
@@ -574,12 +637,12 @@ var describeUpdateCmd = &cobra.Command{
 	},
 }
 
-var listUpdateCmd = &cobra.Command{
-	Use:   "list-update",
+var EKSListUpdateCmd = &cobra.Command{
+	Use:   "list-updates",
 	Short: "A brief description of your command",
 	Long: `	
-	- list-update
-		hybridctl list-update <clusterName> 
+
+	hybridctl list-update <clusterName> 
 
 	- platform
 		- eks (elastic kubernetes service)`,
@@ -624,62 +687,24 @@ var listUpdateCmd = &cobra.Command{
 	},
 }
 
-var EKSUpdateAddonCmd = &cobra.Command{
-	Use:   "update-addon",
-	Short: "A brief description of your command",
-	Long: `	
-	- update-addon
-		hybridctl update-addon  
-
-	- platform
-		- eks (elastic kubernetes service)`,
-
-	Run: func(cmd *cobra.Command, args []string) {
-
-		name, err := cmd.Flags().GetString("name")
-		util.CheckERR(err)
-		addonName, err := cmd.Flags().GetString("addon-name")
-		util.CheckERR(err)
-		addonVersion, err := cmd.Flags().GetString("addon-version")
-		util.CheckERR(err)
-		serviceAccountRoleArn, err := cmd.Flags().GetString("service-account-role-arn")
-		util.CheckERR(err)
-		resolveConflicts, err := cmd.Flags().GetString("resolve-conflicts")
-		util.CheckERR(err)
-		clientRequestToken, err := cmd.Flags().GetString("client-request-token")
-		util.CheckERR(err)
-		updateAddonInput.ClusterName = &name
-		updateAddonInput.AddonName = &addonName
-		if addonVersion != "" {
-			updateAddonInput.AddonVersion = &addonVersion
-		}
-		if serviceAccountRoleArn != "" {
-			updateAddonInput.ServiceAccountRoleArn = &serviceAccountRoleArn
-		}
-		if resolveConflicts != "" {
-			updateAddonInput.ResolveConflicts = &resolveConflicts
-		}
-		if clientRequestToken != "" {
-			updateAddonInput.ClientRequestToken = &clientRequestToken
-		}
-
-		httpPostUrl := "/eks/addon/update"
-		bytes := util.HTTPPostRequest(updateAddonInput, httpPostUrl)
-		var output eks.UpdateAddonOutput
-		EKSCommonPrintOption(output, bytes)
-
-	},
+var EKSClusterConfigCmd = &cobra.Command{
+	Use:   "cluster-config",
+	Short: "",
+	Long:  "",
 }
 
-var updateClusterConfigCmd = &cobra.Command{
+var EKSUpdateClusterConfigCmd = &cobra.Command{
 	Use:   "update-cluster-config",
-	Short: "A brief description of your command",
+	Short: "Updates an Amazon EKS cluster configuration.",
 	Long: `	
-	- update-cluster-config
-		hybridctl update-cluster-config <clusterName>
 
-	- platform
-		- eks (elastic kubernetes service)`,
+	hybridctl eks cluster-config update
+
+	- flags
+		--name <value>
+		[--resources-vpc-config <value>]
+		[--logging <value>]
+		[--client-request-token <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
@@ -721,15 +746,27 @@ var updateClusterConfigCmd = &cobra.Command{
 	},
 }
 
-var updateNodegroupConfigCmd = &cobra.Command{
-	Use:   "update-nodegroup-config",
-	Short: "A brief description of your command",
-	Long: `	
-	- update-Nodegroup-config
-		hybridctl update-nodegroup-config --cluster-name <value> --nodegroup-name <value>
+var EKSNodegroupConfigCmd = &cobra.Command{
+	Use:   "nodegroup-config",
+	Short: "",
+	Long:  "",
+}
 
-	- platform
-		- eks (elastic kubernetes service)`,
+var EKSUpdateNodegroupConfigCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Updates an Amazon EKS managed node group configuration.",
+	Long: `	
+
+	hybridctl eks nodegroup-config update 
+
+	- flags
+		--cluster-name <value>
+		--nodegroup-name <value>
+		[--labels <value>]
+		[--taints <value>]
+		[--scaling-config <value>]
+		[--update-config <value>]
+		[--client-request-token <value>]`,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here

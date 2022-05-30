@@ -98,18 +98,28 @@ func init() {
 	EKSAddonCmd.AddCommand(EKSListAddonCmd)
 	EKSAddonCmd.AddCommand(EKSUpdateAddonCmd)
 
-	EKSCmd.AddCommand(associateEncryptionConfigCmd)
-	EKSCmd.AddCommand(associateIdentityProviderConfigCmd)
-	EKSCmd.AddCommand(describeIdentityProviderConfigCmd)
-	EKSCmd.AddCommand(describeUpdateCmd)
-	EKSCmd.AddCommand(disassociateIdentityProviderConfigCmd)
-	EKSCmd.AddCommand(listIdentityProviderConfigsCmd)
-	EKSCmd.AddCommand(listTagsForResourceCmd)
-	EKSCmd.AddCommand(listUpdateCmd)
-	EKSCmd.AddCommand(tagResourceCmd)
-	EKSCmd.AddCommand(untagResourceCmd)
-	EKSCmd.AddCommand(updateClusterConfigCmd)
-	EKSCmd.AddCommand(updateNodegroupConfigCmd)
+	EKSCmd.AddCommand(EKSEncryptionConfigCmd)
+	EKSEncryptionConfigCmd.AddCommand(EKSAssociateEncryptionConfigCmd)
+
+	EKSCmd.AddCommand(EKSIdentityProviderConfigCmd)
+	EKSIdentityProviderConfigCmd.AddCommand(EKSAssociateIdentityProviderConfigCmd)
+	EKSIdentityProviderConfigCmd.AddCommand(EKSDisassociateIdentityProviderConfigCmd)
+	EKSIdentityProviderConfigCmd.AddCommand(EKSDescribeIdentityProviderConfigCmd)
+	EKSIdentityProviderConfigCmd.AddCommand(EKSListIdentityProviderConfigsCmd)
+
+	EKSCmd.AddCommand(EKSResourceCmd)
+	EKSResourceCmd.AddCommand(EKSTagResourceCmd)
+	EKSResourceCmd.AddCommand(EKSUntagResourceCmd)
+	EKSResourceCmd.AddCommand(EKSListTagsForResourceCmd)
+
+	EKSCmd.AddCommand(EKSUpdateClusterConfigCmd)
+	EKSUpdateClusterConfigCmd.AddCommand(EKSUpdateClusterConfigCmd)
+
+	EKSCmd.AddCommand(EKSNodegroupConfigCmd)
+	EKSNodegroupConfigCmd.AddCommand(EKSUpdateNodegroupConfigCmd)
+
+	EKSCmd.AddCommand(EKSDescribeUpdateCmd)
+	EKSCmd.AddCommand(EKSListUpdateCmd)
 	eksFlags()
 
 	// GKE
