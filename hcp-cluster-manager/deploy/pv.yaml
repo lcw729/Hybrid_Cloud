@@ -15,3 +15,21 @@ spec:
     path: /root/.kube
     server: "10.0.5.86"
     readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-aws-config
+  labels:
+    app: aws-config 
+spec:
+  capacity:
+    storage: 2Gi
+  storageClassName: cluster-manager
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/.aws
+    server: "10.0.5.86"
+    readOnly: false
