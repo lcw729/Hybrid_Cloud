@@ -49,9 +49,10 @@ func CreateNodeInfoMap(clusters *ClusterInfoList) map[string]*NodeInfo {
 const DefaultBindAllHostIP = "0.0.0.0"
 
 func NewNodeInfo(name string, pods ...*v1.Pod) *NodeInfo {
+	r := new(Resource)
 	ni := &NodeInfo{
 		NodeName:           name,
-		RequestedResources: &Resource{},
+		RequestedResources: *r,
 		AllocatableResources: &Resource{
 			AllowedPodNumber: 3,
 			MilliCPU:         30,

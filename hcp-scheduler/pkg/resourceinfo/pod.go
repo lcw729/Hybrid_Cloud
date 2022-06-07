@@ -68,7 +68,7 @@ func calculateResource(pod *v1.Pod) (res Resource, non0CPU int64, non0Mem int64)
 		}
 	}
 
-	return
+	return *resPtr, non0CPU, non0Mem
 }
 
 // Add adds ResourceList into Resource.

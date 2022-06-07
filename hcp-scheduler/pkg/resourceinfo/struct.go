@@ -63,7 +63,7 @@ type NodeInfo struct {
 	ImageStates map[string]*ImageStateSummary
 
 	// Total requested resources of all pods on this node.
-	RequestedResources   *Resource
+	RequestedResources   Resource
 	AllocatableResources *Resource
 	CapacityResources    *Resource
 }

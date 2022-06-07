@@ -1,26 +1,14 @@
 package main
 
-import "Hybrid_Cloud/hcp-scheduler/pkg/scheduler"
+import (
+	"Hybrid_Cloud/hcp-scheduler/pkg/resourceinfo"
+	"fmt"
+)
 
 func main() {
-	// pod := &v1.Pod{
-	// 	Spec: v1.PodSpec{
-	// 		Volumes: []v1.Volume{
-	// 			{
-	// 				VolumeSource: v1.VolumeSource{
-	// 					HostPath: &v1.HostPathVolumeSource{
-	// 						Path: "/test",
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
-
-	// podVols := pod.Spec.Volumes
-	// for _, podVol := range podVols {
-	// 	fmt.Println(podVol.AWSElasticBlockStore)
-	// }
-	sched := scheduler.NewScheduler()
-	sched.Scheduling(nil)
+	clusterInfoList := resourceinfo.NewClusterInfoList()
+	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
+	fmt.Println(clusterInfoMap["eks-cluster"].Nodes[0].Pods[0].Pod.Name)
+	// sched := scheduler.NewScheduler()
+	// sched.Scheduling(nil)
 }
