@@ -1,16 +1,15 @@
 package controller
 
 import (
-	resourcev1alpha1apis "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
-	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
+	deployment "Hybrid_Cloud/kube-resource/deployment"
+	resourcev1alpha1clientset "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	resourcev1alpha1scheme "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
 	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cloud/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
 	"time"
-
-	"Hybrid_Cloud/hybridctl/util"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -46,7 +45,7 @@ const (
 
 type Controller struct {
 	kubeclientset          kubernetes.Interface
-	hcpdeploymentclientset resourcev1alpha1.Interface
+	hcpdeploymentclientset resourcev1alpha1clientset.Interface
 	hcpdeploymentLister    lister.HCPDeploymentLister
 	hcpdeploymentSynced    cache.InformerSynced
 	workqueue              workqueue.RateLimitingInterface
@@ -55,7 +54,7 @@ type Controller struct {
 
 func NewController(
 	kubeclientset kubernetes.Interface,
-	hcpdeploymentclientset resourcev1alpha1.Interface,
+	hcpdeploymentclientset resourcev1alpha1clientset.Interface,
 	hcpdeploymentinformer informer.HCPDeploymentInformer) *Controller {
 	utilruntime.Must(resourcev1alpha1scheme.AddToScheme(scheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
@@ -205,98 +204,58 @@ func (c *Controller) syncHandler(key string) error {
 			return nil
 		}
 	}
-
-	scheduling_status := hcpdeployment.Spec.SchedulingStatus
-
-	if scheduling_status == "Scheduled" {
-		targets := hcpdeployment.Spec.SchedulingResult.Targets
-		size := len(targets)
-		if size < 1 {
-			fmt.Println("Target cluster should be more than one.")
-		} else {
-			var count int32 = 0
-			real_replicas := *hcpdeployment.Spec.RealDeploymentSpec.Replicas
-
-			for i := 0; i < size; i++ {
-				count += *targets[i].Replicas
-			}
-
-			if count < real_replicas {
-				fmt.Println("Insufficient number of replicas.")
-			} else if count > real_replicas {
-				fmt.Println("Excessive number of replicas")
+	cm, _ := clusterManager.NewClusterManager()
+	if !hcpdeployment.Spec.SchedulingNeed && !hcpdeployment.Spec.SchedulingComplete {
+		ok := deployment.DeployDeploymentFromHCPDeployment(hcpdeployment)
+		if ok {
+			fmt.Printf("succeed to deploy deployment %s\n", hcpdeployment.ObjectMeta.Name)
+			hcpdeployment.Spec.SchedulingComplete = true
+			r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
+			if err != nil {
+				fmt.Println(err)
 			} else {
-				fmt.Println("Appropriate number of replicas")
-				ok := DeployKubeDeployment(hcpdeployment)
-				if !ok {
-					fmt.Println("fail to schedule deployment")
-				} else {
-					fmt.Println("success to schedule deployment")
+				fmt.Printf("update HCPDeployment %s SchedulingComplete: %t\n", r.ObjectMeta.Name, r.Spec.SchedulingComplete)
+			}
+		}
+	} else if !hcpdeployment.Spec.SchedulingNeed && hcpdeployment.Spec.SchedulingComplete {
+		targets := hcpdeployment.Spec.SchedulingResult.Targets
+		redeployneed := false
+		redeploytarget := map[string]int32{}
+		var ns string
+		for _, target := range targets {
+			cluster := cm.Cluster_kubeClients[target.Cluster]
+			if hcpdeployment.Spec.RealDeploymentMetadata.Namespace == "" {
+				ns = "default"
+			}
+			_, err := cluster.AppsV1().Deployments(ns).Get(context.TODO(), hcpdeployment.Name, metav1.GetOptions{})
+			if errors.IsNotFound(err) {
+				redeployneed = true
+				redeploytarget[target.Cluster] = *target.Replicas
+			}
+		}
 
-					// HCPDeployment SchedulingStatus 업데이트
-					hcpdeployment.Spec.SchedulingStatus = "Completed"
-					r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
-					if err != nil {
-						fmt.Println(err)
-					} else {
-						fmt.Printf("update HCPDeployment %s SchedulingStatus : Completed\n", r.ObjectMeta.Name)
+		if redeployneed {
+			for key, value := range redeploytarget {
+				cluster := cm.Cluster_kubeClients[key]
+				redeploydeployment := &appsv1.Deployment{}
+				redeploydeployment.ObjectMeta = hcpdeployment.Spec.RealDeploymentMetadata
+				if redeploydeployment.Namespace == "" {
+					redeploydeployment.Namespace = "default"
+				}
+				redeploydeployment.Spec = hcpdeployment.Spec.RealDeploymentSpec
+				redeploydeployment.Spec.Replicas = &value
+				r, err := cluster.AppsV1().Deployments(redeploydeployment.ObjectMeta.Namespace).Create(context.TODO(), redeploydeployment, metav1.CreateOptions{})
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Printf("succeed to redeploy deployment %s in %s\n", r.ObjectMeta.Name, key)
+					for k := range redeploytarget {
+						delete(redeploytarget, k)
 					}
 				}
 			}
 		}
-	} else if scheduling_status == "Requested" {
-		fmt.Println("not yet scheduled")
-	} else if scheduling_status == "Completed" {
-		fmt.Println("already deployed")
-	} else {
-		fmt.Println("Invalid Scheduling Status")
 	}
 
 	return nil
-}
-
-func DeployKubeDeployment(hcp_resource *resourcev1alpha1apis.HCPDeployment) bool {
-	targets := hcp_resource.Spec.SchedulingResult.Targets
-	metadata := hcp_resource.Spec.RealDeploymentMetadata
-	if metadata.Namespace == "" {
-		metadata.Namespace = "default"
-	}
-	spec := hcp_resource.Spec.RealDeploymentSpec
-
-	// HCPDeployment SchedulingResult에 따라 Deployment 배포
-	for _, target := range targets {
-		// cluster clientset 생성
-
-		config, err := util.BuildConfigFromFlags(target.Cluster, "/root/.kube/config")
-		if err != nil {
-			fmt.Println(err)
-			return false
-		}
-
-		clientset, err := kubernetes.NewForConfig(config)
-		if err != nil {
-			fmt.Println(err)
-			return false
-		}
-
-		// spec 값 재설정하기
-		spec.Replicas = target.Replicas
-
-		// 배포할 Deployment resource 정의
-		kube_resource := appsv1.Deployment{
-			ObjectMeta: metadata,
-			Spec:       spec,
-		}
-
-		// Deployment 배포
-		r, err := clientset.AppsV1().Deployments(metadata.Namespace).Create(context.TODO(), &kube_resource, metav1.CreateOptions{})
-
-		if err != nil {
-			fmt.Println(err)
-			return false
-		} else {
-			fmt.Printf("success to create deployment %s in %s\n", r.ObjectMeta.Name, target.Cluster)
-		}
-	}
-	return true
 }
