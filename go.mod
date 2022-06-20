@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go v1.43.13
 	github.com/go-logr/logr v1.2.0
 	github.com/gogo/protobuf v1.3.2
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/googleapis/gnostic v0.5.5
 	github.com/gorilla/mux v1.8.0
@@ -26,7 +26,7 @@ require (
 	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.23.4
 	k8s.io/apiserver v0.23.4
-	k8s.io/autoscaler v0.0.0-20220307092253-72e2fabe59e9
+	k8s.io/autoscaler v0.0.0-20220307092253-72e2fabe59e9 // indirect
 	k8s.io/autoscaler/vertical-pod-autoscaler v0.10.0
 	k8s.io/client-go v0.23.4
 	k8s.io/code-generator v0.23.4

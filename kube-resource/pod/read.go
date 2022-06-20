@@ -12,7 +12,7 @@ import (
 )
 
 func GetPod(cluster string, pod string, pod_namespace string) (*corev1.Pod, error) {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/mnt/config")
+	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
 	p, err := cluster_client.CoreV1().Pods(pod_namespace).Get(context.TODO(), pod, metav1.GetOptions{})
 	if err != nil {

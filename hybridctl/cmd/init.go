@@ -113,7 +113,7 @@ func init() {
 	EKSResourceCmd.AddCommand(EKSListTagsForResourceCmd)
 
 	EKSCmd.AddCommand(EKSUpdateClusterConfigCmd)
-	EKSUpdateClusterConfigCmd.AddCommand(EKSUpdateClusterConfigCmd)
+	//EKSUpdateClusterConfigCmd.AddCommand(EKSUpdateClusterConfigCmd)
 
 	EKSCmd.AddCommand(EKSNodegroupConfigCmd)
 	EKSNodegroupConfigCmd.AddCommand(EKSUpdateNodegroupConfigCmd)

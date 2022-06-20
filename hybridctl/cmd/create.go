@@ -88,7 +88,7 @@ func GetObject(yaml []byte) (runtime.Object, *schema.GroupVersionKind, error) {
 
 func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]byte, error) {
 	fmt.Println("4")
-	LINK := "http://10.0.5.86:8080/resources"
+	LINK := "/resources"
 
 	// check context flag
 	flag_context := cobrautil.Option_context

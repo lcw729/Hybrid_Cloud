@@ -22,6 +22,7 @@ func NewFramework() *hcpFramework {
 			&predicates.NodeResourcesFit{},
 			&predicates.NodeUnschedulable{},
 			&predicates.TaintToleration{},
+			&predicates.JoinCheck{},
 		},
 		scorePlugins: []HCPScorePlugin{
 			&priorities.BalanceAllocation{},
@@ -40,6 +41,7 @@ func (f *hcpFramework) RunFilterPluginsOnClusters(algorithms []string, pod *v1.P
 	for _, i := range algorithms {
 		plugin := f.stringTOHCPFilterPlugin(i)
 		if plugin != nil {
+			fmt.Println(plugin.Name())
 			plugins = append(plugins, plugin)
 		} else {
 			fmt.Println(i, " : no such filter algorithm")
@@ -51,12 +53,12 @@ func (f *hcpFramework) RunFilterPluginsOnClusters(algorithms []string, pod *v1.P
 		isFiltered = false
 		for _, plugin := range plugins {
 			fmt.Println("[plugin]", plugin.Name())
-			//isFiltered = plugin.Filter(pod, status, &cluster)
+			isFiltered = plugin.Filter(pod, status, cluster)
 			/*
 			  result : true => 필터 O
 			  result : false => 필터 X
 			*/
-			isFiltered = true
+			fmt.Println(">>>>>", isFiltered)
 			(*cluster).IsFiltered = isFiltered
 			result[cluster.ClusterName] = isFiltered
 			//하나의 plugin이라도 true이면 다음 클러스터 필터링 시작
@@ -84,6 +86,7 @@ func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Po
 	for _, i := range algorithms {
 		plugin := f.stringTOHCPScorePlugin(i)
 		if plugin != nil {
+			fmt.Println(plugin.Name())
 			plugins = append(plugins, plugin)
 		} else {
 			fmt.Println(i, " : no such filter algorithm")
@@ -98,7 +101,8 @@ func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Po
 		} else {
 			for _, plugin := range plugins {
 				fmt.Println("[plugin]", plugin.Name())
-				//score = plugin.Score(pod, status, &cluster)
+				score = plugin.Score(pod, status, cluster)
+				fmt.Println(score)
 				result[cluster.ClusterName] += score
 			}
 		}

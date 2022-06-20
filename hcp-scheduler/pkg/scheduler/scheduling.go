@@ -31,6 +31,7 @@ func NewScheduler() *Scheduler {
 	hcpFramework := f.NewFramework()
 	clusterInfoList := resourceinfo.NewClusterInfoList()
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
+	fmt.Println(clusterInfoMap)
 	//schedPolicy, _ := policy.GetAlgorithm()
 	// if schedPolicy == nil {
 	// 	// default algorithm
@@ -55,10 +56,8 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 	var score []string
 	for _, policy := range schedPolicy.Spec.Template.Spec.Policies {
 		if policy.Type == "filter" {
-			fmt.Println(policy.Value)
 			filter = append(filter, policy.Value...)
 		} else if policy.Type == "score" {
-			fmt.Println(policy.Value)
 			score = append(score, policy.Value...)
 		}
 	}
@@ -165,7 +164,7 @@ func (sched *Scheduler) getMaxScoreCluster() string {
 
 	for key, value := range sched.ClusterInfoMap {
 		//fmt.Println((*sched.ClusterInfoMap[key]).ClusterScore)
-		if (*sched.ClusterInfoMap[key]).ClusterScore >= int32(max_score) {
+		if !(*sched.ClusterInfoMap[key]).IsFiltered && (*sched.ClusterInfoMap[key]).ClusterScore >= int32(max_score) {
 			max_score = (*sched.ClusterInfoMap[key]).ClusterScore
 			best_cluster = value.ClusterName
 		}

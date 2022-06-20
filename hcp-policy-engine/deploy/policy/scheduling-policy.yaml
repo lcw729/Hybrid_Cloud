@@ -9,8 +9,7 @@ spec:
       policies:
         - type: filter
           value: 
-            - NodeName
-            - NodeResourcesFit
+            - JoinCheck
         - type: score
           value:
             - NodeAffinity

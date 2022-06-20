@@ -54,7 +54,7 @@ var registerCmd = &cobra.Command{
 	  hybridctl register aks CLUSTER_NAME --resource-group RESOURCEGROUP
 
 	- eks   elastic kubernetes service
-	  hybridctl register eks CLUSTER_NAME
+	  hybridctl register eks CLUSTER_NAME --region REGION
 
 	- gke   google kuberntes engine
 	  hybridctl register gke CLUSTER_NAME 

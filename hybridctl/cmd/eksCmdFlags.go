@@ -39,12 +39,12 @@ func eksFlags() {
 	EKSDescribeAddonVersionsCmd.Flags().Int64P("max-results", "", 0, "The maximum number of results to return.")
 	EKSDescribeAddonVersionsCmd.Flags().StringP("next-token", "", "", "The nextToken value returned from a previous paginated DescribeAddonVersionsRequest where maxResults was used and the results exceeded the value of that parameter.")
 
-	describeUpdateCmd.Flags().StringP("name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
-	describeUpdateCmd.MarkFlagRequired("name")
-	describeUpdateCmd.Flags().StringP("update-id", "", "", "")
-	describeUpdateCmd.MarkFlagRequired("update-id")
-	describeUpdateCmd.Flags().StringP("nodegroup-name", "", "", "enter nodegroupName")
-	describeUpdateCmd.Flags().StringP("addon-name", "", "", "enter addonName")
+	EKSDescribeUpdateCmd.Flags().StringP("name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
+	EKSDescribeUpdateCmd.MarkFlagRequired("name")
+	EKSDescribeUpdateCmd.Flags().StringP("update-id", "", "", "")
+	EKSDescribeUpdateCmd.MarkFlagRequired("update-id")
+	EKSDescribeUpdateCmd.Flags().StringP("nodegroup-name", "", "", "enter nodegroupName")
+	EKSDescribeUpdateCmd.Flags().StringP("addon-name", "", "", "enter addonName")
 
 	EKSDisassociateIdentityProviderConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to disassociate an identity provider from.")
 	EKSDisassociateIdentityProviderConfigCmd.MarkFlagRequired("cluster-name")
@@ -69,12 +69,12 @@ func eksFlags() {
 
 	EKSListTagsForResourceCmd.Flags().StringP("resource-arn", "", "", "Enter resource-arn")
 
-	listUpdateCmd.Flags().StringP("name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
-	listUpdateCmd.MarkFlagRequired("name")
-	listUpdateCmd.Flags().StringP("nodegroup-name", "", "", "enter nodegroupName")
-	listUpdateCmd.Flags().StringP("addon-name", "", "", "enter addonName")
-	listUpdateCmd.Flags().Int64P("max-result", "", 0, "enter maxresult")
-	listUpdateCmd.Flags().StringP("next-token", "", "", "enter next token")
+	EKSListUpdateCmd.Flags().StringP("name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
+	EKSListUpdateCmd.MarkFlagRequired("name")
+	EKSListUpdateCmd.Flags().StringP("nodegroup-name", "", "", "enter nodegroupName")
+	EKSListUpdateCmd.Flags().StringP("addon-name", "", "", "enter addonName")
+	EKSListUpdateCmd.Flags().Int64P("max-result", "", 0, "enter maxresult")
+	EKSListUpdateCmd.Flags().StringP("next-token", "", "", "enter next token")
 
 	EKSTagResourceCmd.Flags().StringP("tags", "t", "", "enter your tags Jsonfile name")
 	EKSTagResourceCmd.MarkPersistentFlagRequired("tags")

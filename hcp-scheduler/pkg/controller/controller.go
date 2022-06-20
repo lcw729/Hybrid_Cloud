@@ -206,19 +206,20 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	// 스케줄링되지 않은 파드 감지
-	if hcpdeployment.Spec.SchedulingStatus == "Requested" {
+	// 스케줄링되지 않은 hcpdeployment 감지
+	if hcpdeployment.Spec.SchedulingNeed && !hcpdeployment.Spec.SchedulingComplete {
 		fmt.Println("[Scheduling Start]")
 		sched := scheduler.NewScheduler()
 		target := sched.Scheduling(hcpdeployment)
 		if target != nil {
 			hcpdeployment.Spec.SchedulingResult.Targets = target
-			hcpdeployment.Spec.SchedulingStatus = "Scheduled"
+			hcpdeployment.Spec.SchedulingNeed = false
+			hcpdeployment.Spec.SchedulingComplete = true
 			r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				fmt.Printf("Update HCPDeployment %s SchedulingStatus : Scheduled\n", r.ObjectMeta.Name)
+				fmt.Printf("%s deployment scheduling completed\n", r.ObjectMeta.Name)
 			}
 		}
 	}

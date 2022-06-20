@@ -111,7 +111,6 @@ github.com/gogo/protobuf/vanity
 github.com/gogo/protobuf/vanity/command
 # github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 ## explicit
-github.com/golang/glog
 # github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 github.com/golang/groupcache/lru
 # github.com/golang/protobuf v1.5.2
@@ -553,7 +552,6 @@ k8s.io/apiserver/pkg/features
 k8s.io/apiserver/pkg/util/feature
 # k8s.io/autoscaler v0.0.0-20220307092253-72e2fabe59e9
 ## explicit
-k8s.io/autoscaler/addon-resizer/nanny
 # k8s.io/autoscaler/vertical-pod-autoscaler v0.10.0
 ## explicit
 k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1

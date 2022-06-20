@@ -21,7 +21,7 @@ func GetDeploymentName(pod *corev1.Pod) string {
 }
 
 func GetDeployment(cluster string, pod *corev1.Pod) (*v1.Deployment, error) {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/mnt/config")
+	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
 	cluster_client := kubernetes.NewForConfigOrDie(config)
 	deploymentName := GetDeploymentName(pod)
 	fmt.Println(deploymentName)

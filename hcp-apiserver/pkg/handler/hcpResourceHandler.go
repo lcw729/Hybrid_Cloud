@@ -78,7 +78,8 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 				RealDeploymentMetadata: real_resource.ObjectMeta,
 
 				// SchedulingStatus "Requested"
-				SchedulingStatus: "Requested",
+				SchedulingNeed:     true,
+				SchedulingComplete: false,
 				//SchedulingType:   algorithm[0],
 			},
 		}

@@ -49,8 +49,9 @@ type HCPDeploymentSpec struct {
 	RealDeploymentMetadata metav1.ObjectMeta     `json:"metadata,omitempty"`
 
 	//SchedlingStatus -Requested - Scheduled - Completed
-	SchedulingStatus string              `json:"schedulingstatus,omitempty" protobuf:"bytes,11,opt,name=schedulingstatus"`
-	SchedulingType   string              `json:"schedulingType,omitempty" protobuf:"bytes,3,opt,name=schedulingtype"`
+	SchedulingNeed     bool `json:"schedulingneed,omitempty" protobuf:"bytes,11,opt,name=schedulingneed"`
+	SchedulingComplete bool `json:"schedulingcomplete,omitempty" protobuf:"bytes,11,opt,name=schedulingcomplete"`
+	//SchedulingType     string              `json:"schedulingType,omitempty" protobuf:"bytes,3,opt,name=schedulingtype"`
 	SchedulingResult HCPSchedulingResult `json:"schedulingresult,omitempty" protobuf:"bytes,11,opt,name=schedulingresult"`
 }
 
