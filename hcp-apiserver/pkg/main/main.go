@@ -138,7 +138,8 @@ func handlerRequests() http.Handler {
 	mux.HandleFunc("/gke/source/project-configs/describe", gkeFunc.DescribeProjectConfigs)
 
 	// HCPResource
-	mux.HandleFunc("/resources/deployment", handler.CreateDeploymentHandler).Methods("POST")
+	mux.HandleFunc("/resources/namespaces/{namespace}/deployments", handler.CreateDeploymentHandler).Methods("POST")
+	mux.HandleFunc("/resources/namespaces/{namespace}/deployments/{name}", handler.DeleteDeploymentHandler).Methods("DELETE")
 	mux.HandleFunc("/resources/pod", handler.CreatePodHandler).Methods("POST")
 
 	return mux

@@ -40,7 +40,6 @@ var ResourceCmd = &cobra.Command{
 }
 
 func CreateResource() {
-
 	yaml, err := ReadFile()
 	if err != nil {
 		println(err)
@@ -56,14 +55,7 @@ func CreateResource() {
 }
 
 func ReadFile() ([]byte, error) {
-
 	file_name := cobrautil.Option_file
-
-	if file_name == "" {
-		fmt.Println("Run 'hybridctl create --help' to view all commands")
-		return nil, nil
-	}
-
 	yaml, err := ioutil.ReadFile(file_name)
 	if err != nil {
 		fmt.Println(err)
@@ -87,7 +79,6 @@ func GetObject(yaml []byte) (runtime.Object, *schema.GroupVersionKind, error) {
 }
 
 func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]byte, error) {
-	fmt.Println("4")
 	LINK := "/resources"
 
 	// check context flag
@@ -96,7 +87,7 @@ func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]
 	var resource Resource
 
 	if flag_context == "" {
-		target_cluster = "undefined"
+		target_cluster = ""
 	} else {
 		target_cluster = flag_context
 	}
@@ -104,10 +95,14 @@ func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]
 	// match obj kind
 	switch gvk.Kind {
 	case "Deployment":
-		LINK += "/deployment"
 		real_resource := obj.(*appsv1.Deployment)
+		namespace := real_resource.Namespace
+		if namespace == "" {
+			namespace = "default"
+		}
 		resource.TargetCluster = target_cluster
 		resource.RealResource = real_resource
+		LINK += "/namespaces/" + namespace + "/deployments"
 	case "Pod":
 		LINK += "/pod"
 		real_resource := obj.(*v1.Pod)
