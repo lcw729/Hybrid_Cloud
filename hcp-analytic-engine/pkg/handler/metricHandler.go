@@ -71,7 +71,7 @@ type NetworkMetric struct {
 // 	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!")
 // }
 
-func GetResource(podNum int, clusterName string) []byte {
+func GetResource(podNum int, clusterName string, objectType string) []byte {
 	INFLUX_IP := os.Getenv("INFLUX_IP")
 	INFLUX_PORT := os.Getenv("INFLUX_PORT")
 	INFLUX_USERNAME := os.Getenv("INFLUX_USERNAME")
@@ -80,7 +80,7 @@ func GetResource(podNum int, clusterName string) []byte {
 	inf := influx.NewInflux(INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
 
 	// objectType := "nodes"
-	objectType := "pods"
+	// objectType := "pods"
 
 	if objectType == "pods" {
 

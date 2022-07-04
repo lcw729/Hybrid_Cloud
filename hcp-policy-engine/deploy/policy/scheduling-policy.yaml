@@ -10,6 +10,7 @@ spec:
         - type: filter
           value: 
             - JoinCheck
+            - NodeName
   rangeOfApplication: All
   policyStatus: Disabled
 

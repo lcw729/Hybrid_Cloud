@@ -1,0 +1,27 @@
+apiVersion: hcp.crd.com/v1alpha1
+kind: HCPPolicy
+metadata:
+  name: node-option
+  namespace: hcp
+spec:
+  template:
+    spec:
+      policies:
+        - type: Low
+          value: 
+            - "2" # CPU
+            - "4"  # MEM  
+            - "110" # PODS
+        - type: Middle
+          value: 
+            - "4" # CPU
+            - "8"  # MEM  
+            - "110" # PODS
+        - type: High
+          value: 
+            - "8" # CPU
+            - "16"  # MEM  
+            - "110" # PODS
+  rangeOfApplication: All
+  policyStatus: Disabled
+

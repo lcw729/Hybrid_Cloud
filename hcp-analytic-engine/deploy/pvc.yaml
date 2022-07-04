@@ -13,3 +13,19 @@ spec:
   selector:
     matchLabels:
       app: kube-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-aws-config
+  namespace: hcp
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: hcp-analytic-engine
+  selector:
+    matchLabels:
+      app: aws-config

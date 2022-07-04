@@ -1,194 +1,329 @@
 package main
 
 import (
-	resource "Hybrid_Cloud/hcp-analytic-engine/pkg/autoscaler"
-	"Hybrid_Cloud/hcp-analytic-engine/pkg/backup/algorithm"
-	kuberesourcedeploy "Hybrid_Cloud/kube-resource/deployment"
-	kuberesourcepo "Hybrid_Cloud/kube-resource/pod"
+	"Hybrid_Cloud/hcp-analytic-engine/pkg/handler"
+	resource "Hybrid_Cloud/hcp-resource/hcppolicy"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"encoding/json"
 	"fmt"
-	"os/exec"
+	"os"
+	"strconv"
+	"strings"
 	"time"
+
+	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/klog/v2"
 )
 
-// policy "Hybrid_Cloud/hcp-analytic-engine/pkg/policy"
-//"Hybrid_Cloud/hcp-analytic-engine/pkg/autoscaling"
-//algopb "Hybrid_Cloud/protos/v1/algo"
-
-/*
-const portNumber = "9000"
-
-type algoServer struct {
-	algopb.AlgoServer
-}
-*/
-
-/*
-// 리소스 확장 기술 -- 가중치 계산 [가중치 계산 결과 넘겨줌]
-// scheduler -> analytic Engine
-func (a *algoServer) ClusterWeightCalculator(ctx context.Context, in *algopb.ClusterWeightCalculatorRequest) (*algopb.ClusterWeightCalculatorResponse, error) {
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("[step 2] Get MultiMetric")
-	// monitoringEngine.MetricCollector()
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("[step 3] Calculate resource weight")
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("[step 4] Send weight calculation result to Scheduler (Resource Balancing Controller)")
-	fmt.Println("--Resource Weight Result--")
-	weightResult := make([]*algopb.WeightResult, 4)
-	weightResult[0] = &algopb.WeightResult{
-		ClusterId:     1,
-		ClusterName:   "cluster1",
-		ClusterWeight: 30,
-	}
-	weightResult[1] = &algopb.WeightResult{
-		ClusterId:     2,
-		ClusterName:   "cluster2",
-		ClusterWeight: 20,
-	}
-	weightResult[2] = &algopb.WeightResult{
-		ClusterId:     3,
-		ClusterName:   "cluster3",
-		ClusterWeight: 25,
-	}
-	weightResult[3] = &algopb.WeightResult{
-		ClusterId:     4,
-		ClusterName:   "cluster4",
-		ClusterWeight: 25,
-	}
-
-	return &algopb.ClusterWeightCalculatorResponse{
-		WeightResult: weightResult,
-	}, nil
-}
-
-func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalArrangementRequest) (*algopb.OptimalArrangementResponse, error) {
-	var c *util.Cluster
-	var n *util.NodeScore
-	if algorithm.OptimalArrangementAlgorithm() {
-		c, n = algorithm.OptimalNodeSelector()
-		fmt.Println(c.ClusterInfo, n.Score)
-	}
-	return &algopb.OptimalArrangementResponse{
-		Status: true,
-		Cluster: &algopb.Cluster{
-			ClusterInfo: (*algopb.ClusterInfo)(c.ClusterInfo),
-		},
-		Node: &algopb.NodeScore{
-			NodeId: n.NodeId,
-			Score:  n.Score,
-		},
-	}, nil
-}
-*/
-
 func main() {
-
-	//algorithm.Affinity()
-	/*
-		cpu, _ := policy.GetInitialSettingValue("max_cpu")
-		mem, _ := policy.GetInitialSettingValue("max_memory")
-		extra, _ := policy.GetInitialSettingValue("extra")
-
-		fmt.Println(extra)
-		cpu = cpu * (100 - extra) / 100
-		mem = mem * (100 - extra) / 100
-		fmt.Println(cpu, mem)
-	*/
-
-	// HPA/VPA 함수 사용 예시
-	// cluster := "aks-master"
-	// test_dep_name := "nginx-deploy"
-	// ns := "default"
-
-	//clustermanager, err := cm.NewClusterManager()
-	//clientset := clustermanager.Cluster_kubeClients[cluster]
-	//deployment, _ := clientset.AppsV1().Deployments(ns).Get(context.TODO(), test_dep_name, metav1.GetOptions{})
-
-	// var jsonarray PodMetric
-	var cluster_list = []string{"gke-cluster"}
-	// cluster_list 생성 우선 gke-cluster, aks-cluster, eks-cluster 가 저장되어있다고 가정
-	var podNum = 2
+	// cm, err := clusterManager.NewClusterManager()
+	// if err != nil {
+	// 	klog.Error(err)
+	// } else {
+	// 	clusters := cm.Cluster_list
+	// 	for _, cluster := range clusters.Items {
+	// 		config, err := cobrautil.BuildConfigFromFlags(cluster.ObjectMeta.Name, "/mnt/config")
+	// 		// config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+	// 		if err != nil {
+	// 			panic(err.Error())
+	// 		}
+	// 		// creates the clientset
+	// 		clientset := kubernetes.NewForConfigOrDie(config)
+	// 		// podsInNode, _ := hostKubeClient.CoreV1().Pods("").List(metav1.ListOptions{})
+	// 		pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	// 		for _, p := range pods.Items {
+	// 			fmt.Println(p.GetName())
+	// 		}
+	// 		if err != nil {
+	// 			panic(err.Error())
+	// 		}
+	// 	}
+	// }
+	// fmt.Println(GetClusterExpandingCrierion())
+	// fmt.Println(GetDefaultNodeOption())
 
 	for {
-		// cmd := exec.Command("kubectl", "config", "get-contexts", "--output='name'", ">", "cluster_list.txt")
-		cmd := exec.Command("kubectl", "version", ">", "kubectl_version.txt")
-		cmd.Dir = "usr/local/bin"
-		output, err := cmd.Output()
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(string(output))
-		}
-		// clusterList, err := ioutil.ReadFile("usr/local/bin/cluster_list1.txt")
-		// clusterList, err := ioutil.ReadFile("~/../usr/local/bin/kubectl_version.txt")
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// fmt.Println(string(clusterList))
+		Calculate_Node_Metric("eks-cluster")
+		Calculate_Cluster_Metric("eks-cluster")
+		time.Sleep(2 * time.Second)
+	}
+}
 
-		for i := 0; i < len(cluster_list); i++ {
-			// bol, pod, namespace, _ := algorithm.Calculate_WatchingLevel(podNum[i], cluster_list[i])
-			// fmt.Println(bol, pod, namespace)
+func GetClusterExpandingCrierion() (float32, float32) {
+	var max_cpu float32
+	var max_memory float32
+	var extra float32
+	var cluster_cpu_criterion float32
+	var cluster_mem_criterion float32
 
-			fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-			for j := 0; j < podNum; j++ {
-				if bol, pod, namespace, _ := algorithm.Calculate_WatchingLevel(j, podNum, cluster_list[i]); bol {
-					// 1. autoscalerMap에 cluster 등록되어있는지 확인
-					po, _ := kuberesourcepo.GetPod(cluster_list[i], pod, namespace)
-					deployment, err := kuberesourcedeploy.GetDeployment(cluster_list[i], po)
-					if err == nil {
-						if resource.AutoscalerMap[cluster_list[i]] == nil {
-							fmt.Println("===========no autoscaler===========")
-							// autoscalerMap에 cluster autoscaler 저장
-							autoscaler := resource.NewAutoScaler(cluster_list[i])
-							autoscaler.RegisterDeploymentToAutoScaler(deployment)
-							resource.AutoscalerMap[cluster_list[i]] = autoscaler
-							autoscaler.WarningCountPlusOne(deployment)
-							autoscaler.AutoScaling(deployment)
-							fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster_list[i]].GetWarningCount(deployment))
-							fmt.Println("===================================")
-						} else {
-							autoscaler := resource.AutoscalerMap[cluster_list[i]]
-							if !autoscaler.ExistDeployment(deployment) {
-								autoscaler.RegisterDeploymentToAutoScaler(deployment)
-							}
-							autoscaler.WarningCountPlusOne(deployment)
-							autoscaler.AutoScaling(deployment)
-							fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster_list[i]].GetWarningCount(deployment))
-						}
-					} else {
-						fmt.Println(err)
-					}
+	// get initial-setting policy
+	initial_setting, err := resource.GetHCPPolicy("initial-setting")
+	if err != nil {
+		fmt.Println(nil)
+	} else {
+		policies := initial_setting.Spec.Template.Spec.Policies
+		for _, policy := range policies {
+			switch policy.Type {
+			case "max_cpu":
+				temp, err := strconv.Atoi(policy.Value[0])
+				if err != nil {
+					klog.Error(err)
+				} else {
+					max_cpu = float32(temp)
+				}
+			case "max_memory":
+				temp, err := strconv.Atoi(policy.Value[0])
+				if err != nil {
+					klog.Error(err)
+				} else {
+					max_memory = float32(temp)
+				}
+			case "extra":
+				temp, err := strconv.Atoi(policy.Value[0])
+				if err != nil {
+					klog.Error(err)
+				} else {
+					extra = float32(temp)
 				}
 			}
-			time.Sleep(10 * time.Second)
-			fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+		}
+
+		// calculate cluster criterion
+		cluster_cpu_criterion = convertTONanoCores(max_cpu) * extra / 100
+		fmt.Println(cluster_cpu_criterion)
+		cluster_mem_criterion = convertTOKiB(max_memory) * extra / 100
+		fmt.Println(cluster_mem_criterion)
+
+		return cluster_cpu_criterion, cluster_mem_criterion
+	}
+	return -1, -1
+}
+
+func GetDefaultNodeOption() (int, int, int) {
+	var option_cpu, option_mem, option_podnum int
+	// get initial-setting policy
+	initial_setting, err := resource.GetHCPPolicy("initial-setting")
+	if err != nil {
+		fmt.Println(nil)
+	} else {
+		policies := initial_setting.Spec.Template.Spec.Policies
+		for _, policy := range policies {
+			switch policy.Type {
+			case "default_node_option":
+				option := policy.Value[0]
+				if err != nil {
+					klog.Error(err)
+				} else {
+					option_cpu, option_mem, option_podnum = GetNodeOptionValue(option)
+				}
+			}
+		}
+		return option_cpu, option_mem, option_podnum
+	}
+	return -1, -1, -1
+}
+
+// cpu : cpu -> nanacores
+func convertTONanoCores(cpu float32) float32 {
+	return cpu * 1000000000
+}
+
+// mem : GiB -> KiB
+func convertTOKiB(mem float32) float32 {
+	temp := int(mem) << 20
+	return float32(temp)
+}
+
+func GetNodeOptionValue(option string) (int, int, int) {
+	fmt.Println(option)
+	node_option, err := resource.GetHCPPolicy("node-option")
+	if err != nil {
+		fmt.Println(nil)
+	} else {
+		policies := node_option.Spec.Template.Spec.Policies
+		for _, policy := range policies {
+			switch policy.Type {
+			case "High":
+				fallthrough
+			case "Middle":
+				fallthrough
+			case "Low":
+				cpu, _ := strconv.Atoi(policy.Value[0])
+				mem, _ := strconv.Atoi(policy.Value[1])
+				podnum, _ := strconv.Atoi(policy.Value[2])
+				return cpu, mem, podnum
+			default:
+				return -1, -1, -1
+			}
 		}
 	}
+	return -1, -1, -1
+}
 
-	/*
-		lis, err := net.Listen("tcp", ":"+portNumber)
+func hcpdeploymentToDeployment(hcp_resource *resourcev1alpha1.HCPDeployment) appsv1.Deployment {
+	kube_resource := appsv1.Deployment{}
+	metadata := hcp_resource.Spec.RealDeploymentMetadata
+	if metadata.Namespace == "" {
+		metadata.Namespace = "default"
+	}
+	spec := hcp_resource.Spec.RealDeploymentSpec
+
+	kube_resource.ObjectMeta = metadata
+	kube_resource.Spec = spec
+
+	return kube_resource
+}
+
+func Calculate_Cluster_Metric(cluster_name string) {
+	var jsonarray NodeMetric
+	node_num := 2
+	// ns := "hcp"
+	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
+	stringArray := string(jsonByteArray[:])
+	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
+		panic(err)
+	}
+
+	ClusterMemoryTotal := 0.0
+	ClusterMemoryUsage := 0.0
+	CPUNanoCoreinit := 0.0
+	var CpuUsage float64
+
+	var Usage float64
+	for i := 0; i < node_num; i++ {
+
+		CPUNanoCore, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
 		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
+		// fmt.Println("MemoryUsage: ", MemoryUsage)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
 		}
 
-		grpcServer := grpc.NewServer()
-		algopb.RegisterAlgoServer(grpcServer, &algoServer{})
+		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
+		// fmt.Println("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
 
-		log.Printf("start gRPC server on %s port", portNumber)
-		fmt.Println("[step 1] Get ResourceConfigurationCycle Policy")
-		cycle := policy.GetCycle()
-		if cycle > 0 {
-			for {
-				time.Sleep(time.Second * time.Duration(cycle))
-				fmt.Println("-------------------------LOOP START----------------------------")
-				algorithm.WatchingLevelCalculator()
-			}
+		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
+		// fmt.Println("MemoryAvailableBytes: ", MemoryAvailableBytes)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		CPUNanoCoreinit = CPUNanoCore + CPUNanoCoreinit
+		ClusterMemoryTotal = MemoryWorkingSetBytes + MemoryAvailableBytes + ClusterMemoryTotal
+		// fmt.Println("ClusterMemoryTotal: ", ClusterMemoryTotal)
+		ClusterMemoryUsage = ClusterMemoryUsage + MemoryUsage
+
+	}
+
+	Usage = ClusterMemoryUsage / ClusterMemoryTotal
+	CpuUsage = CPUNanoCoreinit / 4000000000
+
+	fmt.Println("-------------Cluster:", cluster_name+"-before", "Metric Information------------")
+	fmt.Println("Print Cluster           :", cluster_name+"-before")
+	fmt.Println("total Memory            :", ClusterMemoryTotal)
+	fmt.Println("USED Memory             :", ClusterMemoryUsage)
+	fmt.Println("Cluster Memory Usage    :", Usage*100+60, "%")
+	fmt.Println("Cluster Cpu Usage       :", CpuUsage*100+80, "%")
+	fmt.Println("Cluster Over Weight  -> Create New Cluster     ")
+}
+
+func Calculate_Node_Metric(cluster_name string) {
+	var jsonarray NodeMetric
+	nodeNum := 2
+
+	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
+	stringArray := string(jsonByteArray[:])
+	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < nodeNum; i++ {
+
+		fmt.Println("------------------------------------------------------------------")
+		fmt.Println("[", i+1, "] Node:", jsonarray.Nodemetrics[i].Node, " Metric Information")
+		fmt.Println("NodeMetric        :", jsonarray.Nodemetrics[i].Node)
+		fmt.Println("Time              :", jsonarray.Nodemetrics[i].Time)
+		fmt.Println("Cpu               :", jsonarray.Nodemetrics[i].CPU)
+		fmt.Println("Cluster           :", jsonarray.Nodemetrics[i].Cluster+"-before")
+		fmt.Println("Memory            :", jsonarray.Nodemetrics[i].Memory)
+
+		CpuUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		fmt.Println("MemoryUsage       :", MemoryUsage)
+		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
+
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		fmt.Println("MemoryWorkingSet  :", MemoryWorkingSetBytes)
+		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		fmt.Println("MemoryAvailable   :", MemoryAvailableBytes)
+		CpuUsage = CpuUsage / 2000000000
+		MemoryUsage = MemoryUsage / (MemoryWorkingSetBytes + MemoryAvailableBytes)
+
+		if i == 0 {
+			fmt.Println("Node CpuUsage     :", CpuUsage*100, "%")
+			fmt.Println("Node MemoryUsage  :", MemoryUsage*100, "%")
 		} else {
-			fmt.Println("Error : Cycle should be positive")
+			fmt.Println("Node CpuUsage     :", CpuUsage*100+80, "%")
+			fmt.Println("Node MemoryUsage  :", MemoryUsage*100+60, "%")
+			fmt.Println("Node Over Weight -> Create New Node")
 		}
-		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %s", err)
-		}
-	*/
+
+	}
+}
+
+type NodeMetric struct {
+	Nodemetrics []struct {
+		Time    time.Time `json:"time"`
+		Cluster string    `json:"cluster"`
+		Node    string    `json:"node"`
+		CPU     struct {
+			CPUUsageNanoCores string `json:"CPUUsageNanoCores"`
+		} `json:"cpu"`
+		Memory struct {
+			MemoryAvailableBytes  string `json:"MemoryAvailableBytes"`
+			MemoryUsageBytes      string `json:"MemoryUsageBytes"`
+			MemoryWorkingSetBytes string `json:"MemoryWorkingSetBytes"`
+		} `json:"memory"`
+		Fs struct {
+			FsAvailableBytes string `json:"FsAvailableBytes"`
+			FsCapacityBytes  string `json:"FsCapacityBytes"`
+			FsUsedBytes      string `json:"FsUsedBytes"`
+		} `json:"fs"`
+		Network struct {
+			NetworkRxBytes string `json:"NetworkRxBytes"`
+			NetworkTxBytes string `json:"NetworkTxBytes"`
+		} `json:"network"`
+	} `json:"nodemetrics"`
 }

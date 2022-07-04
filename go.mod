@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/container v1.2.0
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
+	github.com/aws/aws-sdk-go-v2 v0.18.0 // indirect
 	github.com/go-logr/logr v1.2.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect

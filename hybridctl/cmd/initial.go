@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
@@ -80,22 +79,15 @@ DESCRIPTION
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
-		polices := make([]hcppolicyapis.HCPPolicies, 5)
-		var cost int
+		polices := make([]hcppolicyapis.HCPPolicies, 4)
 		var max_cpu int
 		var max_memory int
 		var default_node_option string
 		var extra int
 		var exist bool = false
-		hcp_policy, err := hcppolicyv1alpha1.NewForConfig(master_config)
-		if err != nil {
-			log.Println(err)
-		}
 
-		list, err := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").List(context.TODO(), metav1.ListOptions{})
-		if err != nil {
-			log.Println(err)
-		}
+		hcp_policy, _ := hcppolicyv1alpha1.NewForConfig(master_config)
+		list, _ := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").List(context.TODO(), metav1.ListOptions{})
 		for _, policy := range list.Items {
 			if policy.Name == "initial-setting" {
 				exist = true
@@ -103,30 +95,25 @@ DESCRIPTION
 		}
 
 		if !exist {
-			fmt.Printf("Enter the maximum service cost. : ")
-			fmt.Scanln(&cost)
-			polices[0].Type = "cost"
-			polices[0].Value[0] = strconv.Itoa(cost)
-
 			fmt.Printf("Enter the maximum number of CPUs to allocate in the cluster.[NanoCores] : ")
 			fmt.Scanln(&max_cpu)
-			polices[1].Type = "max_cpu"
-			polices[1].Value[0] = strconv.Itoa(max_cpu)
+			polices[0].Type = "max_cpu"
+			polices[0].Value = append(polices[0].Value, strconv.Itoa(max_cpu))
 
 			fmt.Printf("Enter the maximum amount of memory to allocate in the cluster.. : ")
 			fmt.Scanln(&max_memory)
-			polices[2].Type = "max_memory"
-			polices[2].Value[0] = strconv.Itoa(max_memory)
+			polices[1].Type = "max_memory"
+			polices[1].Value = append(polices[1].Value, strconv.Itoa(max_memory))
 
-			fmt.Printf("Enter the node option to use as default : ")
+			fmt.Printf("Enter the node option to use as default [ Low / Middle / High ]: ")
 			fmt.Scanln(&default_node_option)
-			polices[3].Type = "default_node_option"
-			polices[3].Value[0] = default_node_option
+			polices[2].Type = "default_node_option"
+			polices[2].Value = append(polices[2].Value, default_node_option)
 
 			fmt.Printf("Enter the percentage of free resources to use when automatically creating a node. : ")
 			fmt.Scanln(&extra)
-			polices[4].Type = "extra"
-			polices[4].Value[0] = strconv.Itoa(extra)
+			polices[3].Type = "extra"
+			polices[3].Value = append(polices[3].Value, strconv.Itoa(extra))
 
 			fmt.Println(polices)
 
@@ -145,59 +132,45 @@ DESCRIPTION
 							Policies: polices,
 						},
 					},
+					PolicyStatus: "Enabled",
 				},
 			}
-			hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Create(context.TODO(), &policy, metav1.CreateOptions{})
+			_, err := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Create(context.TODO(), &policy, metav1.CreateOptions{})
+			if err != nil {
+				fmt.Println(err)
+			}
 		} else {
 			var answer string
 			fmt.Printf("Do you want to update initial-setting? [y/n] : ")
 			fmt.Scanln(&answer)
 			if answer == "y" {
-				fmt.Printf("Enter the maximum service cost. : ")
-				fmt.Scanln(&cost)
-				polices[0].Type = "cost"
-				polices[0].Value[0] = strconv.Itoa(cost)
 
 				fmt.Printf("Enter the maximum number of CPUs to allocate in the cluster.[NanoCores] : ")
 				fmt.Scanln(&max_cpu)
-				polices[1].Type = "max_cpu"
-				polices[1].Value[0] = strconv.Itoa(max_cpu)
+				polices[0].Type = "max_cpu"
+				polices[0].Value = append(polices[0].Value, strconv.Itoa(max_cpu))
 
-				fmt.Printf("Enter the maximum amount of memory to allocate in the cluster.. : ")
+				fmt.Printf("Enter the maximum amount of memory to allocate in the cluster. : ")
 				fmt.Scanln(&max_memory)
-				polices[2].Type = "max_memory"
-				polices[2].Value[0] = strconv.Itoa(max_memory)
+				polices[1].Type = "max_memory"
+				polices[1].Value = append(polices[1].Value, strconv.Itoa(max_memory))
 
-				fmt.Printf("Enter the node option to use as default : ")
-				fmt.Scanln(&default_node_option)
-				polices[3].Type = "default_node_option"
-				polices[3].Value[0] = default_node_option
+				for (default_node_option != "Low") && (default_node_option != "Middle") && (default_node_option != "High") {
+					fmt.Printf("Enter the node option to use as default [ Low / Middle / High ]: ")
+					fmt.Scanln(&default_node_option)
+					polices[2].Type = "default_node_option"
+					polices[2].Value = append(polices[2].Value, default_node_option)
+				}
 
 				fmt.Printf("Enter the percentage of free resources to use when automatically creating a node. : ")
 				fmt.Scanln(&extra)
-				polices[4].Type = "extra"
-				polices[4].Value[0] = strconv.Itoa(extra)
+				polices[3].Type = "extra"
+				polices[3].Value = append(polices[3].Value, strconv.Itoa(extra))
 
 				fmt.Println(polices)
-
-				policy := hcppolicyapis.HCPPolicy{
-					TypeMeta: metav1.TypeMeta{
-						Kind:       "HCPPolicy",
-						APIVersion: "hcp.crd.com/v1alpha1",
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "initial-setting",
-						Namespace: "hcp",
-					},
-					Spec: hcppolicyapis.HCPPolicySpec{
-						Template: hcppolicyapis.HCPPolicyTemplate{
-							Spec: hcppolicyapis.HCPPolicyTemplateSpec{
-								Policies: polices,
-							},
-						},
-					},
-				}
-				_, err := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Update(context.TODO(), &policy, metav1.UpdateOptions{})
+				policy, _ := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "initial-setting", metav1.GetOptions{})
+				policy.Spec.Template.Spec.Policies = polices
+				_, err := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Update(context.TODO(), policy, metav1.UpdateOptions{})
 				if err != nil {
 					fmt.Println(err)
 				}

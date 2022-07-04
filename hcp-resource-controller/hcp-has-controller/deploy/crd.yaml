@@ -15,10 +15,16 @@ spec:
           spec:
             type: object
             properties:
+              mode:
+                type: string
+                enum:
+                - scaling
+                - expanding
               targetCluster:
                 type: string
               warningCount:
                 type: integer
+                default: 0
               scalingOptions:
                 type: object
                 properties:
@@ -31,11 +37,19 @@ spec:
           status:
             type: object
             properties:
+              firstsProcess:
+                type: boolean
+                default: false
+              scalingInProcess:
+                type: boolean
+                default: false
+              expandingInProcess:
+                type: boolean
+                default: false
               resourceStatus:
                 type: string
                 enum:
                 - WAITING
-                - DOING
                 - DONE
               lastSpec:
                 x-kubernetes-preserve-unknown-fields: true
