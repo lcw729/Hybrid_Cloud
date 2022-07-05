@@ -1,16 +1,13 @@
 package handler
 
 import (
-	// "Hybrid_Cloud/hcp-analytic-engine/influx"
-	// "Hybrid_Cloud/omcplog"
-
 	"Hybrid_Cloud/hcp-analytic-engine/influx"
 	"bytes"
 	"encoding/json"
 	"os"
 
 	"github.com/influxdata/influxdb/client/v2"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 )
 
 type PodMetricList struct {
@@ -79,7 +76,7 @@ func GetResource(podNum int, clusterName string, objectType string) []byte {
 
 	inf := influx.NewInflux(INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
 
-	// objectType := "nodes"
+	// objectType = "nodes"
 	// objectType := "pods"
 
 	if objectType == "pods" {
@@ -113,7 +110,7 @@ func GetResource(podNum int, clusterName string, objectType string) []byte {
 		return prettyJSON.Bytes()
 
 	} else {
-		klog.Info("Error : objectType is only pods or nodes")
+		klog.V(0).Info("Error : objectType is only pods or nodes")
 		return nil
 	}
 

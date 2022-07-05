@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hcp-metric-collector
+  namespace: hcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: hcp-metric-collector
+  template:
+    metadata:
+      labels:
+        name: hcp-metric-collector
+    spec:
+      serviceAccountName: hcp-metric-collector
+      imagePullSecrets:
+        # - name: regcred
+        - name: hcp-metric-collector
+      containers:
+        - name: hcp-metric-collector
+          # Replace this with the built image name
+          image: ketidevit2/hcp-metric-collector:v0.0.23
+          ports:
+          - containerPort: 2051
+          command:
+          - hcp-metric-collector
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: INFLUX_IP
+              value: "10.0.5.83"
+              # value: "10.244.1.8"
+            - name: INFLUX_PORT
+              value: "31051"
+              # value: "8086"
+            - name: INFLUX_USERNAME
+              value: "root"
+            - name: INFLUX_PASSWORD
+              value: "root"
+            - name: OPERATOR_NAME
+              value: "hcp-metric-collector"
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          effect: NoExecute
+          tolerationSeconds: 0
+        - key: node.kubernetes.io/unreachable
+          effect: NoExecute
+          tolerationSeconds: 0
+
+

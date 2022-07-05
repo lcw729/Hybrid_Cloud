@@ -1,0 +1,24 @@
+{
+ "resource": {
+  "aws_eks_cluster": {
+   "test-cluster": {
+    "name": "test-cluster",
+    "role_arn": "arn:aws:iam::741566967679:role/eksClusterRole",
+    "version": "1.21",
+    "enabled_cluster_log_types": [
+     "api",
+     "audit",
+     "authenticator",
+     "controllerManager",
+     "scheduler"
+    ],
+    "vpc_config": {
+     "security_group_ids": null,
+     "subnet_ids": ["subnet-c36f41a5, subnet-7c17225d, subnet-9583abca"],
+     "endpoint_private_access": "true",
+     "endpoint_public_access": "true"
+    }
+   }
+  }
+ }
+}

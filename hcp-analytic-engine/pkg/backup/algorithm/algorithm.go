@@ -41,7 +41,7 @@ func Calculate_WatchingLevel(index int, podNum int, clusterName string) (bool, s
 	fmt.Println("[step 2] Get MultiMetric")
 	var watchingLevel = 0
 	var jsonarray metric.PodMetric
-	jsonByteArray := handler.GetResource(podNum, clusterName)
+	jsonByteArray := handler.GetResource(podNum, clusterName, "_")
 	stringArray := string(jsonByteArray[:])
 	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
 		//panic(err)

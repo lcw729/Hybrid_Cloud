@@ -3,7 +3,9 @@ package main
 import (
 	"Hybrid_Cloud/hcp-analytic-engine/pkg/handler"
 	resource "Hybrid_Cloud/hcp-resource/hcppolicy"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -12,10 +14,79 @@ import (
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 )
 
 func main() {
+	// var jsonarray PodMetric
+	// var cluster_list = []string{"eks-cluster1"}
+	// cluster_list 생성 우선 gke-cluster, aks-cluster, eks-cluster 가 저장되어있다고 가정
+
+	// kubeconfig := os.Getenv("KUBECONFIG")
+	// config, err := rest.InClusterConfig()
+	config, err := cobrautil.BuildConfigFromFlags("master", "/mnt/config")
+	// config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// creates the clientset
+	clientset := kubernetes.NewForConfigOrDie(config)
+
+	// podsInNode, _ := hostKubeClient.CoreV1().Pods("").List(metav1.ListOptions{})
+	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		LabelSelector: "metadata.labels.app=name=hcp-metric-collector",
+	})
+	for _, p := range pods.Items {
+		fmt.Println(p.GetName())
+	}
+	if err != nil {
+		panic(err.Error())
+	}
+	// node 리스트 출력
+	// nodes, err := clientset.CoreV1().Nodes().List(metav1.ListOptions{})
+	// for _, n := range nodes.Items {
+	// 	fmt.Println(n.GetName())
+	// }
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+
+	for {
+		// cmd := exec.Command("kubectl", "config", "get-contexts", "--output='name'", ">", "cluster_list.txt")
+		// cmd := exec.Command("kubectl", "version", ">", "kubectl_version.txt")
+		// cmd.Dir = "usr/local/bin"
+		// output, err := cmd.Output()
+		// if err != nil {
+		// 	fmt.Println(err)
+		// } else {
+		// 	fmt.Println(string(output))
+		// }
+		// clusterList, err := ioutil.ReadFile("usr/local/bin/cluster_list1.txt")
+		// clusterList, err := ioutil.ReadFile("~/../usr/local/bin/kubectl_version.txt")
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// fmt.Println(string(clusterList))
+		// for i := 0; i < len(cluster_list); i++ {
+
+		// 	// Calculate_WatchingLevel(podNum[i], cluster_list[i])
+		// }
+
+		//노드 메트릭
+		// Calculate_Node_Metric(cluster_list[0])
+
+		// Calculate_Cluster_Metric(cluster_list[0])
+		// 클러스터 메트릭 수집
+		// Calculate_Cluster_Metric(cluster_list[0])
+		// fmt.Println(cluster_list[0])
+		time.Sleep(2 * time.Second)
+	}
+
+	// lcw
+
 	// cm, err := clusterManager.NewClusterManager()
 	// if err != nil {
 	// 	klog.Error(err)
@@ -174,133 +245,31 @@ func hcpdeploymentToDeployment(hcp_resource *resourcev1alpha1.HCPDeployment) app
 	return kube_resource
 }
 
-func Calculate_Cluster_Metric(cluster_name string) {
-	var jsonarray NodeMetric
-	node_num := 2
-	// ns := "hcp"
-	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
-	stringArray := string(jsonByteArray[:])
-	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
-		panic(err)
-	}
-
-	ClusterMemoryTotal := 0.0
-	ClusterMemoryUsage := 0.0
-	CPUNanoCoreinit := 0.0
-	var CpuUsage float64
-
-	var Usage float64
-	for i := 0; i < node_num; i++ {
-
-		CPUNanoCore, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
-		// fmt.Println("MemoryUsage: ", MemoryUsage)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-
-		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
-		// fmt.Println("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-
-		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
-		// fmt.Println("MemoryAvailableBytes: ", MemoryAvailableBytes)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		CPUNanoCoreinit = CPUNanoCore + CPUNanoCoreinit
-		ClusterMemoryTotal = MemoryWorkingSetBytes + MemoryAvailableBytes + ClusterMemoryTotal
-		// fmt.Println("ClusterMemoryTotal: ", ClusterMemoryTotal)
-		ClusterMemoryUsage = ClusterMemoryUsage + MemoryUsage
-
-	}
-
-	Usage = ClusterMemoryUsage / ClusterMemoryTotal
-	CpuUsage = CPUNanoCoreinit / 4000000000
-
-	fmt.Println("-------------Cluster:", cluster_name+"-before", "Metric Information------------")
-	fmt.Println("Print Cluster           :", cluster_name+"-before")
-	fmt.Println("total Memory            :", ClusterMemoryTotal)
-	fmt.Println("USED Memory             :", ClusterMemoryUsage)
-	fmt.Println("Cluster Memory Usage    :", Usage*100+60, "%")
-	fmt.Println("Cluster Cpu Usage       :", CpuUsage*100+80, "%")
-	fmt.Println("Cluster Over Weight  -> Create New Cluster     ")
-}
-
-func Calculate_Node_Metric(cluster_name string) {
-	var jsonarray NodeMetric
-	nodeNum := 2
-
-	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
-	stringArray := string(jsonByteArray[:])
-	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
-		panic(err)
-	}
-
-	for i := 0; i < nodeNum; i++ {
-
-		fmt.Println("------------------------------------------------------------------")
-		fmt.Println("[", i+1, "] Node:", jsonarray.Nodemetrics[i].Node, " Metric Information")
-		fmt.Println("NodeMetric        :", jsonarray.Nodemetrics[i].Node)
-		fmt.Println("Time              :", jsonarray.Nodemetrics[i].Time)
-		fmt.Println("Cpu               :", jsonarray.Nodemetrics[i].CPU)
-		fmt.Println("Cluster           :", jsonarray.Nodemetrics[i].Cluster+"-before")
-		fmt.Println("Memory            :", jsonarray.Nodemetrics[i].Memory)
-
-		CpuUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		fmt.Println("MemoryUsage       :", MemoryUsage)
-		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
-
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		fmt.Println("MemoryWorkingSet  :", MemoryWorkingSetBytes)
-		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
-		if err != nil {
-			// handle error
-			fmt.Println(err)
-			os.Exit(2)
-		}
-		fmt.Println("MemoryAvailable   :", MemoryAvailableBytes)
-		CpuUsage = CpuUsage / 2000000000
-		MemoryUsage = MemoryUsage / (MemoryWorkingSetBytes + MemoryAvailableBytes)
-
-		if i == 0 {
-			fmt.Println("Node CpuUsage     :", CpuUsage*100, "%")
-			fmt.Println("Node MemoryUsage  :", MemoryUsage*100, "%")
-		} else {
-			fmt.Println("Node CpuUsage     :", CpuUsage*100+80, "%")
-			fmt.Println("Node MemoryUsage  :", MemoryUsage*100+60, "%")
-			fmt.Println("Node Over Weight -> Create New Node")
-		}
-
-	}
+type PodMetric struct {
+	Podmetrics []struct {
+		Time      time.Time `json:"time"`
+		Cluster   string    `json:"cluster"`
+		Namespace string    `json:"namespace"`
+		Node      string    `json:"node"`
+		Pod       string    `json:"pod"`
+		CPU       struct {
+			CPUUsageNanoCores string `json:"CPUUsageNanoCores"`
+		} `json:"cpu"`
+		Memory struct {
+			MemoryAvailableBytes  string `json:"MemoryAvailableBytes"`
+			MemoryUsageBytes      string `json:"MemoryUsageBytes"`
+			MemoryWorkingSetBytes string `json:"MemoryWorkingSetBytes"`
+		} `json:"memory"`
+		Fs struct {
+			FsAvailableBytes string `json:"FsAvailableBytes"`
+			FsCapacityBytes  string `json:"FsCapacityBytes"`
+			FsUsedBytes      string `json:"FsUsedBytes"`
+		} `json:"fs"`
+		Network struct {
+			NetworkRxBytes string `json:"NetworkRxBytes"`
+			NetworkTxBytes string `json:"NetworkTxBytes"`
+		} `json:"network"`
+	} `json:"podmetrics"`
 }
 
 type NodeMetric struct {
@@ -326,4 +295,234 @@ type NodeMetric struct {
 			NetworkTxBytes string `json:"NetworkTxBytes"`
 		} `json:"network"`
 	} `json:"nodemetrics"`
+}
+
+func Calculate_Node_Metric(cluster_name string) {
+	var jsonarray NodeMetric
+	nodeNum := 2
+	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
+	stringArray := string(jsonByteArray[:])
+	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < nodeNum; i++ {
+
+		fmt.Println("------------------------------------------------------------------")
+		fmt.Println("[", i+1, "] Node:", jsonarray.Nodemetrics[i].Node, " Metric Information")
+		fmt.Println("NodeMetric        :", jsonarray.Nodemetrics[i].Node)
+		fmt.Println("Time              :", jsonarray.Nodemetrics[i].Time)
+		fmt.Println("Cpu               :", jsonarray.Nodemetrics[i].CPU)
+		fmt.Println("Cluster           :", jsonarray.Nodemetrics[i].Cluster)
+		fmt.Println("Memory           :", jsonarray.Nodemetrics[i].Memory)
+
+		// memoryusage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
+		// if err != nil {
+		// 	// handle error
+		// 	fmt.Println(err)
+		// 	os.Exit(2)
+		// }
+
+		// // memoryusage, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "Mi"), 32)
+		// // if err != nil {
+		// // 	// handle error
+		// // 	fmt.Println(err)
+		// // 	os.Exit(2)
+		// // }
+		// memorytotal, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
+		// if err != nil {
+		// 	// handle error
+		// 	fmt.Println(err)
+		// 	os.Exit(2)
+		// }
+
+		// memorytotal, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "Mi"), 32)
+		// if err != nil {
+		// 	// handle error
+		// 	fmt.Println(err)
+		// 	os.Exit(2)
+		// }
+
+		CpuUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		fmt.Println("MemoryUsage: ", MemoryUsage)
+		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
+
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		fmt.Println("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
+		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		fmt.Println("MemoryAvailableBytes: ", MemoryAvailableBytes)
+		CpuUsage = CpuUsage / 1000000000
+		MemoryUsage = MemoryUsage / (MemoryWorkingSetBytes + MemoryAvailableBytes)
+		fmt.Println("-------------CpuUsage:", CpuUsage, "---------------")
+		fmt.Println("-------------MemoryUsage:", MemoryUsage, "---------------")
+
+	}
+}
+
+func Calculate_Cluster_Metric(cluster_name string) {
+	var jsonarray NodeMetric
+	node_num := 2
+	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
+	stringArray := string(jsonByteArray[:])
+	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
+		panic(err)
+	}
+
+	ClusterMemoryTotal := 0.0
+	ClusterMemoryUsage := 0.0
+	var Usage float64
+	for i := 0; i < node_num; i++ {
+		fmt.Println("ClusterMemoryTotal: ", ClusterMemoryTotal)
+
+		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
+		fmt.Println("MemoryUsage: ", MemoryUsage)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+
+		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
+		fmt.Println("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+
+		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
+		fmt.Println("MemoryAvailableBytes: ", MemoryAvailableBytes)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+
+		ClusterMemoryTotal = MemoryWorkingSetBytes + MemoryAvailableBytes + ClusterMemoryTotal
+		fmt.Println("ClusterMemoryTotal: ", ClusterMemoryTotal)
+		ClusterMemoryUsage = ClusterMemoryUsage + MemoryUsage
+
+	}
+
+	Usage = ClusterMemoryUsage / ClusterMemoryTotal
+
+	fmt.Println("-------------------Cluster:", cluster_name, "Metric information-------------------")
+	fmt.Println("Print Cluster : ", cluster_name)
+	fmt.Println("Cluster total Memory            : ", ClusterMemoryTotal)
+	fmt.Println("Cluster USED Memory            : ", ClusterMemoryUsage)
+	fmt.Println("Cluster", cluster_name, "Memory Usage: ", Usage)
+}
+
+func Calculate_WatchingLevel(podNum int, clusterName string) {
+	var watchingLevel = 0
+	var jsonarray PodMetric
+	jsonByteArray := handler.GetResource(podNum, clusterName, "pods")
+	stringArray := string(jsonByteArray[:])
+	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
+		panic(err)
+	}
+	fmt.Println("----------------------------------------------------------")
+	fmt.Println("Print Cluster : ", clusterName)
+	fmt.Println("")
+
+	//파드 개수를 가져와서 for문의 변수로 넣어주어야 함
+
+	for i := 0; i < podNum; i++ {
+
+		fmt.Println("------------------------------------------------------------------")
+		fmt.Println("[", i+1, "] Pod:", jsonarray.Podmetrics[i].Pod, " Metric Information")
+		fmt.Println("PodMetric         :", jsonarray.Podmetrics[i].Pod)
+		fmt.Println("Time              :", jsonarray.Podmetrics[i].Time)
+		fmt.Println("Cpu               :", jsonarray.Podmetrics[i].CPU)
+		fmt.Println("Cluster           :", jsonarray.Podmetrics[i].Cluster)
+		fmt.Println("Memory            :", jsonarray.Podmetrics[i].Memory)
+		fmt.Println("Namespace         :", jsonarray.Podmetrics[i].Namespace)
+
+		// memoryusage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
+		// if err != nil {
+		// 	// handle error
+		// 	fmt.Println(err)
+		// 	os.Exit(2)
+		// }
+
+		// // memoryusage, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "Mi"), 32)
+		// // if err != nil {
+		// // 	// handle error
+		// // 	fmt.Println(err)
+		// // 	os.Exit(2)
+		// // }
+		// memorytotal, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
+		// if err != nil {
+		// 	// handle error
+		// 	fmt.Println(err)
+		// 	os.Exit(2)
+		// }
+
+		// memorytotal, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "Mi"), 32)
+		// if err != nil {
+		// 	// handle error
+		// 	fmt.Println(err)
+		// 	os.Exit(2)
+		// }
+
+		CpuUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
+		if err != nil {
+			// handle error
+			fmt.Println(err)
+			os.Exit(2)
+		}
+		CpuUsage = CpuUsage / 1000000000
+		if CpuUsage != 0 {
+			fmt.Println("CpuUsage          : ", CpuUsage)
+			switch {
+			case CpuUsage <= 0.2:
+				watchingLevel = 1
+				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+			case CpuUsage <= 0.4:
+				watchingLevel = 2
+				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+			case CpuUsage <= 0.6:
+				watchingLevel = 3
+				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+			case CpuUsage <= 0.8:
+				watchingLevel = 4
+				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+			case CpuUsage <= 1:
+				watchingLevel = 5
+				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+			case CpuUsage > 1:
+				watchingLevel = 5
+				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				fmt.Println("Watching Level is over 5")
+				fmt.Println("!!!!!!!!!!!!!!!", jsonarray.Podmetrics[i].Pod, "!!!!!!!!!!!!!!!!!!!")
+			}
+		} else {
+			fmt.Println("This Pod use 0 Cpu nanocores")
+		}
+	}
+	fmt.Println("------------------------------------------")
+}
+
+func AutoSacling() {
+	//디플로이먼트 이름을 넘겨주어야 함
 }

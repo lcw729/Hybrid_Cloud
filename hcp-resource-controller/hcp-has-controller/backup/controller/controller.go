@@ -1,23 +1,16 @@
 package controller
 
 import (
-	"Hybrid_Cloud/hcp-resource-controller/hcp-has-controller/src/autoscaler"
-	cobrautil "Hybrid_Cloud/hybridctl/util"
 	hcphasv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
 	lister "Hybrid_Cloud/pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
 	hcphasscheme "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 
-	"context"
 	"fmt"
 	"time"
 
-	vpaclientset "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/client/clientset/versioned"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -210,82 +203,63 @@ func (c *Controller) syncHandler(key string) error {
 
 		return err
 	}
+	_ = hcphas
+	/*
+		// get HCP hybridautoscalers Info
+		scaler := autoscaler.NewAutoScaler()
+		master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+		clientset, _ := hcphasv1alpha1.NewForConfig(master_config)
+		warning_count := hcphas.Spec.WarningCount
+		options := hcphas.Spec.ScalingOptions
+		resource_status := hcphas.Status.ResourceStatus
+		target_cluster := hcphas.Spec.TargetCluster
+		mode := hcphas.Spec.Mode
+		hcpdeployment, _ := clientset.HcpV1alpha1().HCPDeployments("").Get(context.TODO(), name, v1.GetOptions{})
+		targets := hcpdeployment.Spec.SchedulingResult.Targets
 
-	// get HCP hybridautoscalers Info
-	scaler := autoscaler.NewAutoScaler()
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
-	clientset, _ := hcphasv1alpha1.NewForConfig(master_config)
-	warning_count := hcphas.Spec.WarningCount
-	options := hcphas.Spec.ScalingOptions
-	resource_status := hcphas.Status.ResourceStatus
-	target_cluster := hcphas.Spec.TargetCluster
-	mode := hcphas.Spec.Mode
-	hcpdeployment, _ := clientset.HcpV1alpha1().HCPDeployments("").Get(context.TODO(), name, v1.GetOptions{})
-	targets := hcpdeployment.Spec.SchedulingResult.Targets
+		if !scaler.ExistDeployment(hcpdeployment) {
+			scaler.RegisterDeploymentToAutoScaler(hcpdeployment, hcphas)
+		}
+		// watching_level 계산
+		for _, target := range targets {
+			scaler.WarningCountPlusOne(hcpdeployment, target)
+			scaler.AutoScaling(hcpdeployment, target)
+			fmt.Println("current warningcount is ", scaler.GetWarningCount(hcpdeployment, target))
+		}
 
-	if !scaler.ExistDeployment(hcpdeployment) {
-		scaler.RegisterDeploymentToAutoScaler(hcpdeployment, hcphas)
-	}
-	// watching_level 계산
-	for _, target := range targets {
-		scaler.WarningCountPlusOne(hcpdeployment, target)
-		scaler.AutoScaling(hcpdeployment, target)
-		fmt.Println("current warningcount is ", scaler.GetWarningCount(hcpdeployment, target))
-	}
+		// hpa
+		hpa_template := options.HpaTemplate
+		hpa_namespace := hpa_template.ObjectMeta.Namespace
 
-	// hpa
-	hpa_template := options.HpaTemplate
-	hpa_namespace := hpa_template.ObjectMeta.Namespace
+		// vpa
+		vpa_template := options.VpaTemplate
+		vpa_namespace := vpa_template.ObjectMeta.Namespace
 
-	// vpa
-	vpa_template := options.VpaTemplate
-	vpa_namespace := vpa_template.ObjectMeta.Namespace
+		// create target_cluster clientset
+		config, err := cobrautil.BuildConfigFromFlags(target_cluster, "/root/.kube/config")
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 
-	// create target_cluster clientset
-	config, err := cobrautil.BuildConfigFromFlags(target_cluster, "/root/.kube/config")
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+		_, err = kubernetes.NewForConfig(config)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
 
-	_, err = kubernetes.NewForConfig(config)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
+		// create vpa_clientset
+		vpa_clientset, _ := vpaclientset.NewForConfig(config)
+		if mode == "scaling" {
+			fmt.Println(mode)
+			// check resource_status [ WAITING | DOING | DONE ]
+			if resource_status == "WAITING" {
 
-	// create vpa_clientset
-	vpa_clientset, _ := vpaclientset.NewForConfig(config)
-	if mode == "scaling" {
-		fmt.Println(mode)
-		// check resource_status [ WAITING | DOING | DONE ]
-		if resource_status == "WAITING" {
+				// check warning_count [ range : 1 <= warning_count <=3 ]
+				if warning_count == 1 {
 
-			// check warning_count [ range : 1 <= warning_count <=3 ]
-			if warning_count == 1 {
-
-				// create hpa resource for deployment [in target cluster]
-				_, err = clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(hpa_namespace).Create(context.TODO(), &hpa_template, metav1.CreateOptions{})
-				if err != nil {
-					utilruntime.HandleError(fmt.Errorf(err.Error()))
-					return err
-				} else {
-					klog.Info("Success to Create HorizontalPodAutoscalers resource : ", hcphas.ObjectMeta.Name)
-
-					// update has resource status
-					hcphas.Status.ResourceStatus = "DONE"
-					hcphas.Status.LastSpec = hcphas.Spec
-					c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
-				}
-			} else if warning_count == 2 {
-
-				last_maxReplicas := hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas
-
-				// Check if previous MaxReplicas is less than requested value
-				if hpa_template.Spec.MaxReplicas > last_maxReplicas {
-
-					// update hpa resource for deployment [in target cluster]
-					_, err = clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(hpa_namespace).Update(context.TODO(), &hpa_template, metav1.UpdateOptions{})
+					// create hpa resource for deployment [in target cluster]
+					_, err = clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(hpa_namespace).Create(context.TODO(), &hpa_template, metav1.CreateOptions{})
 					if err != nil {
 						utilruntime.HandleError(fmt.Errorf(err.Error()))
 						return err
@@ -297,33 +271,54 @@ func (c *Controller) syncHandler(key string) error {
 						hcphas.Status.LastSpec = hcphas.Spec
 						c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
 					}
+				} else if warning_count == 2 {
+
+					last_maxReplicas := hcphas.Status.LastSpec.ScalingOptions.HpaTemplate.Spec.MaxReplicas
+
+					// Check if previous MaxReplicas is less than requested value
+					if hpa_template.Spec.MaxReplicas > last_maxReplicas {
+
+						// update hpa resource for deployment [in target cluster]
+						_, err = clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(hpa_namespace).Update(context.TODO(), &hpa_template, metav1.UpdateOptions{})
+						if err != nil {
+							utilruntime.HandleError(fmt.Errorf(err.Error()))
+							return err
+						} else {
+							klog.Info("Success to Create HorizontalPodAutoscalers resource : ", hcphas.ObjectMeta.Name)
+
+							// update has resource status
+							hcphas.Status.ResourceStatus = "DONE"
+							hcphas.Status.LastSpec = hcphas.Spec
+							c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
+						}
+					} else {
+						klog.Info("Set a value greater than the current number of replicas")
+					}
+
+				} else if warning_count == 3 {
+
+					// create vpa resource for deployment [in target cluster]
+					_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(vpa_namespace).Create(context.TODO(), &vpa_template, metav1.CreateOptions{})
+					if err != nil {
+						utilruntime.HandleError(fmt.Errorf(err.Error()))
+						return err
+					} else {
+						klog.Info("Success to Create VerticalPodAutoscalers resource : ", hcphas.ObjectMeta.Name)
+
+						// update status
+						hcphas.Status.ResourceStatus = "DONE"
+						hcphas.Status.LastSpec = hcphas.Spec
+						c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
+					}
 				} else {
-					klog.Info("Set a value greater than the current number of replicas")
+					utilruntime.HandleError(fmt.Errorf("warning count is out of range"))
 				}
-
-			} else if warning_count == 3 {
-
-				// create vpa resource for deployment [in target cluster]
-				_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(vpa_namespace).Create(context.TODO(), &vpa_template, metav1.CreateOptions{})
-				if err != nil {
-					utilruntime.HandleError(fmt.Errorf(err.Error()))
-					return err
-				} else {
-					klog.Info("Success to Create VerticalPodAutoscalers resource : ", hcphas.ObjectMeta.Name)
-
-					// update status
-					hcphas.Status.ResourceStatus = "DONE"
-					hcphas.Status.LastSpec = hcphas.Spec
-					c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, metav1.UpdateOptions{})
-				}
-			} else {
-				utilruntime.HandleError(fmt.Errorf("warning count is out of range"))
+			} else if resource_status == "DOING" {
+				utilruntime.HandleError(fmt.Errorf("creating Autoscaler resource : %s", hcphas.ObjectMeta.Name))
 			}
-		} else if resource_status == "DOING" {
-			utilruntime.HandleError(fmt.Errorf("creating Autoscaler resource : %s", hcphas.ObjectMeta.Name))
-		}
-	} else if mode == "expanding" {
+		} else if mode == "expanding" {
 
-	}
+		}
+	*/
 	return nil
 }

@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: influxdb
+  namespace: hcp
+spec:
+  selector:
+    matchLabels:
+      app: influxdb
+  serviceName: influxdb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - influx
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: influxdb
+        image: docker.io/influxdb:1.6.4
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - secretRef:
+            name: influxdb-creds
+        volumeMounts:
+        - mountPath: /var/lib/influxdb
+          name: var-lib-influxdb
+        - mountPath: /etc/localtime
+          name: timezone-config
+      volumes:
+      - name: var-lib-influxdb
+        persistentVolumeClaim:
+         claimName: pv-influxdb
+      # - name: timezone-config
+        hostPath:
+          # path: /usr/share/zoneinfo/Asia/Seoul
+          path: /var/lib/influxdb
+      # tolerations:
+      #  - key: node.kubernetes.io/not-ready
+      #    effect: NoExecute
+      #    tolerationSeconds: 0
+      #  - key: node.kubernetes.io/unreachable
+      #    effect: NoExecute
+      #    tolerationSeconds: 0
+  volumeClaimTemplates:
+  - metadata:
+      name: var-lib-influxdb
+    spec:
+      accessModes: 
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 2Gi
+# 여기까지 분산 코드
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   namespace: hcp
+#   name: influxdb
+#   labels:
+#     component: influxdb
+#     app: influxdb
+# spec:
+#   serviceName: influxdb
+#   selector:
+#     matchLabels:
+#       component: influxdb
+#   replicas: 1
+#   template:
+#     metadata:
+#       name: influxdb
+#       labels:
+#         component: influxdb
+#         app: influxdb
+#     spec:
+#       containers:
+#       - name: influxdb
+#         image: influxdb:1.6.4
+#         imagePullPolicy: Always
+#         resources:
+#           limits:
+#             memory: 2G
+#           requests:
+#             memory: 1G
+#         env:
+#           - name: INFLUXDB_IFQL_ENABLED
+#             value: "true"
+#           - name: INFLUXDB_LOGGING_LEVEL
+#             value: "error"
+#           - name: INFLUXDB_HTTP_LOG_ENABLED
+#             value: "false"
+#         volumeMounts:
+#           - name: influxdb
+#             mountPath: /var/lib/influxdb
+#         ports:
+#           - containerPort: 8086
+#             name: server
+#           - containerPort: 8082
+#             name: ifql
+#   volumeClaimTemplates:
+#   - metadata:
+#        name: influxdb
+#     spec:
+#       accessModes: [ "ReadWriteOnce" ]
+#       resources:
+#         requests:
+#           storage: 2Gi
+
+
+

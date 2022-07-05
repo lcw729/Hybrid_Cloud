@@ -55,3 +55,11 @@ go.work
 /old-code-generator/
 /main/main
 /.vscode/
+
+dist/
+imports/*
+!imports/__init__.py
+.terraform
+cdktf.out
+cdktf.log
+*terraform.*.tfstate*

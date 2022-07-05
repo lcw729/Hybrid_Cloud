@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hcp-analytic-engine
+  namespace: hcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: hcp-analytic-engine
+  template:
+    metadata:
+      labels:
+        name: hcp-analytic-engine
+    spec:
+      serviceAccountName: hcp-analytic-engine-sa
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: hcp-analytic-engine
+          image: ketidevit2/hcp-analytic-engine:v0.0.1
+          command:
+          - hcp-analytic-engine
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              #value: ""
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: INFLUX_IP
+              # value: "10.244.1.76"
+              value: "10.0.5.83"
+            - name: INFLUX_PORT
+              # value: "8086"
+              value: "31051"
+            - name: INFLUX_USERNAME
+              value: "root"
+            - name: INFLUX_PASSWORD
+              value: "root"
+            - name: OPERATOR_NAME
+              value: "hcp-analytic-engine"
+          ports:
+          - containerPort: 8086
+            name: http
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          effect: NoExecute
+          tolerationSeconds: 0
+        - key: node.kubernetes.io/unreachable
+          effect: NoExecute
+          tolerationSeconds: 0
+      restartPolicy: Always
