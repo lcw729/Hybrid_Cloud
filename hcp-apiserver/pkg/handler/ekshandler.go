@@ -22,7 +22,7 @@ func checkErr(err error) {
 }
 
 func GetEKSClient(clusterName *string) (*eks.EKS, error) {
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(master_config)
 
 	cluster, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), *clusterName, metav1.GetOptions{})

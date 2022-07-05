@@ -26,7 +26,7 @@ import (
 )
 
 // var checkAKS, checkEKS, checkGKE = false, false, false
-// var master_config, _ = util.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+// var master_config, _ = util.BuildConfigFromFlags("master", "/root/.kube/config")
 // var master_client = kubernetes.NewForConfigOrDie(master_config)
 
 // type Cli struct {

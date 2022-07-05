@@ -49,7 +49,7 @@ func CreateClusterInfoMap(clusters *ClusterInfoList) map[string]*ClusterInfo {
 
 func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 	var joinCluster_list []v1alpha1.HCPCluster
-	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	if err != nil {
 		fmt.Println("err")
 		return nil, err

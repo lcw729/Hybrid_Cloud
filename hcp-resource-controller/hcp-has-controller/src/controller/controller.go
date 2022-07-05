@@ -219,7 +219,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	// get HCP hybridautoscalers Info
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	clientset, _ := hcphasv1alpha1.NewForConfig(master_config)
 	resource_status := hcphas.Status.ResourceStatus
 	mode := hcphas.Spec.Mode

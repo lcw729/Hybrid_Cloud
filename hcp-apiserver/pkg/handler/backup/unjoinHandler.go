@@ -23,7 +23,7 @@ import (
 
 func Unjoin(info mappingTable.ClusterInfo) {
 
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	clusterRegisterClientSet, err := clusterRegister.NewForConfig(master_config)
 	if err != nil {
 		log.Println(err)
@@ -93,7 +93,7 @@ func Unjoin(info mappingTable.ClusterInfo) {
 
 func unjoinCluster(info mappingTable.ClusterInfo, cluster_client *kubernetes.Clientset) bool {
 
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	apiextensionsClientSet, err := KubeFedCluster.NewForConfig(master_config)
 	if err != nil {
 		log.Println(err)

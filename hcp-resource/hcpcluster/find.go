@@ -10,7 +10,7 @@ import (
 )
 
 func FindHCPClusterList(cluster string) bool {
-	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	if err != nil {
 		fmt.Println("this error")
 	}
@@ -34,7 +34,7 @@ func FindHCPClusterList(cluster string) bool {
 }
 
 func FindHCPClusterList2(cluster string) bool {
-	config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	if err != nil {
 		fmt.Println("this error")
 	}

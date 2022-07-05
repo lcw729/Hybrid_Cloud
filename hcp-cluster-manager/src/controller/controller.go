@@ -224,7 +224,7 @@ func (c *Controller) syncHandler(key string) error {
 	// platform := hcpcluster.Spec.ClusterPlatform
 	clustername := hcpcluster.Name
 
-	var master_config, _ = cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	var master_config, _ = cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 

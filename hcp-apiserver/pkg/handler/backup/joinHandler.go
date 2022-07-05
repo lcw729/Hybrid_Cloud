@@ -44,7 +44,7 @@ import (
 /*
 func Join(info mappingTable.ClusterInfo) bool {
 
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	clusterRegisterClientSet, err := clusterRegister.NewForConfig(master_config)
 	if err != nil {
 		log.Println(err)
@@ -139,7 +139,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 
 func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.Clientset, APIEndPoint string) bool {
 
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	master_client := kubernetes.NewForConfigOrDie(master_config)
 
 	// 1. CREATE namespace "kube-federation-system"

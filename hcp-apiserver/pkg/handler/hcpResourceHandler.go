@@ -40,7 +40,7 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, _ := json.Marshal(resource.RealResource)
 	json.Unmarshal(bytes, &real_resource)
 
-	master_config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -117,7 +117,7 @@ func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	namespace := vars["namespace"]
 	name := vars["name"]
-	master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	master_clientset, _ := resourcev1alpha1clientset.NewForConfig(master_config)
 
 	hcpdeployment, err := master_clientset.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
@@ -184,7 +184,7 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 	// TargetCluster가 지정되지 않은 경우
 	if resource.TargetCluster == "undefined" {
 
-		master_config, err := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+		master_config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 		if err != nil {
 			fmt.Println(err)
 			return

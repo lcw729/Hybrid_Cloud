@@ -1,4 +1,4 @@
-# kubectl config use-context kube-master
+# kubectl config use-context master
 # kubectl create ns hcp
 kubectl apply -f crds/crd.yaml
 kubectl apply -f crds/cr.yaml

@@ -27,7 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// var master_config, _ = util.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+// var master_config, _ = util.BuildConfigFromFlags("master", "/root/.kube/config")
 
 // var master_client = kubernetes.NewForConfigOrDie(master_config)
 

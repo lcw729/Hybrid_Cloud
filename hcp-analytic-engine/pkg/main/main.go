@@ -26,7 +26,7 @@ func main() {
 
 	// kubeconfig := os.Getenv("KUBECONFIG")
 	// config, err := rest.InClusterConfig()
-	config, err := cobrautil.BuildConfigFromFlags("master", "/mnt/config")
+	config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	// config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		panic(err.Error())

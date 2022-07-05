@@ -207,7 +207,7 @@ func (c *Controller) syncHandler(key string) error {
 	/*
 		// get HCP hybridautoscalers Info
 		scaler := autoscaler.NewAutoScaler()
-		master_config, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+		master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 		clientset, _ := hcphasv1alpha1.NewForConfig(master_config)
 		warning_count := hcphas.Spec.WarningCount
 		options := hcphas.Spec.ScalingOptions

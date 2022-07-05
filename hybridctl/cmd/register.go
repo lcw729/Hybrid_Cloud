@@ -119,7 +119,7 @@ var registerCmd = &cobra.Command{
 					return
 				}
 
-				resource.CreateNamespace("kube-master", HCP_NAMESPACE)
+				resource.CreateNamespace("master", HCP_NAMESPACE)
 				if CreateHCPCluster(platform, clustername, region) {
 					err := u.ChangeConfigClusterName(HCP_NAMESPACE, clustername)
 					if err != nil {

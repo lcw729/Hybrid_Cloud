@@ -72,9 +72,9 @@ func main() {
 
 	// cm := clusterManager.NewClusterManager()
 
-	// host_ctx := "kube-master"
+	// host_ctx := "master"
 	// namespace := "hybrid"
-	// host_cfg, _ := cobrautil.BuildConfigFromFlags("kube-master", "/root/.kube/config")
+	// host_cfg, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	// // host_cfg := cm.Host_config
 	// live := cluster.New(host_ctx, host_cfg, cluster.Options{CacheOptions: cluster.CacheOptions{Namespace: namespace}})
 	// ghosts := []*cluster.Cluster{}
