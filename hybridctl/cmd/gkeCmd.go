@@ -737,7 +737,7 @@ var GKEInitCmd = &cobra.Command{
 			}
 
 			command := &exec.Cmd{
-				Path:   "./gcloud-init.sh",
+				Path:   "./sh/gcloud-init.sh",
 				Args:   arguments,
 				Stdout: os.Stdout,
 				Stderr: os.Stderr,

@@ -1,7 +1,6 @@
 package backup
 
 import (
-	mappingTable "Hybrid_Cloud/hcp-apiserver/pkg/converter"
 	cobrautil "Hybrid_Cloud/hybridctl/util"
 
 	// KubeFedCluster "Hybrid_Cloud/pkg/apis/kubefedcluster/v1alpha1"
@@ -137,7 +136,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 }
 */
 
-func JoinCluster(info mappingTable.ClusterInfo, join_cluster_client *kubernetes.Clientset, APIEndPoint string) bool {
+func JoinCluster(info ClusterInfo, join_cluster_client *kubernetes.Clientset, APIEndPoint string) bool {
 
 	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	master_client := kubernetes.NewForConfigOrDie(master_config)
