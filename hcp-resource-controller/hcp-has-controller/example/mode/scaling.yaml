@@ -4,8 +4,8 @@ metadata:
   namespace: hcp
   name: nginx-deploy
 spec:
-  mode: scaling
   targetCluster: eks-cluster
+  mode: scaling
   scalingOptions: 
     hpaTemplate:
       spec: 
