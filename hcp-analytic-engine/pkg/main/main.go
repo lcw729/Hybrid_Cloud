@@ -93,7 +93,7 @@ func main() {
 	// } else {
 	// 	clusters := cm.Cluster_list
 	// 	for _, cluster := range clusters.Items {
-	// 		config, err := cobrautil.BuildConfigFromFlags(cluster.ObjectMeta.Name, "/mnt/config")
+	// 		config, err := cobrautil.BuildConfigFromFlags(cluster.ObjectMeta.Name, "/root/.kube/config")
 	// 		// config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	// 		if err != nil {
 	// 			panic(err.Error())
@@ -113,11 +113,6 @@ func main() {
 	// fmt.Println(GetClusterExpandingCrierion())
 	// fmt.Println(GetDefaultNodeOption())
 
-	for {
-		Calculate_Node_Metric("eks-cluster")
-		Calculate_Cluster_Metric("eks-cluster")
-		time.Sleep(2 * time.Second)
-	}
 }
 
 func GetClusterExpandingCrierion() (float32, float32) {

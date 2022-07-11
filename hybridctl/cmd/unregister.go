@@ -100,6 +100,12 @@ var unregisterCmd = &cobra.Command{
 						}
 					}
 
+					fmt.Println(">>> delete config in kubeconfig")
+					err = util.DeleteConfig(platform, clustername)
+					if err != nil {
+						fmt.Println(err)
+					}
+
 					fmt.Println(">>> delete hcpcluster")
 					for {
 						cluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Get(context.TODO(), clustername, metav1.GetOptions{})
@@ -114,11 +120,6 @@ var unregisterCmd = &cobra.Command{
 								break
 							}
 						}
-					}
-					fmt.Println(">>> delete config in kubeconfig")
-					err = util.DeleteConfig(platform, clustername)
-					if err != nil {
-						fmt.Println(err)
 					}
 				} else {
 					fmt.Printf("%s does not exist\n", clustername)

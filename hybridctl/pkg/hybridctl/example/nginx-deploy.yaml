@@ -18,6 +18,4 @@ spec:
     spec:
       containers:
       - name: nginx-pod
-        image: nginx:1.14
-        ports:
-        - containerPort: 
+        image: nginx:1.14 

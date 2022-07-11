@@ -214,7 +214,7 @@ func (c *Controller) syncHandler(key string) error {
 		if target != nil {
 			hcpdeployment.Spec.SchedulingResult.Targets = target
 			hcpdeployment.Spec.SchedulingNeed = false
-			hcpdeployment.Spec.SchedulingComplete = true
+			hcpdeployment.Spec.SchedulingComplete = false
 			r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
 			if err != nil {
 				fmt.Println(err)

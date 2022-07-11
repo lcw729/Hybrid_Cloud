@@ -10,7 +10,7 @@ require (
 	cloud.google.com/go/pubsub v1.3.1
 	github.com/Jeffail/gabs v1.4.0
 	github.com/aws/aws-sdk-go v1.43.13
-	github.com/go-logr/logr v1.2.0
+	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
 	github.com/googleapis/gnostic v0.5.5
@@ -87,6 +87,6 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.23.4
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.23.4
 	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.10.3
-	//sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.0
+//sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.0
 // k8s.io/api => k8s.io/api v0.18.6
 )

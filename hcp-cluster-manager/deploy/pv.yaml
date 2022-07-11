@@ -13,7 +13,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     path: /root/.kube
-    server: "10.0.5.86"
+    server: "10.0.5.83"
     readOnly: false
 ---
 apiVersion: v1
@@ -31,5 +31,5 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     path: /root/.aws
-    server: "10.0.5.86"
+    server: "10.0.5.83"
     readOnly: false

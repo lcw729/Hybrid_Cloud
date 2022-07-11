@@ -97,7 +97,7 @@ type ScalingOptions struct {
 
 type HCPHybridAutoScalerStatus struct {
 	ResourceStatus     string                  `json:"resourceStatus"`
-	FirstProcess       bool                    `json:"firstProcess"`
+	FirstProcess       bool                    `json:"firstsProcess"`
 	ScalingInProcess   bool                    `json:"scalingInProcess"`
 	ExpandingInProcess bool                    `json:"expandingInProcess"`
 	LastSpec           HCPHybridAutoScalerSpec `json:"lastSpec"`
