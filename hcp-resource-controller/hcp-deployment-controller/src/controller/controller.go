@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"Hybrid_Cloud/hcp-scheduler/src/scheduler"
 	deployment "Hybrid_Cloud/kube-resource/deployment"
 	resourcev1alpha1clientset "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	resourcev1alpha1scheme "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
@@ -28,6 +29,8 @@ import (
 
 const controllerAgentName = "hcp-deployment-controller"
 
+var cm, _ = clusterManager.NewClusterManager()
+
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Foo is synced
 	SuccessSynced = "Synced"
@@ -50,6 +53,7 @@ type Controller struct {
 	hcpdeploymentSynced    cache.InformerSynced
 	workqueue              workqueue.RateLimitingInterface
 	recorder               record.EventRecorder
+	scheduler              *scheduler.Scheduler
 }
 
 func NewController(
@@ -62,6 +66,7 @@ func NewController(
 	eventBroadCaster.StartStructuredLogging(0)
 	eventBroadCaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("hcp")})
 	recorder := eventBroadCaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+	sched := scheduler.NewScheduler()
 
 	controller := &Controller{
 		kubeclientset:          kubeclientset,
@@ -70,6 +75,7 @@ func NewController(
 		hcpdeploymentSynced:    hcpdeploymentinformer.Informer().HasSynced,
 		workqueue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "hcpdeployment"),
 		recorder:               recorder,
+		scheduler:              sched,
 	}
 
 	klog.Info("Setting up event handlers")
@@ -204,7 +210,10 @@ func (c *Controller) syncHandler(key string) error {
 			return nil
 		}
 	}
-	cm, _ := clusterManager.NewClusterManager()
+
+	fmt.Println("need", hcpdeployment.Spec.SchedulingNeed)
+	fmt.Println("complete", hcpdeployment.Spec.SchedulingComplete)
+	// 스케줄링되지 않은 hcpdeployment 감지
 	if !hcpdeployment.Spec.SchedulingNeed && !hcpdeployment.Spec.SchedulingComplete {
 		ok := deployment.DeployDeploymentFromHCPDeployment(hcpdeployment)
 		if ok {
