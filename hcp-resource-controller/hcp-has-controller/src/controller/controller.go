@@ -1,7 +1,6 @@
 package controller
 
 import (
-	cobrautil "Hybrid_Cloud/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	hcphasv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	informer "Hybrid_Cloud/pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
@@ -35,6 +34,8 @@ import (
 
 const controllerAgentName = "hcp-has-controller"
 
+var cm, _ = clusterManager.NewClusterManager()
+
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Foo is synced
 	SuccessSynced = "Synced"
@@ -49,9 +50,6 @@ const (
 	// is synced successfully
 	MessageResourceSynced = "Foo synced successfully"
 )
-
-var cm, _ = clusterManager.NewClusterManager()
-var cnt = 0
 
 type Controller struct {
 	kubeclientset   kubernetes.Interface
@@ -223,7 +221,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	// get HCP hybridautoscalers Info
-	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
+	master_config := cm.Host_config
 	clientset, _ := hcphasv1alpha1.NewForConfig(master_config)
 	resource_status := hcphas.Status.ResourceStatus
 	mode := hcphas.Spec.Mode

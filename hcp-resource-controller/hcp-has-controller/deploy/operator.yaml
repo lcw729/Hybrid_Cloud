@@ -13,7 +13,7 @@ spec:
       labels:
         name: hcp-has-controller
     spec:
-      serviceAccountName: hcp-has-controller-sa
+      serviceAccountName: hcp-has-controller
       imagePullSecrets:
         - name: regcred
       containers:
@@ -48,13 +48,6 @@ spec:
           # - containerPort: 8086
           - containerPort: 8086
             name: http
-          volumeMounts:
-           - name: kubeconfig
-             mountPath: /mnt
-      volumes:
-      - name: kubeconfig
-        persistentVolumeClaim: 
-          claimName: pvc-kubeconfig
       tolerations:
         - key: node.kubernetes.io/not-ready
           effect: NoExecute

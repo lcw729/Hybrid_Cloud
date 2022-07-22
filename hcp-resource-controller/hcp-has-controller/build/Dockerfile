@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi7/ubi-minimal:latest
 
 ENV OPERATOR=/usr/local/bin/hcp-has-controller \
-    USER_UID=1001 \
+    USER_UID=root \
     USER_NAME=hcp-has-controller
 
 # install operator binary
