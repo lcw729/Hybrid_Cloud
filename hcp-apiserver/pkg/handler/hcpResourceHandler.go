@@ -248,6 +248,11 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
+CreateHCPHASHandler(){
+	
+}
+
 func deploymentToHCPDeployment(real_resource *appsv1.Deployment) resourcev1alpha1.HCPDeployment {
 	// HCPDeployment 생성하기
 	hcp_resource := resourcev1alpha1.HCPDeployment{

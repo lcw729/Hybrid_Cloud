@@ -5,7 +5,6 @@ import (
 	f "Hybrid_Cloud/hcp-scheduler/src/framework/v1alpha1"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
-	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
 
@@ -27,7 +26,6 @@ type Scheduler struct {
 }
 
 func NewScheduler() *Scheduler {
-	cm, _ := clusterManager.NewClusterManager()
 	hcpFramework := f.NewFramework()
 	clusterInfoList := resourceinfo.NewClusterInfoList()
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
@@ -38,7 +36,6 @@ func NewScheduler() *Scheduler {
 	// }
 
 	schd := Scheduler{
-		ClusterClients:  cm.Cluster_kubeClients,
 		HCPFramework:    hcpFramework,
 		ClusterInfoList: *clusterInfoList,
 		ClusterInfoMap:  clusterInfoMap,
@@ -51,6 +48,8 @@ func NewScheduler() *Scheduler {
 func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha1.Target {
 
 	fmt.Println("[scheduling start]")
+	sched.ClusterInfoList = *resourceinfo.NewClusterInfoList()
+	sched.SchedulingResult = make([]v1alpha1.Target, 0)
 	schedPolicy, _ := p.GetHCPPolicy("scheduling-policy")
 	var filter []string
 	var score []string

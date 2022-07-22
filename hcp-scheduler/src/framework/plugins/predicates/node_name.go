@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 )
 
 type NodeName struct{}
@@ -23,12 +24,16 @@ func (pl *NodeName) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, cluste
 			//clusterInfo.MinusOneAvailableNodes()
 			continue
 		}
-		if !Fits(pod, nodeInfo) {
-			fmt.Println("Node Name is unmatched")
+
+		klog.Info("fits ", Fits(pod, nodeInfo))
+		klog.Info("podname ", pod.Spec.NodeName)
+		klog.Info("nodename ", nodeInfo.NodeName)
+		if Fits(pod, nodeInfo) {
+			return false
 			//nodeInfo.FilterNode()
 			//clusterInfo.MinusOneAvailableNodes()
 		} else {
-			return false
+			fmt.Println("Node Name is unmatched")
 		}
 	}
 	return true
@@ -36,5 +41,5 @@ func (pl *NodeName) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, cluste
 
 // Fits actually checks if the pod fits the node.
 func Fits(pod *v1.Pod, nodeInfo *resourceinfo.NodeInfo) bool {
-	return len(pod.Spec.NodeName) == 0 || pod.Spec.NodeName == nodeInfo.Node.Name
+	return len(pod.Spec.NodeName) == 0 || pod.Spec.NodeName == nodeInfo.NodeName
 }

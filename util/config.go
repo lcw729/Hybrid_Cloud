@@ -1,6 +1,7 @@
 package util
 
 import (
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
@@ -64,11 +65,8 @@ func UnMarshalKubeConfig(data []byte) (KubeConfig, error) {
 }
 
 func ChangeConfigClusterName(platform string, clustername string) error {
-	cm, err := clusterManager.NewClusterManager()
-	if err != nil {
-		return err
-	}
-	master_config := cm.Host_config
+
+	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 	if err != nil {
 		return err
