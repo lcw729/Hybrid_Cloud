@@ -9,8 +9,8 @@ require (
 	cloud.google.com/go/kms v1.4.0 // indirect
 	cloud.google.com/go/pubsub v1.3.1
 	github.com/Jeffail/gabs v1.4.0
+	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.4.5
 	github.com/aws/aws-sdk-go v1.43.13
-	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2
 	github.com/googleapis/gnostic v0.5.5
@@ -40,7 +40,7 @@ require (
 	k8s.io/klog v1.0.0
 	k8s.io/klog/v2 v2.30.0
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
-	k8s.io/kubernetes v1.23.5
+	k8s.io/kubernetes v1.22.9
 	k8s.io/metrics v0.23.4
 	k8s.io/sample-controller v0.23.4
 	sigs.k8s.io/aws-iam-authenticator v0.5.5
@@ -80,7 +80,7 @@ replace (
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.23.4
 	k8s.io/kubectl => k8s.io/kubectl v0.23.4
 	k8s.io/kubelet => k8s.io/kubelet v0.23.4
-	k8s.io/kubernetes/pkg/features => k8s.io/kubernetes/pkg/features v1.17.13
+	// k8s.io/kubernetes/pkg/features => k8s.io/kubernetes/pkg/features v1.22.9
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.23.4
 	k8s.io/metrics => k8s.io/metrics v0.22.4
 	k8s.io/mount-utils => k8s.io/mount-utils v0.23.4

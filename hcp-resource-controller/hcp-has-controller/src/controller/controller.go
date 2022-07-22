@@ -260,6 +260,8 @@ func (c *Controller) syncHandler(key string) error {
 
 					if WatchingLevelCalculator() > 3 {
 						hcphas.Spec.WarningCount = hcphas.Spec.WarningCount + 1
+						hcphas.Status.ResourceStatus = "WAITING"
+						c.hcphasclientset.HcpV1alpha1().HCPHybridAutoScalers(namespace).Update(context.TODO(), hcphas, v1.UpdateOptions{})
 					}
 				}
 
