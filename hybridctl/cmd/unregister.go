@@ -80,6 +80,8 @@ var unregisterCmd = &cobra.Command{
 			case "eks":
 				fallthrough
 			case "gke":
+				fallthrough
+			case "nks":
 				if hcpcluster.FindHCPClusterList(clustername) {
 					HCP_NAMESPACE = "hcp"
 					hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
@@ -100,19 +102,23 @@ var unregisterCmd = &cobra.Command{
 						}
 					}
 
-					fmt.Println(">>> delete config in kubeconfig")
-					err = util.DeleteConfig(platform, clustername)
-					if err != nil {
-						fmt.Println(err)
-					}
-
 					fmt.Println(">>> delete hcpcluster")
 					for {
 						cluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Get(context.TODO(), clustername, metav1.GetOptions{})
 						if err != nil {
 							log.Println(err)
 						}
-						if cluster.Spec.JoinStatus == "UNJOIN" {
+						if cluster.Spec.JoinStatus == "UNJOINING" {
+
+							fmt.Println("yet unjoining")
+						} else {
+
+							fmt.Println(">>> delete config in kubeconfig")
+							err = util.DeleteConfig(platform, clustername)
+							if err != nil {
+								fmt.Println(err)
+							}
+
 							err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Delete(context.TODO(), clustername, metav1.DeleteOptions{})
 							if err != nil {
 								log.Println(err)

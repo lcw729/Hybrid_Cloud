@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 
+	"Hybrid_Cloud/hybridctl/pkg/nks"
 	resource "Hybrid_Cloud/kube-resource/namespace"
 	hcpclusterapis "Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
 	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
@@ -29,6 +30,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // joinCmd represents the join command
@@ -57,7 +59,10 @@ var registerCmd = &cobra.Command{
 	  hybridctl register eks CLUSTER_NAME --region REGION
 
 	- gke   google kuberntes engine
-	  hybridctl register gke CLUSTER_NAME 
+	  hybridctl register gke CLUSTER_NAME
+	
+	- nks naver kubernetes service
+	hybridctl register nks CLUSTER_NAME --region REGION
 
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -101,13 +106,50 @@ var registerCmd = &cobra.Command{
 				fallthrough
 			case "gke":
 				command := &exec.Cmd{
-					Path:   "/root/go/src/Hybrid_Cloud/hybridctl/cmd/register/register",
+					Path:   "/root/go/src/Hybrid_LCW/Hybrid_Cloud/hybridctl/cmd/register/register",
 					Args:   arguments,
 					Stdout: os.Stdout,
 					Stderr: os.Stderr,
 				}
 
 				err := command.Start()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+
+				err = command.Wait()
+				if err != nil {
+					// fmt.Println(err)
+					return
+				}
+			case "nks":
+				region, _ = cmd.Flags().GetString("region")
+				if region != "" {
+					arguments = append(arguments, region)
+				} else {
+					fmt.Println("ERROR: Enter region")
+					return
+				}
+				// klog.Infoln(arguments)
+				// arguments = ["bin/bash", "platform", "cluster-name", "region"]
+				nks_clustername := arguments[2]
+
+				// klog.Infoln(ncp_clustername)
+				real_clustername, err := nks.NksGetClusterName(nks_clustername)
+				// klog.Infoln(real_clustername)
+				if err != nil {
+					klog.Error(err)
+				}
+				arguments[2] = real_clustername
+				command := &exec.Cmd{
+					Path:   "/root/go/src/Hybrid_LCW/Hybrid_Cloud/hybridctl/cmd/register/register",
+					Args:   arguments,
+					Stdout: os.Stdout,
+					Stderr: os.Stderr,
+				}
+
+				err = command.Start()
 				if err != nil {
 					fmt.Println(err)
 					return

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	cobrautil "Hybrid_Cloud/hybridctl/util"
+	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -116,6 +117,13 @@ func RequestCreateResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]
 		real_resource := obj.(*v1.Pod)
 		resource.TargetCluster = target_cluster
 		resource.RealResource = real_resource
+	case "HCPHybridAutoScaler":
+		real_resource := obj.(*v1alpha1.HCPHybridAutoScaler)
+		namespace := "hcp" // hcp로 고정
+		real_resource.Namespace = namespace
+		resource.TargetCluster = "master"
+		resource.RealResource = real_resource
+		LINK += "/namespaces/" + namespace + "/hcphybridautoscalers"
 	}
 
 	fmt.Println(LINK)
