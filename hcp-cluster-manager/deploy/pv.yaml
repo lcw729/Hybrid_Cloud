@@ -33,3 +33,21 @@ spec:
     path: /root/.aws
     server: "10.0.5.83"
     readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-nks-config
+  labels:
+    app: nks-config 
+spec:
+  capacity:
+    storage: 2Gi
+  storageClassName: cluster-manager
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/.ncloud
+    server: "10.0.5.83"
+    readOnly: false

@@ -35,9 +35,11 @@ spec:
             value: "hcp-cluster-manager"
           volumeMounts:
           - name: kubeconfig
-            mountPath: /mnt
+            mountPath: /root/.kube
           - name: awsconfig 
             mountPath: /root/.aws
+          - name: nksconfig 
+            mountPath: /root/.ncloud
       volumes:
       - name: kubeconfig
         persistentVolumeClaim: 
@@ -45,6 +47,9 @@ spec:
       - name: awsconfig
         persistentVolumeClaim:
           claimName: pvc-aws-config
+      - name: nksconfig
+        persistentVolumeClaim:
+          claimName: pvc-nks-config
       tolerations:
         - key: node.kubernetes.io/not-ready
           effect: NoExecute

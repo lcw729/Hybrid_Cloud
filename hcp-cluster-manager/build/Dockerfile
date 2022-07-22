@@ -12,6 +12,14 @@ RUN unzip awscliv2.zip
 
 RUN ./aws/install
 
+WORKDIR /usr/local/bin
+
+RUN curl -o ncp-iam-authenticator https://kr.object.ncloudstorage.com/nks-download/ncp-iam-authenticator/v1.0.5/linux/amd64/ncp-iam-authenticator
+
+RUN chmod 777 ncp-iam-authenticator
+
+WORKDIR /
+
 # install operator binary
 COPY _output/bin/hcp-cluster-manager ${OPERATOR}
 COPY bin /usr/local/bin

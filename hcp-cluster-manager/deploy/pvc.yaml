@@ -29,3 +29,19 @@ spec:
   selector:
     matchLabels:
       app: aws-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nks-config
+  namespace: hcp
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: cluster-manager
+  selector:
+    matchLabels:
+      app: nks-config

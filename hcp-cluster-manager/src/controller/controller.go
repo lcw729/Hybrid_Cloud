@@ -224,14 +224,14 @@ func (c *Controller) syncHandler(key string) error {
 	// platform := hcpcluster.Spec.ClusterPlatform
 	clustername := hcpcluster.Name
 
-	var master_config, _ = cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
-	join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
+	cm, _ := clusterManager.NewClusterManager()
+	var master_config = cm.Host_config
 	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
 
 	// JOIN 대기
 	if joinstatus == "JOINING" {
 		klog.Info("[JOIN START]")
-		fmt.Println(clustername)
+		join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
 		if JoinCluster(clustername, master_config, join_cluster_config, hcp_cluster) {
 
 			hcpcluster.Spec.JoinStatus = "JOIN"
@@ -254,6 +254,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
+		join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
 		if UnJoinCluster(clustername, master_config, join_cluster_config) {
 			hcpcluster.Spec.JoinStatus = "UNJOIN"
 			_, err = hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), hcpcluster, metav1.UpdateOptions{})
@@ -268,6 +269,7 @@ func (c *Controller) syncHandler(key string) error {
 		}
 	} else if joinstatus == "UNREADY" {
 		// UNREADY -- JOIN UNSTABLE
+		join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
 		if UnJoinCluster(clustername, master_config, join_cluster_config) {
 			if JoinCluster(clustername, master_config, join_cluster_config, hcp_cluster) {
 				hcpcluster.Spec.JoinStatus = "JOIN"
@@ -335,6 +337,7 @@ func (c *Controller) syncHandler(key string) error {
 				// UNJOIN -- UNJOIN / kubefedcluster에 존재하는 경우
 				if clustername == cluster.Name {
 					klog.Infof("ERROR: UNJOIN Cluster %s is in a kubefedclusterList", clustername)
+					join_cluster_config, _ := cobrautil.BuildConfigFromFlags(clustername, "/root/.kube/config")
 					UnJoinCluster(clustername, master_config, join_cluster_config)
 				}
 			}
