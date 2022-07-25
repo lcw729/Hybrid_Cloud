@@ -19,6 +19,7 @@ set -o nounset
 set -o pipefail
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
+CLUSTER=${2}
 
 function print_help {
   echo "ERROR! Usage: vpa-process-yamls.sh <action> [<component>]"
@@ -34,7 +35,7 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-if [ $# -gt 2 ]; then
+if [ $# -gt 3 ]; then
   print_help
   exit 1
 fi
@@ -45,14 +46,14 @@ case ${ACTION} in
 delete|diff|print) COMPONENTS+=" vpa-beta2-crd" ;;
 esac
 
-if [ $# -gt 1 ]; then
+if [ $# -gt 3 ]; then
   COMPONENTS="$2-deployment"
 fi
 
 for i in $COMPONENTS; do
   if [ $i == admission-controller-deployment ] ; then
     if [ ${ACTION} == create ] ; then
-      (bash ${SCRIPT_ROOT}/pkg/admission-controller/gencerts.sh || true)
+      (bash ${SCRIPT_ROOT}/pkg/admission-controller/gencerts.sh ${CLUSTER}|| true)
     elif [ ${ACTION} == delete ] ; then
       (bash ${SCRIPT_ROOT}/pkg/admission-controller/rmcerts.sh || true)
       (bash ${SCRIPT_ROOT}/pkg/admission-controller/delete-webhook.sh || true)
@@ -61,6 +62,6 @@ for i in $COMPONENTS; do
   if [[ ${ACTION} == print ]]; then
     ${SCRIPT_ROOT}/hack/vpa-process-yaml.sh ${SCRIPT_ROOT}/deploy/$i.yaml
   else
-    ${SCRIPT_ROOT}/hack/vpa-process-yaml.sh ${SCRIPT_ROOT}/deploy/$i.yaml | kubectl ${ACTION} -f - || true
+    ${SCRIPT_ROOT}/hack/vpa-process-yaml.sh ${SCRIPT_ROOT}/deploy/$i.yaml | kubectl ${ACTION} -f - --context ${CLUSTER} || true
   fi
 done

@@ -23,6 +23,8 @@ set -o pipefail
 
 CN_BASE="vpa_webhook"
 TMP_DIR="/tmp/vpa-certs"
+CLUSTER=${1}
+echo $CLUSTER
 
 echo "Generating certs for the VPA Admission Controller in ${TMP_DIR}."
 mkdir -p ${TMP_DIR}
@@ -55,7 +57,7 @@ openssl req -new -key ${TMP_DIR}/serverKey.pem -out ${TMP_DIR}/server.csr -subj 
 openssl x509 -req -in ${TMP_DIR}/server.csr -CA ${TMP_DIR}/caCert.pem -CAkey ${TMP_DIR}/caKey.pem -CAcreateserial -out ${TMP_DIR}/serverCert.pem -days 100000 -extensions SAN -extensions v3_req -extfile ${TMP_DIR}/server.conf
 
 echo "Uploading certs to the cluster."
-kubectl create secret --namespace=kube-system generic vpa-tls-certs --from-file=${TMP_DIR}/caKey.pem --from-file=${TMP_DIR}/caCert.pem --from-file=${TMP_DIR}/serverKey.pem --from-file=${TMP_DIR}/serverCert.pem
+kubectl create secret --namespace=kube-system generic vpa-tls-certs --from-file=${TMP_DIR}/caKey.pem --from-file=${TMP_DIR}/caCert.pem --from-file=${TMP_DIR}/serverKey.pem --from-file=${TMP_DIR}/serverCert.pem --context ${CLUSTER}
 
 # Clean up after we're done.
 echo "Deleting ${TMP_DIR}."
