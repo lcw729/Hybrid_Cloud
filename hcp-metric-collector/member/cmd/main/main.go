@@ -130,7 +130,6 @@ func MemberMetricCollector() {
 
 		host_config, err := rest.InClusterConfig() // apiserver에 접근해 config파일 읽어오기
 
-		// host_config, err := clientcmd.BuildConfigFromFlags("", "/root/.kube/config")
 		if err != nil {
 			fmt.Println(err)
 		}

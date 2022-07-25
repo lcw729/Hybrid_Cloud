@@ -5,13 +5,16 @@ import (
 	f "Hybrid_Cloud/hcp-scheduler/src/framework/v1alpha1"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
 )
+
+var cm, _ = clusterManager.NewClusterManager()
 
 // Scheduler watches for new unscheduled pods. It attempts to find
 // nodes that they fit on and writes bindings back to the api server.
@@ -29,7 +32,7 @@ func NewScheduler() *Scheduler {
 	hcpFramework := f.NewFramework()
 	clusterInfoList := resourceinfo.NewClusterInfoList()
 	clusterInfoMap := resourceinfo.CreateClusterInfoMap(clusterInfoList)
-	fmt.Println(clusterInfoMap)
+	klog.Infoln(clusterInfoMap)
 	//schedPolicy, _ := policy.GetAlgorithm()
 	// if schedPolicy == nil {
 	// 	// default algorithm
@@ -47,10 +50,10 @@ func NewScheduler() *Scheduler {
 
 func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha1.Target {
 
-	fmt.Println("[scheduling start]")
+	klog.Infoln("[scheduling start]")
 	sched.ClusterInfoList = *resourceinfo.NewClusterInfoList()
 	sched.SchedulingResult = make([]v1alpha1.Target, 0)
-	schedPolicy, _ := p.GetHCPPolicy("scheduling-policy")
+	schedPolicy, _ := p.GetHCPPolicy(*cm.HCPPolicy_Client, "scheduling-policy")
 	var filter []string
 	var score []string
 	for _, policy := range schedPolicy.Spec.Template.Spec.Policies {
@@ -73,25 +76,25 @@ func (sched *Scheduler) Scheduling(deployment *v1alpha1.HCPDeployment) []v1alpha
 		if best_cluster != "" {
 			if sched.updateSchedulingResult(best_cluster) {
 				cnt += 1
-				fmt.Printf("[Scheduling] %d/%d pod / TargetCluster : %s\n", i+1, replicas, best_cluster)
-				fmt.Println()
+				klog.Infof("[Scheduling] %d/%d pod / TargetCluster : %s\n", i+1, replicas, best_cluster)
+				klog.Infoln()
 			} else {
-				fmt.Println("ERROR: No cluster to be scheduled")
-				fmt.Println("Scheduling failed")
+				klog.Infoln("ERROR: No cluster to be scheduled")
+				klog.Infoln("Scheduling failed")
 				break
 			}
 		} else {
-			fmt.Println("Scheduling failed")
+			klog.Infoln("Scheduling failed")
 			return nil
 		}
 	}
 
 	if cnt == replicas {
-		fmt.Println("Scheduling succeeded")
+		klog.Infoln("Scheduling succeeded")
 		sched.printSchedulingResult()
 		return sched.SchedulingResult
 	} else {
-		fmt.Println("Scheduling failed")
+		klog.Infoln("Scheduling failed")
 		return nil
 	}
 }
@@ -136,12 +139,12 @@ func (sched *Scheduler) updateSchedulingResult(cluster string) bool {
 }
 
 func (sched *Scheduler) printSchedulingResult() {
-	fmt.Println("========scheduling result========")
+	klog.Infoln("========scheduling result========")
 	targets := sched.SchedulingResult
 	for _, i := range targets {
-		fmt.Println("target cluster :", i.Cluster)
-		fmt.Println("replicas       :", *i.Replicas)
-		fmt.Println()
+		klog.Infoln("target cluster :", i.Cluster)
+		klog.Infoln("replicas       :", *i.Replicas)
+		klog.Infoln()
 	}
 }
 
@@ -162,7 +165,7 @@ func (sched *Scheduler) getMaxScoreCluster() string {
 	_ = best_cluster
 
 	for key, value := range sched.ClusterInfoMap {
-		//fmt.Println((*sched.ClusterInfoMap[key]).ClusterScore)
+		//klog.Infoln((*sched.ClusterInfoMap[key]).ClusterScore)
 		if !(*sched.ClusterInfoMap[key]).IsFiltered && (*sched.ClusterInfoMap[key]).ClusterScore >= int32(max_score) {
 			max_score = (*sched.ClusterInfoMap[key]).ClusterScore
 			best_cluster = value.ClusterName
@@ -182,19 +185,19 @@ func (sched *Scheduler) Filtering(algorithm string) {
 	switch algorithm {
 	case "CheckNodeUnschedulable":
 		for i, _ := range sched.ClusterInfoList {
-			fmt.Println(sched.ClusterInfoList[i].ClusterName)
-			fmt.Println("==before filtering==")
-			fmt.Println(sched.ClusterInfoList[i].Nodes)
+			klog.Infoln(sched.ClusterInfoList[i].ClusterName)
+			klog.Infoln("==before filtering==")
+			klog.Infoln(sched.ClusterInfoList[i].Nodes)
 			predicates.CheckNodeUnschedulable(*pod, &sched.ClusterInfoList[i])
-			fmt.Println("==after filtering==")
-			fmt.Println(&sched.ClusterInfoList[i].Nodes)
+			klog.Infoln("==after filtering==")
+			klog.Infoln(&sched.ClusterInfoList[i].Nodes)
 		}
 	}
 }
 
 func (sched *Scheduler) Scoring(algorithm string) {
 
-	fmt.Println("[scoring start]")
+	klog.Infoln("[scoring start]")
 	var pod = &sched.SchedulingResource
 	var score int32
 
@@ -204,21 +207,21 @@ func (sched *Scheduler) Scoring(algorithm string) {
 
 	case "Affinity":
 		for _, clusterinfo := range sched.ClusterInfoList {
-			fmt.Println("==>", clusterinfo.ClusterName)
+			klog.Infoln("==>", clusterinfo.ClusterName)
 			score = 0
 			for _, node := range clusterinfo.Nodes {
 				var node_score int32 = priorities.NodeAffinity(*pod, node.Node)
 				if node_score == -1 {
-					fmt.Println("fail to scoring node")
+					klog.Infoln("fail to scoring node")
 					return
 				} else {
 					node.NodeScore = node_score
-					fmt.Println(node.NodeName, "score :", node_score)
+					klog.Infoln(node.NodeName, "score :", node_score)
 					score += node_score
 				}
 			}
 			sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
-			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
+			klog.Infoln("*", clusterinfo.ClusterName, "total score :", score)
 		}
 	case "TaintToleration":
 		var node_score int32
@@ -229,7 +232,7 @@ func (sched *Scheduler) Scoring(algorithm string) {
 			for _, node := range clusterinfo.Nodes {
 				node_score = priorities.TaintToleration(*pod, node.Node)
 				if node_score == -1 {
-					fmt.Println("fail to scoring node")
+					klog.Infoln("fail to scoring node")
 					return
 				} else {
 					node.NodeScore = node_score
@@ -245,9 +248,9 @@ func (sched *Scheduler) Scoring(algorithm string) {
 		max := result[0]
 
 		// scoring - normalize for intolerable taints count
-		fmt.Println("[REAL SCORE]")
+		klog.Infoln("[REAL SCORE]")
 		for _, clusterinfo := range sched.ClusterInfoList {
-			fmt.Println("==>", clusterinfo.ClusterName)
+			klog.Infoln("==>", clusterinfo.ClusterName)
 			score = 0
 			for _, node := range clusterinfo.Nodes {
 				if node.NodeScore == 0 {
@@ -256,58 +259,58 @@ func (sched *Scheduler) Scoring(algorithm string) {
 					node.NodeScore = int32(100 * ((float32(max) - float32(node.NodeScore)) / float32(max)))
 				}
 				score += node.NodeScore
-				fmt.Println("===>", node.NodeName, node.NodeScore)
+				klog.Infoln("===>", node.NodeName, node.NodeScore)
 			}
 
 			if int32(len(clusterinfo.Nodes)) > 0 {
 				// clusterInfoMap[clusterinfo.ClusterName].ClusterScore = score / int32(len((*clusterinfo).Nodes))
 				sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
-				fmt.Println("*", clusterinfo.ClusterName, "total score :", sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore)
+				klog.Infoln("*", clusterinfo.ClusterName, "total score :", sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore)
 			} else {
 				sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = 0
-				fmt.Println("*", clusterinfo.ClusterName, "total score :", sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore)
+				klog.Infoln("*", clusterinfo.ClusterName, "total score :", sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore)
 			}
 		}
 	case "NodeResourcesBalancedAllocation":
 		// 현재 pod이 배치 된 후, CPU와 Memory 사용률이 균형을 검사
 		for _, clusterinfo := range sched.ClusterInfoList {
-			fmt.Println("==>", clusterinfo.ClusterName)
+			klog.Infoln("==>", clusterinfo.ClusterName)
 			score = 0
 			for _, node := range clusterinfo.Nodes {
 				var node_score int32 = int32(priorities.NodeResourcesBalancedAllocation(*pod, node.Node))
 				if node_score == -1 {
-					fmt.Println("fail to scoring node")
+					klog.Infoln("fail to scoring node")
 					return
 				} else {
 					node.NodeScore = node_score
-					fmt.Println(node.NodeName, "score :", node_score)
+					klog.Infoln(node.NodeName, "score :", node_score)
 					score += node_score
 				}
 			}
 
-			//fmt.Println(sched.ClusterInfoMap)
+			//klog.Infoln(sched.ClusterInfoMap)
 			(*sched.ClusterInfoMap[clusterinfo.ClusterName]).ClusterScore = score
-			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
-			fmt.Println()
+			klog.Infoln("*", clusterinfo.ClusterName, "total score :", score)
+			klog.Infoln()
 		}
 	case "ImageLocality":
 		for _, clusterinfo := range sched.ClusterInfoList {
-			fmt.Println("==>", clusterinfo.ClusterName)
+			klog.Infoln("==>", clusterinfo.ClusterName)
 			score = 0
 			for _, node := range clusterinfo.Nodes {
-				fmt.Println(node.ImageStates)
+				klog.Infoln(node.ImageStates)
 				var node_score int32 = int32(priorities.ImageLocality(*pod, node, sched.getTotalNumNodes()))
 				if node_score == -1 {
-					fmt.Println("fail to scoring node")
+					klog.Infoln("fail to scoring node")
 					return
 				} else {
 					node.NodeScore = node_score
-					fmt.Println(node.NodeName, "score :", node_score)
+					klog.Infoln(node.NodeName, "score :", node_score)
 					score += node_score
 				}
 			}
 			sched.ClusterInfoMap[clusterinfo.ClusterName].ClusterScore = score
-			fmt.Println("*", clusterinfo.ClusterName, "total score :", score)
+			klog.Infoln("*", clusterinfo.ClusterName, "total score :", score)
 		}
 	}
 

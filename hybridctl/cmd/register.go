@@ -15,17 +15,15 @@
 package cmd
 
 import (
-	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"os/exec"
-
 	"Hybrid_Cloud/hybridctl/pkg/nks"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 	resource "Hybrid_Cloud/kube-resource/namespace"
 	hcpclusterapis "Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
-	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	u "Hybrid_Cloud/util"
+	"Hybrid_Cloud/util/clientset"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -123,6 +121,18 @@ var registerCmd = &cobra.Command{
 					// fmt.Println(err)
 					return
 				}
+
+				resource.CreateNamespace(clientset.MasterClienset, HCP_NAMESPACE)
+				if CreateHCPCluster(platform, clustername, region) {
+					err := cobrautil.ChangeConfigClusterName(HCP_NAMESPACE, clustername)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+				} else {
+					fmt.Printf("fail to create HCPCluster %s\n", clustername)
+					return
+				}
 			case "nks":
 				region, _ = cmd.Flags().GetString("region")
 				if region != "" {
@@ -142,6 +152,7 @@ var registerCmd = &cobra.Command{
 					klog.Error(err)
 				}
 				arguments[2] = real_clustername
+
 				command := &exec.Cmd{
 					Path:   "/root/go/src/Hybrid_LCW/Hybrid_Cloud/hybridctl/cmd/register/register",
 					Args:   arguments,
@@ -161,9 +172,9 @@ var registerCmd = &cobra.Command{
 					return
 				}
 
-				resource.CreateNamespace("master", HCP_NAMESPACE)
+				resource.CreateNamespace(clientset.MasterClienset, HCP_NAMESPACE)
 				if CreateHCPCluster(platform, clustername, region) {
-					err := u.ChangeConfigClusterName(HCP_NAMESPACE, clustername)
+					err := cobrautil.ChangeConfigClusterName(HCP_NAMESPACE, clustername)
 					if err != nil {
 						fmt.Println(err)
 						return
@@ -180,11 +191,7 @@ var registerCmd = &cobra.Command{
 }
 
 func CreateHCPCluster(platform string, clustername string, region string) bool {
-	hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
+
 	data, err := ioutil.ReadFile("/root/.kube/kubeconfig")
 	if err != nil {
 		fmt.Println("File reading error", err)
@@ -210,7 +217,7 @@ func CreateHCPCluster(platform string, clustername string, region string) bool {
 			JoinStatus:      "UNJOIN",
 		},
 	}
-	newhcpcluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Create(context.TODO(), &cluster, metav1.CreateOptions{})
+	newhcpcluster, err := clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Create(context.TODO(), &cluster, metav1.CreateOptions{})
 
 	if err != nil {
 		fmt.Println(err)

@@ -3,10 +3,11 @@ package clusterManager
 import (
 	// clientV1alpha1 "Hybrid_Cloud/pkg/client/policy/v1alpha1/clientset"
 
+	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	"context"
 	"fmt"
-
-	cobrautil "Hybrid_Cloud/hybridctl/util"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +30,9 @@ type ClusterManager struct {
 	Cluster_configs     map[string]*rest.Config
 	Cluster_genClients  map[string]genericclient.Client
 	Cluster_kubeClients map[string]*kubernetes.Clientset
+	HCPCluster_Client   *hcpclusterv1alpha1.Clientset
+	HCPPolicy_Client    *hcppolicyv1alpha1.Clientset
+	HCPResource_Client  *resourcev1alpha1.Clientset
 	// Cluster_dynClients  map[string]dynamic.Interface
 	//Mutex	*sync.Mutex
 }
@@ -116,7 +120,7 @@ func GetNodeList(c *kubernetes.Clientset) (*corev1.NodeList, error) {
 
 func NewClusterManager() (*ClusterManager, error) {
 	fed_namespace := "kube-federation-system"
-	host_config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
+	host_config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -129,17 +133,23 @@ func NewClusterManager() (*ClusterManager, error) {
 	cluster_configs := KubeFedClusterConfigs(cluster_list, host_client, fed_namespace)
 	cluster_gen_clients := KubeFedClusterGenClients(cluster_list, cluster_configs)
 	cluster_kube_clients := KubeFedClusterKubeClients(cluster_list, cluster_configs)
-	cm := &ClusterManager{
-		Fed_namespace:   fed_namespace,
-		Host_config:     host_config,
-		Host_client:     host_client,
-		Host_kubeClient: host_kubeclient,
-		Cluster_list:    cluster_list,
-		Node_list:       node_list,
 
+	hcppolicy_client := hcppolicyv1alpha1.NewForConfigOrDie(host_config)
+	hcpcluster_client := hcpclusterv1alpha1.NewForConfigOrDie(host_config)
+	hcpresource_client := resourcev1alpha1.NewForConfigOrDie(host_config)
+	cm := &ClusterManager{
+		Fed_namespace:       fed_namespace,
+		Host_config:         host_config,
+		Host_client:         host_client,
+		Host_kubeClient:     host_kubeclient,
+		Cluster_list:        cluster_list,
+		Node_list:           node_list,
 		Cluster_configs:     cluster_configs,
 		Cluster_genClients:  cluster_gen_clients,
 		Cluster_kubeClients: cluster_kube_clients,
+		HCPPolicy_Client:    hcppolicy_client,
+		HCPCluster_Client:   hcpcluster_client,
+		HCPResource_Client:  hcpresource_client,
 	}
 	return cm, nil
 }

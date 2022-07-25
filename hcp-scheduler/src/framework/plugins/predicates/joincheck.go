@@ -15,5 +15,5 @@ func (pl *JoinCheck) Name() string {
 }
 
 func (pl *JoinCheck) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
-	return !kubefed.Iskubefedcluster(clusterInfo.ClusterName)
+	return !kubefed.IsKubeFedCluster(clusterInfo.ClusterName)
 }

@@ -3,16 +3,16 @@ package aks
 import (
 	"Hybrid_Cloud/hcp-apiserver/pkg/handler"
 	"Hybrid_Cloud/hcp-apiserver/pkg/util"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os/exec"
+
+	"k8s.io/klog"
 )
 
 func CheckErr(err error) {
 	if err != nil {
-		log.Println(err)
+		klog.Error(err)
 	}
 }
 
@@ -23,7 +23,7 @@ func AddonDisable(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "addon", "disable", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -36,7 +36,7 @@ func AddonEnable(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "addon", "enable", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -49,7 +49,7 @@ func AddonList(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "addon", "list", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -62,7 +62,7 @@ func AddonListAvailable(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "addon", "list-available")
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -75,7 +75,7 @@ func AddonShow(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "addon", "show", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -88,7 +88,7 @@ func AddonUpdate(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "addon", "update", "--name", input.ClusterName, "--resource-group", input.ResourceGroupName, "--addon", input.Addon.Addon)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -110,7 +110,7 @@ func PodIdentityAdd(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -123,7 +123,7 @@ func PodIdentityDelete(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "pod-identity", "delete", "--cluster-name", input.ClusterName, "--name", input.PodIdentity.Name, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -136,7 +136,7 @@ func PodIdentityList(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "pod-identity", "list", "--cluster-name", input.ClusterName, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -153,7 +153,7 @@ func PodIdentityExceptionAdd(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -165,7 +165,7 @@ func PodIdentityExceptionDelete(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "pod-identity", "exception", "delete", "--cluster-name", input.ClusterName, "--name", input.PodIdentity.Name, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -177,7 +177,7 @@ func PodIdentityExceptionList(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "pod-identity", "exception", "list", "--cluster-name", input.ClusterName, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -190,7 +190,7 @@ func PodIdentityExceptionUpdate(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "aks", "pod-identity", "add", "--cluster-name", input.ClusterName, "--pod-labels", input.PodIdentity.PodLabels, "--name", input.PodIdentity.Name, "--namespace", input.PodIdentity.Namespace, "--resource-group", input.ResourceGroupName)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -251,7 +251,7 @@ func ConfigurationCreate(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -264,7 +264,7 @@ func ConfigurationDelete(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "k8sconfiguration", "delete", "-g", input.ResourceGroupName, "-c", input.ClusterName, "--cluster-type", input.K8sConfiguration.ClusterType, "-n", input.K8sConfiguration.Name, "--yes")
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -276,7 +276,7 @@ func ConfigurationShow(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "k8sconfiguration", "show", "-g", input.ResourceGroupName, "-c", input.ClusterName, "--cluster-type", input.K8sConfiguration.ClusterType, "-n", input.K8sConfiguration.Name)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -289,7 +289,7 @@ func ConfigurationList(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", "k8s-configuration", "list", "-g", input.ResourceGroupName, "-c", input.ClusterName, "-t", input.K8sConfiguration.ClusterType)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -305,7 +305,7 @@ func Connectedk8sConnect(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -319,7 +319,7 @@ func Connectedk8sDelete(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -337,7 +337,7 @@ func Connectedk8sDisableFeatures(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -355,7 +355,7 @@ func Connectedk8sEnableFeatures(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -372,7 +372,7 @@ func Connectedk8sList(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -386,7 +386,7 @@ func Connectedk8sProxy(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -400,7 +400,7 @@ func Connectedk8sShow(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -414,7 +414,7 @@ func Connectedk8sUpdate(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -428,7 +428,7 @@ func Connectedk8sUpgrade(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -507,11 +507,11 @@ func AppUp(w http.ResponseWriter, req *http.Request) {
 	if input.Repository != "" {
 		args = append(args, "--repository", input.Repository)
 	}
-	fmt.Println(args)
+
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -534,11 +534,11 @@ func Browse(w http.ResponseWriter, req *http.Request) {
 	if input.Subscription != "" {
 		args = append(args, "--subscription", input.Subscription)
 	}
-	fmt.Println(args)
+
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -553,11 +553,11 @@ func CheckAcr(w http.ResponseWriter, req *http.Request) {
 	if input.Subscription != "" {
 		args = append(args, "--subscription", input.Subscription)
 	}
-	fmt.Println(args)
+
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -572,11 +572,11 @@ func GetUpgrades(w http.ResponseWriter, req *http.Request) {
 	if input.Subscription != "" {
 		args = append(args, "--subscription", input.Subscription)
 	}
-	fmt.Println(args)
+
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -591,11 +591,11 @@ func GetVersions(w http.ResponseWriter, req *http.Request) {
 	if input.Subscription != "" {
 		args = append(args, "--subscription", input.Subscription)
 	}
-	fmt.Println(args)
+
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -609,7 +609,7 @@ func Kanalyze(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -623,7 +623,7 @@ func Kollect(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -641,7 +641,7 @@ func NodepoolGetUpgrades(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
@@ -677,7 +677,7 @@ func InstallCLI(w http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("az", args...)
 	data, err := util.GetOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		klog.Errorln(err)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)

@@ -3,8 +3,9 @@ package test
 import (
 	//"Hybrid_Cloud/hcp-scheduler/pkg/algorithm/predicates"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
-	"fmt"
 	"testing"
+
+	"k8s.io/klog"
 )
 
 func TestNodeResourceFit(t *testing.T) {
@@ -22,18 +23,18 @@ func TestNodeResourceFit(t *testing.T) {
 	clusterinfo.ClusterName = "test-cluster"
 	clusterinfo.Nodes = append(clusterinfo.Nodes, nodeList...)
 
-	fmt.Println("===before NodeResourceFit Filtering===")
+	klog.Infoln("===before NodeResourceFit Filtering===")
 	//predicates.NodeResourcesFit(pod, &clusterinfo)
-	fmt.Println("===after NodeResourceFit Filtering===")
+	klog.Infoln("===after NodeResourceFit Filtering===")
 	for _, node := range clusterinfo.Nodes {
-		fmt.Println((*node).NodeName)
+		klog.Infoln((*node).NodeName)
 	}
 
-	fmt.Println("===before NodeUnschedulable Filtering===")
+	klog.Infoln("===before NodeUnschedulable Filtering===")
 	//	predicates.CheckNodeUnschedulable(pod, &clusterinfo)
-	fmt.Println("===after NodeUnschedulable Filtering===")
+	klog.Infoln("===after NodeUnschedulable Filtering===")
 	for _, node := range clusterinfo.Nodes {
-		fmt.Println((*node).NodeName)
+		klog.Infoln((*node).NodeName)
 	}
 
 }

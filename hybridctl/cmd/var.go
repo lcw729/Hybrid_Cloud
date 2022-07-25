@@ -1,14 +1,8 @@
 package cmd
 
 import (
-	"Hybrid_Cloud/hybridctl/util"
-
 	"github.com/aws/aws-sdk-go/service/eks"
 )
-
-var master_config, _ = util.BuildConfigFromFlags("master", "/root/.kube/config")
-
-//var master_client = kubernetes.NewForConfigOrDie(master_config)
 
 // eks
 var associateEncryptionConfigInput eks.AssociateEncryptionConfigInput

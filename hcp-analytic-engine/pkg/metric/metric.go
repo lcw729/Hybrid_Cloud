@@ -28,3 +28,28 @@ type PodMetric struct {
 		} `json:"network"`
 	} `json:"podmetrics"`
 }
+
+type NodeMetric struct {
+	Nodemetrics []struct {
+		Time    time.Time `json:"time"`
+		Cluster string    `json:"cluster"`
+		Node    string    `json:"node"`
+		CPU     struct {
+			CPUUsageNanoCores string `json:"CPUUsageNanoCores"`
+		} `json:"cpu"`
+		Memory struct {
+			MemoryAvailableBytes  string `json:"MemoryAvailableBytes"`
+			MemoryUsageBytes      string `json:"MemoryUsageBytes"`
+			MemoryWorkingSetBytes string `json:"MemoryWorkingSetBytes"`
+		} `json:"memory"`
+		Fs struct {
+			FsAvailableBytes string `json:"FsAvailableBytes"`
+			FsCapacityBytes  string `json:"FsCapacityBytes"`
+			FsUsedBytes      string `json:"FsUsedBytes"`
+		} `json:"fs"`
+		Network struct {
+			NetworkRxBytes string `json:"NetworkRxBytes"`
+			NetworkTxBytes string `json:"NetworkTxBytes"`
+		} `json:"network"`
+	} `json:"nodemetrics"`
+}

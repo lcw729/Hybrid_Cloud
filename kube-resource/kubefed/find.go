@@ -2,7 +2,7 @@ package kubefed
 
 import "Hybrid_Cloud/util/clusterManager"
 
-func Iskubefedcluster(clustername string) bool {
+func IsKubeFedCluster(clustername string) bool {
 	cm, _ := clusterManager.NewClusterManager()
 	list := cm.Cluster_list
 	for _, i := range list.Items {

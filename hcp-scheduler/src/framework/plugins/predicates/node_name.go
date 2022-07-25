@@ -3,7 +3,6 @@ package predicates
 import (
 	"Hybrid_Cloud/hcp-scheduler/src/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog"
@@ -19,7 +18,7 @@ func (pl *NodeName) Name() string {
 func (pl *NodeName) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) bool {
 	for _, nodeInfo := range clusterInfo.Nodes {
 		if nodeInfo.Node == nil {
-			fmt.Println("node not found")
+			klog.Infoln("node not found")
 			//nodeInfo.FilterNode()
 			//clusterInfo.MinusOneAvailableNodes()
 			continue
@@ -33,7 +32,7 @@ func (pl *NodeName) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus, cluste
 			//nodeInfo.FilterNode()
 			//clusterInfo.MinusOneAvailableNodes()
 		} else {
-			fmt.Println("Node Name is unmatched")
+			klog.Infoln("Node Name is unmatched")
 		}
 	}
 	return true

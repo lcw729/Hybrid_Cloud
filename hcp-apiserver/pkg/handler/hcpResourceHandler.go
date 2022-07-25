@@ -1,13 +1,10 @@
 package handler
 
 import (
-	"Hybrid_Cloud/hybridctl/util"
-	cobrautil "Hybrid_Cloud/hybridctl/util"
 	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
-	resourcev1alpha1clientset "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -15,7 +12,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
 )
 
 type Resource struct {
@@ -40,49 +37,23 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, _ := json.Marshal(resource.RealResource)
 	json.Unmarshal(bytes, &real_resource)
 
-	master_config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	master_clienset, err := resourcev1alpha1clientset.NewForConfig(master_config)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	/*
-		// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
-		algorithm, err := policy.GetAlgorithm()
-		fmt.Println(algorithm)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	*/
-
+	cm, _ := clusterManager.NewClusterManager()
 	// TargetCluster가 지정되지 않은 경우
 	if resource.TargetCluster == "" {
 
 		// HCPDeployment 생성하기
 		hcp_resource := deploymentToHCPDeployment(real_resource)
 
-		r, err := master_clienset.HcpV1alpha1().HCPDeployments("hcp").Create(context.TODO(), &hcp_resource, metav1.CreateOptions{})
+		r, err := cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Create(context.TODO(), &hcp_resource, metav1.CreateOptions{})
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		} else {
-			fmt.Printf("request scheduling to scheduler : %s \n", r.Name)
+			klog.Info("Request scheduling to scheduler : %s \n", r.Name)
 		}
 	} else {
 		// TargetCluster가 지정된 경우
-		config, err := cobrautil.BuildConfigFromFlags(resource.TargetCluster, "/root/.kube/config")
-		if err != nil {
-			fmt.Println(err)
-		}
-		clientset, _ := kubernetes.NewForConfig(config)
-
+		target_clientset := cm.Cluster_kubeClients[resource.TargetCluster]
 		// namespace
 		namespace := real_resource.ObjectMeta.Namespace
 		if namespace == "" {
@@ -94,21 +65,21 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 			Cluster:  resource.TargetCluster,
 			Replicas: real_resource.Spec.Replicas,
 		})
-		_, err = master_clienset.HcpV1alpha1().HCPDeployments("hcp").Create(context.TODO(), &hcp_resource, metav1.CreateOptions{})
+		_, err = cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Create(context.TODO(), &hcp_resource, metav1.CreateOptions{})
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		} else {
-			fmt.Printf("succeed to create hcpdeployment: %s \n", hcp_resource.Name)
+			klog.Info("Succeed to create hcpdeployment: %s \n", hcp_resource.Name)
 		}
 		// Kubernetes Deployment 생성
-		r, err := clientset.AppsV1().Deployments(namespace).Create(context.TODO(), real_resource, metav1.CreateOptions{})
+		r, err := target_clientset.AppsV1().Deployments(namespace).Create(context.TODO(), real_resource, metav1.CreateOptions{})
 
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		} else {
-			fmt.Printf("success to create deployment %s \n", r.Name)
+			klog.Info("Succeed to create deployment %s \n", r.Name)
 		}
 	}
 }
@@ -117,10 +88,8 @@ func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	namespace := vars["namespace"]
 	name := vars["name"]
-	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
-	master_clientset, _ := resourcev1alpha1clientset.NewForConfig(master_config)
 
-	hcpdeployment, err := master_clientset.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
+	hcpdeployment, err := cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
 
 	if !hcpdeployment.Spec.SchedulingNeed && hcpdeployment.Spec.SchedulingComplete {
 		// if target_cluster != "" {
@@ -131,31 +100,30 @@ func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 		targets := hcpdeployment.Spec.SchedulingResult.Targets
 		for _, target := range targets {
 			// TODO : cluster unregister한 경우
-			config, _ := util.BuildConfigFromFlags(target.Cluster, "/root/.kube/config")
-			clientset, _ := kubernetes.NewForConfig(config)
+			cm, _ := clusterManager.NewClusterManager()
+			clientset := cm.Cluster_kubeClients[target.Cluster]
 			err = clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 		}
 		// }
 	}
 
 	if err != nil {
-		fmt.Println(err)
+		klog.Error(err)
 		return
 	} else {
-		fmt.Printf("succeed to delete deployment %s \n", name)
-		err = master_clientset.HcpV1alpha1().HCPDeployments("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
+		klog.Info("Succeed to delete deployment %s \n", name)
+		err = cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		} else {
-			fmt.Printf("succeed to delete hcpdeployment %s \n", name)
+			klog.Info("Succeed to delete hcpdeployment %s \n", name)
 		}
 	}
 }
 
 func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("111")
 	var resource Resource
 
 	jsonDataFromHttp, _ := ioutil.ReadAll(r.Body)
@@ -172,30 +140,8 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 	bytes, _ := json.Marshal(resource.RealResource)
 	json.Unmarshal(bytes, &real_resource)
 
-	// HCPPolicy 최적 배치 알고리즘 정책 읽어오기
-	// algorithm, err := policy.GetAlgorithm()
-	// fmt.Println(algorithm)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	fmt.Println(resource.TargetCluster)
 	// TargetCluster가 지정되지 않은 경우
 	if resource.TargetCluster == "undefined" {
-
-		master_config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		clienset, err := resourcev1alpha1clientset.NewForConfig(master_config)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
 		// HCPDeployment 생성하기
 		hcp_resource := resourcev1alpha1.HCPPod{
 			TypeMeta: metav1.TypeMeta{
@@ -215,21 +161,17 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		r, err := clienset.HcpV1alpha1().HCPPods("hcp").Create(context.TODO(), &hcp_resource, metav1.CreateOptions{})
+		r, err := cm.HCPResource_Client.HcpV1alpha1().HCPPods("hcp").Create(context.TODO(), &hcp_resource, metav1.CreateOptions{})
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		} else {
-			fmt.Printf("request scheduling to scheduler : %s \n", r.Name)
+			klog.Info("request scheduling to scheduler : %s \n", r.Name)
 		}
 	} else {
 		// TargetCluster가 지정된 경우
-		config, err := cobrautil.BuildConfigFromFlags(resource.TargetCluster, "/root/.kube/config")
-		if err != nil {
-			fmt.Println(err)
-		}
-		clientset, _ := kubernetes.NewForConfig(config)
-
+		cm, _ := clusterManager.NewClusterManager()
+		clientset := cm.Cluster_kubeClients[resource.TargetCluster]
 		// namespace
 		namespace := real_resource.ObjectMeta.Namespace
 		if namespace == "" {
@@ -240,17 +182,16 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 		r, err := clientset.CoreV1().Pods(namespace).Create(context.TODO(), real_resource, metav1.CreateOptions{})
 
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return
 		} else {
-			fmt.Printf("success to create pod %s \n", r.Name)
+			klog.Info("Succeed to create pod %s \n", r.Name)
 		}
 	}
 }
 
+func CreateHCPHASHandler() {
 
-CreateHCPHASHandler(){
-	
 }
 
 func deploymentToHCPDeployment(real_resource *appsv1.Deployment) resourcev1alpha1.HCPDeployment {

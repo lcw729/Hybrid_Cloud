@@ -29,8 +29,6 @@ import (
 
 const controllerAgentName = "hcp-deployment-controller"
 
-var cm, _ = clusterManager.NewClusterManager()
-
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Foo is synced
 	SuccessSynced = "Synced"
@@ -201,6 +199,7 @@ func (c *Controller) syncHandler(key string) error {
 		return nil
 	}
 
+	cm, _ := clusterManager.NewClusterManager()
 	hcpdeployment, err := c.hcpdeploymentLister.HCPDeployments(namespace).Get(name)
 	if err != nil {
 		// The Foo resource may no longer exist, in which case we stop
@@ -211,19 +210,20 @@ func (c *Controller) syncHandler(key string) error {
 		}
 	}
 
-	fmt.Println("need", hcpdeployment.Spec.SchedulingNeed)
-	fmt.Println("complete", hcpdeployment.Spec.SchedulingComplete)
+	klog.Infoln("[1] SchedulingNeed", hcpdeployment.Spec.SchedulingNeed)
+	klog.Infoln("[2] SchedulingComplete", hcpdeployment.Spec.SchedulingComplete)
+
 	// 스케줄링되지 않은 hcpdeployment 감지
 	if !hcpdeployment.Spec.SchedulingNeed && !hcpdeployment.Spec.SchedulingComplete {
 		ok := deployment.DeployDeploymentFromHCPDeployment(hcpdeployment)
 		if ok {
-			fmt.Printf("succeed to deploy deployment %s\n", hcpdeployment.ObjectMeta.Name)
+			klog.Info("Succeed to deploy deployment %s\n", hcpdeployment.ObjectMeta.Name)
 			hcpdeployment.Spec.SchedulingComplete = true
 			r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
 			if err != nil {
-				fmt.Println(err)
+				klog.Error(err)
 			} else {
-				fmt.Printf("update HCPDeployment %s SchedulingComplete: %t\n", r.ObjectMeta.Name, r.Spec.SchedulingComplete)
+				klog.Info("Update HCPDeployment %s SchedulingComplete: %t\n", r.ObjectMeta.Name, r.Spec.SchedulingComplete)
 			}
 		}
 	} else if !hcpdeployment.Spec.SchedulingNeed && hcpdeployment.Spec.SchedulingComplete {
@@ -232,11 +232,12 @@ func (c *Controller) syncHandler(key string) error {
 		redeploytarget := map[string]int32{}
 		var ns string
 		for _, target := range targets {
-			cluster := cm.Cluster_kubeClients[target.Cluster]
 			if hcpdeployment.Spec.RealDeploymentMetadata.Namespace == "" {
 				ns = "default"
 			}
-			_, err := cluster.AppsV1().Deployments(ns).Get(context.TODO(), hcpdeployment.Name, metav1.GetOptions{})
+
+			clientset := cm.Cluster_kubeClients[target.Cluster]
+			_, err := deployment.GetDeployment(clientset, hcpdeployment.Name, ns)
 			if errors.IsNotFound(err) {
 				redeployneed = true
 				redeploytarget[target.Cluster] = *target.Replicas
@@ -245,7 +246,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		if redeployneed {
 			for key, value := range redeploytarget {
-				cluster := cm.Cluster_kubeClients[key]
+				clientset := cm.Cluster_kubeClients[key]
 				redeploydeployment := &appsv1.Deployment{}
 				redeploydeployment.ObjectMeta = hcpdeployment.Spec.RealDeploymentMetadata
 				if redeploydeployment.Namespace == "" {
@@ -253,11 +254,11 @@ func (c *Controller) syncHandler(key string) error {
 				}
 				redeploydeployment.Spec = hcpdeployment.Spec.RealDeploymentSpec
 				redeploydeployment.Spec.Replicas = &value
-				r, err := cluster.AppsV1().Deployments(redeploydeployment.ObjectMeta.Namespace).Create(context.TODO(), redeploydeployment, metav1.CreateOptions{})
+				err := deployment.CreateDeployment(clientset, "", redeploydeployment)
 				if err != nil {
-					fmt.Println(err)
+					klog.Error(err)
 				} else {
-					fmt.Printf("succeed to redeploy deployment %s in %s\n", r.ObjectMeta.Name, key)
+					klog.Info("Succeed to redeploy deployment %s in %s\n", redeploydeployment.ObjectMeta.Name, key)
 					for k := range redeploytarget {
 						delete(redeploytarget, k)
 					}

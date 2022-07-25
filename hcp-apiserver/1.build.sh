@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker_id="ketidevit"
+docker_id="ketidevit2"
 controller_name="hcp-apiserver"
 
 export GO111MODULE=on

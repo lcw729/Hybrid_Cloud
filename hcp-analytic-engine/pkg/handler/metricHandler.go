@@ -85,7 +85,7 @@ func GetResource(podNum int, clusterName string, objectType string) []byte {
 
 		pm := setPodMetric(results)
 		// fmt.Print("results: ", results)
-		// fmt.Println("----------------------------------------------------")
+		// klog.Info("----------------------------------------------------")
 		// fmt.Print("pm: ", pm.Items)
 		bytesJson, _ := json.Marshal(pm)
 		var prettyJSON bytes.Buffer

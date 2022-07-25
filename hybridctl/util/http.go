@@ -11,7 +11,7 @@ import (
 
 func GetResponseBody(method string, URL string, input interface{}) ([]byte, error) {
 
-	URL = "http://localhost:8080" + URL
+	URL = "http://10.96.0.2:8080" + URL
 	jsonData, _ := json.Marshal(&input)
 	buff := bytes.NewBuffer(jsonData)
 	request, _ := http.NewRequest(method, URL, buff)

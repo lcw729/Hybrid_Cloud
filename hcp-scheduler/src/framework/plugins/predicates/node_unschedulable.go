@@ -3,9 +3,9 @@ package predicates
 import (
 	"Hybrid_Cloud/hcp-scheduler/src/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 )
 
 type NodeUnschedulable struct{}
@@ -27,7 +27,7 @@ func (pl *NodeUnschedulable) Filter(pod *v1.Pod, status *resourceinfo.CycleStatu
 		if nodeInfo.Node.Spec.Unschedulable && podToleratesUnschedulable {
 			return false
 		} else {
-			fmt.Println("Node has Unschedulable Taint.\nbut, Pod hasn't Unschedulable Toleration.")
+			klog.Infoln("Node has Unschedulable Taint.\nbut, Pod hasn't Unschedulable Toleration.")
 		}
 	}
 	return true

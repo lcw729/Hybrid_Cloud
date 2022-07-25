@@ -15,17 +15,18 @@
 package cmd
 
 import (
+	"Hybrid_Cloud/hcp-resource/hcpcluster"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
+	"Hybrid_Cloud/util/clientset"
 	"fmt"
 	"log"
-
-	"Hybrid_Cloud/hcp-resource/hcpcluster"
-	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	"Hybrid_Cloud/util"
-	"Hybrid_Cloud/util/clusterManager"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
+	kubefed "sigs.k8s.io/kubefed/pkg/client/generic"
 )
 
 // joinCmd represents the join command
@@ -82,21 +83,16 @@ var unregisterCmd = &cobra.Command{
 			case "gke":
 				fallthrough
 			case "nks":
-				if hcpcluster.FindHCPClusterList(clustername) {
+				if hcpcluster.FindHCPClusterList(clientset.HCPClusterClientset, clustername) {
 					HCP_NAMESPACE = "hcp"
-					hcp_cluster, err := hcpclusterv1alpha1.NewForConfig(master_config)
-					if err != nil {
-						log.Println(err)
-					}
-
 					if Iskubefedcluster(clustername) {
 						fmt.Println(">>> unjoin cluster")
-						cluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Get(context.TODO(), clustername, metav1.GetOptions{})
+						cluster, err := clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Get(context.TODO(), clustername, metav1.GetOptions{})
 						if err != nil {
 							log.Println(err)
 						}
 						cluster.Spec.JoinStatus = "UNJOINING"
-						_, err = hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), cluster, metav1.UpdateOptions{})
+						_, err = clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Update(context.TODO(), cluster, metav1.UpdateOptions{})
 						if err != nil {
 							fmt.Println(err)
 						}
@@ -104,7 +100,7 @@ var unregisterCmd = &cobra.Command{
 
 					fmt.Println(">>> delete hcpcluster")
 					for {
-						cluster, err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Get(context.TODO(), clustername, metav1.GetOptions{})
+						cluster, err := clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Get(context.TODO(), clustername, metav1.GetOptions{})
 						if err != nil {
 							log.Println(err)
 						}
@@ -114,12 +110,12 @@ var unregisterCmd = &cobra.Command{
 						} else {
 
 							fmt.Println(">>> delete config in kubeconfig")
-							err = util.DeleteConfig(platform, clustername)
+							err = cobrautil.DeleteConfig(platform, clustername)
 							if err != nil {
 								fmt.Println(err)
 							}
 
-							err := hcp_cluster.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Delete(context.TODO(), clustername, metav1.DeleteOptions{})
+							err := clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Delete(context.TODO(), clustername, metav1.DeleteOptions{})
 							if err != nil {
 								log.Println(err)
 							} else {
@@ -137,9 +133,10 @@ var unregisterCmd = &cobra.Command{
 }
 
 func Iskubefedcluster(clustername string) bool {
-	cm, _ := clusterManager.NewClusterManager()
-	list := cm.Cluster_list
-	for _, i := range list.Items {
+	clientset := kubefed.NewForConfigOrDie(clientset.MasterConfig)
+	tempClusterList := &fedv1b1.KubeFedClusterList{}
+	_ = clientset.List(context.TODO(), tempClusterList, "kube-federation-system", &client.ListOptions{})
+	for _, i := range tempClusterList.Items {
 		if i.Name == clustername {
 			return true
 		}

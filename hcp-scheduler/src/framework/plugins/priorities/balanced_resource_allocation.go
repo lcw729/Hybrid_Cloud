@@ -5,10 +5,10 @@ import (
 	"Hybrid_Cloud/hcp-scheduler/src/internal/scoretable"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
 	"Hybrid_Cloud/hcp-scheduler/src/util"
-	"fmt"
 	"math"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 )
 
 type BalanceAllocation struct{}
@@ -22,9 +22,9 @@ func (pl *BalanceAllocation) Score(pod *v1.Pod, status *resourceinfo.CycleStatus
 	for _, node := range clusterInfo.Nodes {
 
 		requested := util.CreateResourceToValueMapPO(pod)
-		fmt.Println("requested CPU:", requested[v1.ResourceCPU], "requested Memory:", requested[v1.ResourceMemory])
+		klog.Infoln("requested CPU:", requested[v1.ResourceCPU], "requested Memory:", requested[v1.ResourceMemory])
 		allocable := util.CreateResourceToValueMapNode(node.Node)
-		fmt.Println("allocable CPU:", allocable[v1.ResourceCPU], "allocable Memory:", allocable[v1.ResourceMemory])
+		klog.Infoln("allocable CPU:", allocable[v1.ResourceCPU], "allocable Memory:", allocable[v1.ResourceMemory])
 
 		var includeVolumes bool
 		if len(node.Node.Status.VolumesAttached) > 0 {

@@ -22,14 +22,14 @@ type algoServer struct {
 // 리소스 확장 기술 -- 가중치 계산 [가중치 계산 결과 넘겨줌]
 // scheduler -> analytic Engine
 func (a *algoServer) ClusterWeightCalculator(ctx context.Context, in *algopb.ClusterWeightCalculatorRequest) (*algopb.ClusterWeightCalculatorResponse, error) {
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("[step 2] Get MultiMetric")
+	klog.Info("---------------------------------------------------------------")
+	klog.Info("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("[step 3] Calculate resource weight")
-	fmt.Println("---------------------------------------------------------------")
-	fmt.Println("[step 4] Send weight calculation result to Scheduler (Resource Balancing Controller)")
-	fmt.Println("--Resource Weight Result--")
+	klog.Info("---------------------------------------------------------------")
+	klog.Info("[step 3] Calculate resource weight")
+	klog.Info("---------------------------------------------------------------")
+	klog.Info("[step 4] Send weight calculation result to Scheduler (Resource Balancing Controller)")
+	klog.Info("--Resource Weight Result--")
 	weightResult := make([]*algopb.WeightResult, 4)
 	weightResult[0] = &algopb.WeightResult{
 		ClusterId:     1,
@@ -62,7 +62,7 @@ func (a *algoServer) OptimalArrangement(ctx context.Context, in *algopb.OptimalA
 	var n *util.NodeScore
 	if algorithm.OptimalArrangementAlgorithm() {
 		c, n = algorithm.OptimalNodeSelector()
-		fmt.Println(c.ClusterInfo, n.Score)
+		klog.Info(c.ClusterInfo, n.Score)
 	}
 	return &algopb.OptimalArrangementResponse{
 		Status: true,
@@ -85,10 +85,10 @@ func main() {
 		mem, _ := policy.GetInitialSettingValue("max_memory")
 		extra, _ := policy.GetInitialSettingValue("extra")
 
-		fmt.Println(extra)
+		klog.Info(extra)
 		cpu = cpu * (100 - extra) / 100
 		mem = mem * (100 - extra) / 100
-		fmt.Println(cpu, mem)
+		klog.Info(cpu, mem)
 	*/
 
 	// HPA/VPA 함수 사용 예시
@@ -111,9 +111,9 @@ func main() {
 			cmd.Dir = "usr/local/bin"
 			output, err := cmd.Output()
 			if err != nil {
-				fmt.Println(err)
+				klog.Error(err)
 			} else {
-				fmt.Println(string(output))
+				klog.Info(string(output))
 			}
 	*/
 	// clusterList, err := ioutil.ReadFile("usr/local/bin/cluster_list1.txt")
@@ -121,11 +121,11 @@ func main() {
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// fmt.Println(string(clusterList))
+	// klog.Info(string(clusterList))
 
 	//for i := 0; i < len(cluster_list); i++ {
 	// bol, pod, namespace, _ := algorithm.Calculate_WatchingLevel(podNum[i], cluster_list[i])
-	// fmt.Println(bol, pod, namespace)
+	// klog.Info(bol, pod, namespace)
 
 	// deployment := hcpdeploymentToDeployment(hcpdeployment)
 
@@ -138,27 +138,27 @@ func main() {
 
 				if err == nil {
 		if resource.AutoscalerMap[cluster_list[i]] == nil {
-			fmt.Println("===========no autoscaler===========")
+			klog.Info("===========no autoscaler===========")
 			// autoscalerMap에 cluster autoscaler 저장
 			autoscaler := resource.NewAutoScaler()
 			autoscaler.RegisterDeploymentToAutoScaler(&deployment)
 			resource.AutoscalerMap[cluster_list[i]] = autoscaler
 			autoscaler.WarningCountPlusOne(&deployment)
 			autoscaler.AutoScaling(&deployment)
-			fmt.Println("current warningcount is ", resource.AutoscalerMap[cluster_list[i]].GetWarningCount(&deployment))
-			fmt.Println("===================================")
+			klog.Info("current warningcount is ", resource.AutoscalerMap[cluster_list[i]].GetWarningCount(&deployment))
+			klog.Info("===================================")
 		} else {
 			autoscaler := resource.AutoscalerMap[cluster_list[i]]
 	*/
 
 	/*
 		} else {
-					fmt.Println(err)
+					klog.Error(err)
 				}
 			}
 		}
 		time.Sleep(10 * time.Second)
-		fmt.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+		klog.Info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 			}
 		}
 	*/
@@ -172,16 +172,16 @@ func main() {
 		algopb.RegisterAlgoServer(grpcServer, &algoServer{})
 
 		log.Printf("start gRPC server on %s port", portNumber)
-		fmt.Println("[step 1] Get ResourceConfigurationCycle Policy")
+		klog.Info("[step 1] Get ResourceConfigurationCycle Policy")
 		cycle := policy.GetCycle()
 		if cycle > 0 {
 			for {
 				time.Sleep(time.Second * time.Duration(cycle))
-				fmt.Println("-------------------------LOOP START----------------------------")
+				klog.Info("-------------------------LOOP START----------------------------")
 				algorithm.WatchingLevelCalculator()
 			}
 		} else {
-			fmt.Println("Error : Cycle should be positive")
+			klog.Info("Error : Cycle should be positive")
 		}
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %s", err)

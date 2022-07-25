@@ -3,7 +3,6 @@ package resourceinfo
 import (
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
-	"fmt"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
@@ -11,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/klog"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
@@ -139,7 +139,7 @@ func NodeMetrics(clusterName string) {
 
 	// mc.MetricsV1beta1().NodeMetricses().Get(cotex"your node name", metav1.GetOptions{})
 	nodeMetrics_list, _ := mc.MetricsV1beta1().NodeMetricses().List(context.TODO(), metav1.ListOptions{})
-	fmt.Println(nodeMetrics_list.Items[0].Usage)
+	klog.Infoln(nodeMetrics_list.Items[0].Usage)
 
 }
 

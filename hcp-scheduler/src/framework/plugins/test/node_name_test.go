@@ -2,11 +2,11 @@ package test
 
 import (
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
-	"fmt"
 	"testing"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 func TestNodeName(t *testing.T) {
@@ -37,12 +37,12 @@ func TestNodeName(t *testing.T) {
 	clusterinfo.Nodes = append(clusterinfo.Nodes, nodeList...)
 
 	for _, pod := range test_pods {
-		fmt.Println(pod.Spec.NodeName)
-		fmt.Println("===before NodeName Filtering===")
+		klog.Infoln(pod.Spec.NodeName)
+		klog.Infoln("===before NodeName Filtering===")
 		//framework.HCPFilterPlugin.Filter(pod, clusterinfo)
-		fmt.Println("===after NodeName Filtering===")
+		klog.Infoln("===after NodeName Filtering===")
 		for _, node := range clusterinfo.Nodes {
-			fmt.Println((*node).NodeName)
+			klog.Infoln((*node).NodeName)
 		}
 	}
 }

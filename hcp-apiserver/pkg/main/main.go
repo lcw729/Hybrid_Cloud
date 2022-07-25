@@ -8,17 +8,10 @@ import (
 	eksFunc "Hybrid_Cloud/hcp-apiserver/pkg/main/eks"
 	gkeFunc "Hybrid_Cloud/hcp-apiserver/pkg/main/gke"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
-
-func CheckErr(err error) {
-	if err != nil {
-		log.Println(err)
-	}
-}
 
 func handlerRequests() http.Handler {
 

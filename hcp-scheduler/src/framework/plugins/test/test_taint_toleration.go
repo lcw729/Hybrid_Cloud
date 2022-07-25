@@ -170,7 +170,7 @@ func CreateTestClusterTaintAndToleration(clusterinfo_list *resourceinfo.ClusterI
 		var rep int32 = 2
 
 		test := tests[2].pod
-		fmt.Println("TaintToleration")
+		klog.Infoln("TaintToleration")
 		test_deployment := &v1alpha1.HCPDeployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:        "test_deployment",

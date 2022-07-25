@@ -24,6 +24,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/klog"
 )
 
 type NodeAffinity struct{}
@@ -57,7 +58,7 @@ func (pl *NodeAffinity) Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clu
 				// TODO: Avoid computing it for all nodes if this becomes a performance problem.
 				nodeSelector, err := NodeSelectorRequirementsAsSelector(preferredSchedulingTerm.Preference.MatchExpressions)
 				if err != nil {
-					fmt.Println(err)
+					klog.Error(err)
 					return -1
 				}
 

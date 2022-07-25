@@ -1,63 +1,55 @@
 package deployment
 
 import (
-	"Hybrid_Cloud/hybridctl/util"
-	cobrautil "Hybrid_Cloud/hybridctl/util"
 	resourcev1alpha1apis "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
-	"fmt"
 
 	ns "Hybrid_Cloud/kube-resource/namespace"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
 
 	v1 "k8s.io/api/apps/v1"
 )
 
-func CreateDeployment(cluster string, node string, deployment *v1.Deployment) error {
-	config, _ := cobrautil.BuildConfigFromFlags(cluster, "/root/.kube/config")
-	cluster_client := kubernetes.NewForConfigOrDie(config)
+func CreateDeployment(clientset *kubernetes.Clientset, node string, deployment *v1.Deployment) error {
 	deployment.Spec.Template.Spec.NodeName = node
 	deployment.ResourceVersion = ""
 
+	// Namespace 생성
 	namespace := deployment.ObjectMeta.Namespace
-	ns.CreateNamespace(cluster, namespace)
-	new_dep, err := cluster_client.AppsV1().Deployments(namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
+	ns.CreateNamespace(clientset, namespace)
+
+	// Deployment 배포
+	new_dep, err := clientset.AppsV1().Deployments(namespace).Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {
+		klog.Error(err)
 		return err
 	} else {
-		fmt.Printf("success to create %s in cluster %s [replicas : %d]\n", new_dep.Name, cluster, *deployment.Spec.Replicas)
+		klog.Info("success to create %s [replicas : %d]\n", new_dep.Name, *deployment.Spec.Replicas)
 	}
+
 	return nil
 }
 
 func DeployDeploymentFromHCPDeployment(hcp_resource *resourcev1alpha1apis.HCPDeployment) bool {
+
+	cm, _ := clusterManager.NewClusterManager()
 	targets := hcp_resource.Spec.SchedulingResult.Targets
 	metadata := hcp_resource.Spec.RealDeploymentMetadata
+
 	if metadata.Namespace == "" {
 		metadata.Namespace = "default"
 	}
+
 	spec := hcp_resource.Spec.RealDeploymentSpec
 
 	// HCPDeployment SchedulingResult에 따라 Deployment 배포
 	for _, target := range targets {
-		// cluster clientset 생성
-
-		config, err := util.BuildConfigFromFlags(target.Cluster, "/root/.kube/config")
-		if err != nil {
-			fmt.Println(err)
-			return false
-		}
-
-		clientset, err := kubernetes.NewForConfig(config)
-		if err != nil {
-			fmt.Println(err)
-			return false
-		}
-
 		// spec 값 재설정하기
 		spec.Replicas = target.Replicas
 
@@ -68,13 +60,14 @@ func DeployDeploymentFromHCPDeployment(hcp_resource *resourcev1alpha1apis.HCPDep
 		}
 
 		// Deployment 배포
+		clientset := cm.Cluster_kubeClients[target.Cluster]
 		r, err := clientset.AppsV1().Deployments(metadata.Namespace).Create(context.TODO(), &kube_resource, metav1.CreateOptions{})
 
 		if err != nil {
-			fmt.Println(err)
+			klog.Error(err)
 			return false
 		} else {
-			fmt.Printf("succeed to deploy deployment %s in %s\n", r.ObjectMeta.Name, target.Cluster)
+			klog.Info("succeed to deploy deployment %s in %s\n", r.ObjectMeta.Name, target.Cluster)
 		}
 	}
 	return true

@@ -19,17 +19,12 @@ import (
 	"strconv"
 
 	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
-
-	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	"Hybrid_Cloud/util/clientset"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// var master_config, _ = util.BuildConfigFromFlags("master", "/root/.kube/config")
-
-// var master_client = kubernetes.NewForConfigOrDie(master_config)
 
 // joinCmd represents the join command
 var initialCmd = &cobra.Command{
@@ -86,8 +81,7 @@ DESCRIPTION
 		var extra int
 		var exist bool = false
 
-		hcp_policy, _ := hcppolicyv1alpha1.NewForConfig(master_config)
-		list, _ := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").List(context.TODO(), metav1.ListOptions{})
+		list, _ := clientset.HCPPolicyClientset.HcpV1alpha1().HCPPolicies("hcp").List(context.TODO(), metav1.ListOptions{})
 		for _, policy := range list.Items {
 			if policy.Name == "initial-setting" {
 				exist = true
@@ -135,7 +129,7 @@ DESCRIPTION
 					PolicyStatus: "Enabled",
 				},
 			}
-			_, err := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Create(context.TODO(), &policy, metav1.CreateOptions{})
+			_, err := clientset.HCPPolicyClientset.HcpV1alpha1().HCPPolicies("hcp").Create(context.TODO(), &policy, metav1.CreateOptions{})
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -168,9 +162,9 @@ DESCRIPTION
 				polices[3].Value = append(polices[3].Value, strconv.Itoa(extra))
 
 				fmt.Println(polices)
-				policy, _ := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "initial-setting", metav1.GetOptions{})
+				policy, _ := clientset.HCPPolicyClientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), "initial-setting", metav1.GetOptions{})
 				policy.Spec.Template.Spec.Policies = polices
-				_, err := hcp_policy.HcpV1alpha1().HCPPolicies("hcp").Update(context.TODO(), policy, metav1.UpdateOptions{})
+				_, err := clientset.HCPPolicyClientset.HcpV1alpha1().HCPPolicies("hcp").Update(context.TODO(), policy, metav1.UpdateOptions{})
 				if err != nil {
 					fmt.Println(err)
 				}

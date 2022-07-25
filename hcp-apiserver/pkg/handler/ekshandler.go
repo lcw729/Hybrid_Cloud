@@ -1,11 +1,8 @@
 package handler
 
 import (
-	cobrautil "Hybrid_Cloud/hybridctl/util"
-	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
-	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -14,18 +11,10 @@ import (
 )
 
 // addon
-
-func checkErr(err error) {
-	if err != nil {
-		log.Println(err)
-	}
-}
+var cm, _ = clusterManager.NewClusterManager()
 
 func GetEKSClient(clusterName *string) (*eks.EKS, error) {
-	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
-	cluster_client := hcpclusterv1alpha1.NewForConfigOrDie(master_config)
-
-	cluster, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), *clusterName, metav1.GetOptions{})
+	cluster, err := cm.HCPCluster_Client.HcpV1alpha1().HCPClusters("hcp").Get(context.TODO(), *clusterName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +22,7 @@ func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(cluster.Spec.Region),
 	}))
+
 	eksSvc := eks.New(sess)
 	return eksSvc, nil
 }
@@ -256,8 +246,6 @@ func EKSUntagResource(input eks.UntagResourceInput) (*eks.UntagResourceOutput, e
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	eksSvc := eks.New(sess)
-
-	fmt.Println(input.TagKeys)
 	input = eks.UntagResourceInput{
 		ResourceArn: input.ResourceArn,
 		TagKeys:     input.TagKeys,

@@ -3,9 +3,7 @@ package resource
 import (
 	hcppolicyapis "Hybrid_Cloud/pkg/apis/hcppolicy/v1alpha1"
 	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
-	"Hybrid_Cloud/util/clusterManager"
 	"context"
-	"fmt"
 	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,21 +19,11 @@ type Level struct {
 	Value string
 }
 
-func GetHCPPolicy(policy_name string) (*hcppolicyapis.HCPPolicy, error) {
-	cm, err := clusterManager.NewClusterManager()
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
+func GetHCPPolicy(clientset hcppolicyv1alpha1.Clientset, policy_name string) (*hcppolicyapis.HCPPolicy, error) {
 
-	c, err := hcppolicyv1alpha1.NewForConfig(cm.Host_config)
+	policy, err := clientset.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), policy_name, metav1.GetOptions{})
 	if err != nil {
-		klog.Info(err)
-		return nil, err
-	}
-	policy, err := c.HcpV1alpha1().HCPPolicies("hcp").Get(context.TODO(), policy_name, metav1.GetOptions{})
-	if err != nil {
-		klog.Info(err)
+		klog.Error(err)
 		return nil, err
 	}
 	return policy, nil
@@ -72,10 +60,10 @@ func GetInitialSettingValue(typ string) (int, string) {
 }
 */
 
-func GetWatchingLevel() WatchingLevel {
-	hcppolicy, err := GetHCPPolicy("watching-level")
+func GetWatchingLevel(clientset hcppolicyv1alpha1.Clientset) WatchingLevel {
+	hcppolicy, err := GetHCPPolicy(clientset, "watching-level")
 	if err != nil {
-		klog.Info(err)
+		klog.Error(err)
 	}
 
 	var watchingLevel WatchingLevel
@@ -90,10 +78,10 @@ func GetWatchingLevel() WatchingLevel {
 	return watchingLevel
 }
 
-func GetWarningLevel() Level {
-	hcppolicy, err := GetHCPPolicy("warning-level")
+func GetWarningLevel(clientset hcppolicyv1alpha1.Clientset) Level {
+	hcppolicy, err := GetHCPPolicy(clientset, "warning-level")
 	if err != nil {
-		klog.Info(err)
+		klog.Error(err)
 	}
 
 	// for i, policy := range hcppolicy.Spec.Template.Spec.Policies {
@@ -112,10 +100,10 @@ func GetWarningLevel() Level {
 	}
 }
 
-func GetAlgorithm() ([]string, error) {
-	hcppolicy, err := GetHCPPolicy("scheduling-policy")
+func GetAlgorithm(clientset hcppolicyv1alpha1.Clientset) ([]string, error) {
+	hcppolicy, err := GetHCPPolicy(clientset, "scheduling-policy")
 	if err != nil {
-		klog.Info(err)
+		klog.Error(err)
 	}
 
 	policies := hcppolicy.Spec.Template.Spec.Policies
@@ -128,8 +116,8 @@ func GetAlgorithm() ([]string, error) {
 	return nil, err
 }
 
-func GetCycle() float64 {
-	hcppolicy, err := GetHCPPolicy("weight-calculation-cycle")
+func GetCycle(clientset hcppolicyv1alpha1.Clientset) float64 {
+	hcppolicy, err := GetHCPPolicy(clientset, "weight-calculation-cycle")
 	if err != nil {
 		klog.Info(err)
 	}
@@ -138,8 +126,8 @@ func GetCycle() float64 {
 		if policy.Type == "cycle" && len(policy.Value) == 1 {
 			cycle, err := strconv.ParseFloat(policy.Value[0], 64)
 			if err == nil && cycle > 0 {
-				fmt.Println("Policy Type : ", "cycle")
-				fmt.Println("Policy Value [cycle] : ", cycle)
+				klog.Info("Policy Type : ", "cycle")
+				klog.Info("Policy Value [cycle] : ", cycle)
 				return cycle
 			}
 		}

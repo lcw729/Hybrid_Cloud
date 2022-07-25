@@ -53,7 +53,7 @@ go.work
 /vpa/
 /code-generator/
 /old-code-generator/
-/main/main
+main/main
 /.vscode/
 _output/bin/
 

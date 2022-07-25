@@ -3,9 +3,9 @@ package predicates
 import (
 	"Hybrid_Cloud/hcp-scheduler/src/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 )
 
 type TaintToleration struct {
@@ -33,7 +33,7 @@ func (pl *TaintToleration) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus,
 		if !isUntolerated {
 			return false
 		} else {
-			fmt.Printf("node(s) had taint {%s: %s}, that the pod didn't tolerate\n", taint.Key, taint.Value)
+			klog.Infof("node(s) had taint {%s: %s}, that the pod didn't tolerate\n", taint.Key, taint.Value)
 		}
 	}
 	return true

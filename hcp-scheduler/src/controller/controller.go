@@ -211,7 +211,7 @@ func (c *Controller) syncHandler(key string) error {
 
 	// 스케줄링되지 않은 hcpdeployment 감지
 	if hcpdeployment.Spec.SchedulingNeed && !hcpdeployment.Spec.SchedulingComplete {
-		fmt.Println("[Scheduling Start]")
+		klog.Infoln("[Scheduling Start]")
 		target := c.scheduler.Scheduling(hcpdeployment)
 		if target != nil {
 			hcpdeployment.Spec.SchedulingResult.Targets = target
@@ -219,9 +219,9 @@ func (c *Controller) syncHandler(key string) error {
 			hcpdeployment.Spec.SchedulingComplete = false
 			r, err := c.hcpdeploymentclientset.HcpV1alpha1().HCPDeployments("hcp").Update(context.TODO(), hcpdeployment, metav1.UpdateOptions{})
 			if err != nil {
-				fmt.Println(err)
+				klog.Error(err)
 			} else {
-				fmt.Printf("%s deployment scheduling completed\n", r.ObjectMeta.Name)
+				klog.Infof("%s deployment scheduling completed\n", r.ObjectMeta.Name)
 			}
 		}
 	}

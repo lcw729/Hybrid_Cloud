@@ -3,8 +3,8 @@ package test
 import (
 	policy "Hybrid_Cloud/hcp-resource/hcppolicy"
 	clusterManager "Hybrid_Cloud/util/clusterManager"
-	"fmt"
 
+	"k8s.io/klog"
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 )
 
@@ -14,38 +14,39 @@ import (
 // }
 
 var TargetCluster = make(map[string]*fedv1b1.KubeFedCluster)
+var cm, _ = clusterManager.NewClusterManager()
 
 func WatchingLevelCalculator() {
-	fmt.Println("-----------------------------------------")
-	fmt.Println("[step 2] Get Policy - watching level & warning level")
-	watching_level := policy.GetWatchingLevel()
-	fmt.Println("< Watching Level > \n", watching_level)
+	klog.Infoln("-----------------------------------------")
+	klog.Infoln("[step 2] Get Policy - watching level & warning level")
+	watching_level := policy.GetWatchingLevel(*cm.HCPPolicy_Client)
+	klog.Infoln("< Watching Level > \n", watching_level)
 	// 각 클러스터의 watching level 계산하고 warning level 초과 시 targetCluster에 추가
-	warning_level := policy.GetWarningLevel()
-	fmt.Println("< Warning  Level > \n", warning_level)
-	fmt.Println("-----------------------------------------")
-	fmt.Println("[step 3] Get MultiMetric")
+	warning_level := policy.GetWarningLevel(*cm.HCPPolicy_Client)
+	klog.Infoln("< Warning  Level > \n", warning_level)
+	klog.Infoln("-----------------------------------------")
+	klog.Infoln("[step 3] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
-	fmt.Println("[step 4] Calculate watching level")
+	klog.Infoln("[step 4] Calculate watching level")
 
 	cm, err := clusterManager.NewClusterManager()
 	if err != nil {
-		fmt.Println(err)
+		klog.Error(err)
 		return
 	}
 	for _, cluster := range cm.Cluster_list.Items {
-		fmt.Println(cluster.Name)
+		klog.Infoln(cluster.Name)
 		TargetCluster[cluster.Name] = &cluster
 	}
-	fmt.Println(TargetCluster)
+	klog.Infoln(TargetCluster)
 	// cluster := &util.ClusterInfo{
 	// 	ClusterId:   1,
 	// 	ClusterName: "cluster1",
 	// }
 	// if !appendTargetCluster(cluster) {
-	// 	fmt.Printf("%d exist already\n", cluster.ClusterId)
+	// 	klog.Infof("%d exist already\n", cluster.ClusterId)
 	// } else {
-	// 	fmt.Println("ok")
+	// 	klog.Infoln("ok")
 	// }
 
 	// cluster = &util.ClusterInfo{
@@ -53,9 +54,9 @@ func WatchingLevelCalculator() {
 	// 	ClusterName: "cluster2",
 	// }
 	// if !appendTargetCluster(cluster) {
-	// 	fmt.Printf("%d exist already\n", cluster.ClusterId)
+	// 	klog.Infof("%d exist already\n", cluster.ClusterId)
 	// } else {
-	// 	fmt.Println("ok")
+	// 	klog.Infoln("ok")
 	// }
 }
 
@@ -78,61 +79,61 @@ func WatchingLevelCalculator() {
 // func ResourceConfigurationManagement() {
 // 	// targetCluster := WatchingLevelCalculator()
 // 	WatchingLevelCalculator()
-// 	// fmt.Println("[step 5] Start ResourceConfiguration")
+// 	// klog.Infoln("[step 5] Start ResourceConfiguration")
 // 	// for index, cluster := range targetCluster {
-// 	// 	fmt.Println("Index : ", index, "\nClusterId : ", cluster.ClusterId, "\nClusterName : ", cluster.ClusterName)
+// 	// 	klog.Infoln("Index : ", index, "\nClusterId : ", cluster.ClusterId, "\nClusterName : ", cluster.ClusterName)
 // 	// }
 // }
 
 // // 최적 배치 알고리즘
 // func Affinity(clusterList *[]string) string {
-// 	fmt.Println("---------------------------------------------------------------")
-// 	fmt.Println("Affinity Calculator Called")
-// 	fmt.Println("[step 2] Get MultiMetric")
+// 	klog.Infoln("---------------------------------------------------------------")
+// 	klog.Infoln("Affinity Calculator Called")
+// 	klog.Infoln("[step 2] Get MultiMetric")
 // 	// monitoringEngine.MetricCollector()
-// 	fmt.Println("[step 3-1] Start analysis Resource Affinity")
+// 	klog.Infoln("[step 3-1] Start analysis Resource Affinity")
 // 	// score_table := scoretable.NewScoreTable(clusterList)
 // 	// for _, i := range *clusterList {
 // 	// 	score_table[i] = rand.Float32()
 // 	// }
 // 	// result := score_table.SortScore()
-// 	fmt.Println("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
-// 	fmt.Println("---------------------------------------------------------------")
-// 	// fmt.Println(score_table)
+// 	klog.Infoln("[step 3-2] Send analysis result to Scheduler [Target Cluster]")
+// 	klog.Infoln("---------------------------------------------------------------")
+// 	// klog.Infoln(score_table)
 // 	// return result[0].Cluster
 // }
 
 func DRF() bool {
-	fmt.Println("DRF Math operation Called")
-	fmt.Println("-----------------------------------------")
-	fmt.Println("[step 2] Get MultiMetric")
+	klog.Infoln("DRF Math operation Called")
+	klog.Infoln("-----------------------------------------")
+	klog.Infoln("[step 2] Get MultiMetric")
 	// monitoringEngine.MetricCollector()
-	fmt.Println("-----------------------------------------")
-	fmt.Println("[step 3-1] Handling Math Operation")
-	fmt.Println("[step 3-2] Search Pod Fit Resources")
-	fmt.Println("[step 3-3] Schedule Decision")
-	fmt.Println("---------------------------------------------------------------")
+	klog.Infoln("-----------------------------------------")
+	klog.Infoln("[step 3-1] Handling Math Operation")
+	klog.Infoln("[step 3-2] Search Pod Fit Resources")
+	klog.Infoln("[step 3-3] Schedule Decision")
+	klog.Infoln("---------------------------------------------------------------")
 	return true
 }
 
 /*
 // 배치 알고리즘에 설정 값에 따라 알고리즘 변경
 func OptimalArrangementAlgorithm() map[string]float32 {
-	fmt.Println("[step 1] Get Policy - algorithm")
+	klog.Infoln("[step 1] Get Policy - algorithm")
 	algo := policy.GetAlgorithm()
 	if algo != "" {
-		fmt.Println(algo)
+		klog.Infoln(algo)
 		switch algo {
 		case "DRF":
 			return DRF()
 		case "Affinity":
 			return Affinity()
 		default:
-			fmt.Println("there is no such algorithm.")
+			klog.Infoln("there is no such algorithm.")
 			return false
 		}
 	} else {
-		fmt.Println("there is no such algorithm.")
+		klog.Infoln("there is no such algorithm.")
 		return false
 	}
 }

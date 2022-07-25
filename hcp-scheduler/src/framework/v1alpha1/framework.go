@@ -4,9 +4,9 @@ import (
 	"Hybrid_Cloud/hcp-scheduler/src/framework/plugins/predicates"
 	"Hybrid_Cloud/hcp-scheduler/src/framework/plugins/priorities"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 )
 
 type hcpFramework struct {
@@ -41,24 +41,24 @@ func (f *hcpFramework) RunFilterPluginsOnClusters(algorithms []string, pod *v1.P
 	for _, i := range algorithms {
 		plugin := f.stringTOHCPFilterPlugin(i)
 		if plugin != nil {
-			fmt.Println(plugin.Name())
+			klog.Infoln(plugin.Name())
 			plugins = append(plugins, plugin)
 		} else {
-			fmt.Println(i, " : no such filter algorithm")
+			klog.Infoln(i, " : no such filter algorithm")
 		}
 	}
 
 	for _, cluster := range *clusterInfoList {
-		fmt.Println(">>", cluster.ClusterName)
+		klog.Infoln(">>", cluster.ClusterName)
 		isFiltered = false
 		for _, plugin := range plugins {
-			fmt.Println("[plugin]", plugin.Name())
+			klog.Infoln("[plugin]", plugin.Name())
 			isFiltered = plugin.Filter(pod, status, cluster)
 			/*
 			  result : true => 필터 O
 			  result : false => 필터 X
 			*/
-			fmt.Println(">>>>>", isFiltered)
+			klog.Infoln(">>>>>", isFiltered)
 			(*cluster).IsFiltered = isFiltered
 			result[cluster.ClusterName] = isFiltered
 			//하나의 plugin이라도 true이면 다음 클러스터 필터링 시작
@@ -86,23 +86,23 @@ func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Po
 	for _, i := range algorithms {
 		plugin := f.stringTOHCPScorePlugin(i)
 		if plugin != nil {
-			fmt.Println(plugin.Name())
+			klog.Infoln(plugin.Name())
 			plugins = append(plugins, plugin)
 		} else {
-			fmt.Println(i, " : no such filter algorithm")
+			klog.Infoln(i, " : no such filter algorithm")
 		}
 	}
 
 	for _, cluster := range *clusterInfoList {
 		score = 0
-		fmt.Println(">>", cluster.ClusterName)
+		klog.Infoln(">>", cluster.ClusterName)
 		if cluster.IsFiltered {
-			fmt.Println(cluster.ClusterName, "is already filtered")
+			klog.Infoln(cluster.ClusterName, "is already filtered")
 		} else {
 			for _, plugin := range plugins {
-				fmt.Println("[plugin]", plugin.Name())
+				klog.Infoln("[plugin]", plugin.Name())
 				score = plugin.Score(pod, status, cluster)
-				fmt.Println(score)
+				klog.Infoln(score)
 				result[cluster.ClusterName] += score
 			}
 		}

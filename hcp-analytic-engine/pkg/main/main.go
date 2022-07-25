@@ -2,22 +2,21 @@ package main
 
 import (
 	"Hybrid_Cloud/hcp-analytic-engine/pkg/handler"
+	"Hybrid_Cloud/hcp-analytic-engine/pkg/metric"
 	resource "Hybrid_Cloud/hcp-resource/hcppolicy"
-	cobrautil "Hybrid_Cloud/hybridctl/util"
-	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 )
+
+var cm, _ = clusterManager.NewClusterManager()
 
 func main() {
 	// var jsonarray PodMetric
@@ -26,21 +25,16 @@ func main() {
 
 	// kubeconfig := os.Getenv("KUBECONFIG")
 	// config, err := rest.InClusterConfig()
-	config, err := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
-	// config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		panic(err.Error())
-	}
 
 	// creates the clientset
-	clientset := kubernetes.NewForConfigOrDie(config)
+	clientset := cm.Host_kubeClient
 
 	// podsInNode, _ := hostKubeClient.CoreV1().Pods("").List(metav1.ListOptions{})
 	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 		LabelSelector: "metadata.labels.app=name=hcp-metric-collector",
 	})
 	for _, p := range pods.Items {
-		fmt.Println(p.GetName())
+		klog.Info(p.GetName())
 	}
 	if err != nil {
 		panic(err.Error())
@@ -48,7 +42,7 @@ func main() {
 	// node 리스트 출력
 	// nodes, err := clientset.CoreV1().Nodes().List(metav1.ListOptions{})
 	// for _, n := range nodes.Items {
-	// 	fmt.Println(n.GetName())
+	// 	klog.Info(n.GetName())
 	// }
 	// if err != nil {
 	// 	panic(err.Error())
@@ -60,16 +54,16 @@ func main() {
 		// cmd.Dir = "usr/local/bin"
 		// output, err := cmd.Output()
 		// if err != nil {
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// } else {
-		// 	fmt.Println(string(output))
+		// 	klog.Info(string(output))
 		// }
 		// clusterList, err := ioutil.ReadFile("usr/local/bin/cluster_list1.txt")
 		// clusterList, err := ioutil.ReadFile("~/../usr/local/bin/kubectl_version.txt")
 		// if err != nil {
 		// 	panic(err)
 		// }
-		// fmt.Println(string(clusterList))
+		// klog.Info(string(clusterList))
 		// for i := 0; i < len(cluster_list); i++ {
 
 		// 	// Calculate_WatchingLevel(podNum[i], cluster_list[i])
@@ -81,7 +75,7 @@ func main() {
 		// Calculate_Cluster_Metric(cluster_list[0])
 		// 클러스터 메트릭 수집
 		// Calculate_Cluster_Metric(cluster_list[0])
-		// fmt.Println(cluster_list[0])
+		// klog.Info(cluster_list[0])
 		time.Sleep(2 * time.Second)
 	}
 
@@ -103,15 +97,15 @@ func main() {
 	// 		// podsInNode, _ := hostKubeClient.CoreV1().Pods("").List(metav1.ListOptions{})
 	// 		pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 	// 		for _, p := range pods.Items {
-	// 			fmt.Println(p.GetName())
+	// 			klog.Info(p.GetName())
 	// 		}
 	// 		if err != nil {
 	// 			panic(err.Error())
 	// 		}
 	// 	}
 	// }
-	// fmt.Println(GetClusterExpandingCrierion())
-	// fmt.Println(GetDefaultNodeOption())
+	// klog.Info(GetClusterExpandingCrierion())
+	// klog.Info(GetDefaultNodeOption())
 
 }
 
@@ -123,9 +117,9 @@ func GetClusterExpandingCrierion() (float32, float32) {
 	var cluster_mem_criterion float32
 
 	// get initial-setting policy
-	initial_setting, err := resource.GetHCPPolicy("initial-setting")
+	initial_setting, err := resource.GetHCPPolicy(*cm.HCPPolicy_Client, "initial-setting")
 	if err != nil {
-		fmt.Println(nil)
+		klog.Info(nil)
 	} else {
 		policies := initial_setting.Spec.Template.Spec.Policies
 		for _, policy := range policies {
@@ -156,9 +150,9 @@ func GetClusterExpandingCrierion() (float32, float32) {
 
 		// calculate cluster criterion
 		cluster_cpu_criterion = convertTONanoCores(max_cpu) * extra / 100
-		fmt.Println(cluster_cpu_criterion)
+		klog.Info(cluster_cpu_criterion)
 		cluster_mem_criterion = convertTOKiB(max_memory) * extra / 100
-		fmt.Println(cluster_mem_criterion)
+		klog.Info(cluster_mem_criterion)
 
 		return cluster_cpu_criterion, cluster_mem_criterion
 	}
@@ -168,9 +162,9 @@ func GetClusterExpandingCrierion() (float32, float32) {
 func GetDefaultNodeOption() (int, int, int) {
 	var option_cpu, option_mem, option_podnum int
 	// get initial-setting policy
-	initial_setting, err := resource.GetHCPPolicy("initial-setting")
+	initial_setting, err := resource.GetHCPPolicy(*cm.HCPPolicy_Client, "initial-setting")
 	if err != nil {
-		fmt.Println(nil)
+		klog.Info(nil)
 	} else {
 		policies := initial_setting.Spec.Template.Spec.Policies
 		for _, policy := range policies {
@@ -201,10 +195,10 @@ func convertTOKiB(mem float32) float32 {
 }
 
 func GetNodeOptionValue(option string) (int, int, int) {
-	fmt.Println(option)
-	node_option, err := resource.GetHCPPolicy("node-option")
+	klog.Info(option)
+	node_option, err := resource.GetHCPPolicy(*cm.HCPPolicy_Client, "node-option")
 	if err != nil {
-		fmt.Println(nil)
+		klog.Info(nil)
 	} else {
 		policies := node_option.Spec.Template.Spec.Policies
 		for _, policy := range policies {
@@ -226,74 +220,8 @@ func GetNodeOptionValue(option string) (int, int, int) {
 	return -1, -1, -1
 }
 
-func hcpdeploymentToDeployment(hcp_resource *resourcev1alpha1.HCPDeployment) appsv1.Deployment {
-	kube_resource := appsv1.Deployment{}
-	metadata := hcp_resource.Spec.RealDeploymentMetadata
-	if metadata.Namespace == "" {
-		metadata.Namespace = "default"
-	}
-	spec := hcp_resource.Spec.RealDeploymentSpec
-
-	kube_resource.ObjectMeta = metadata
-	kube_resource.Spec = spec
-
-	return kube_resource
-}
-
-type PodMetric struct {
-	Podmetrics []struct {
-		Time      time.Time `json:"time"`
-		Cluster   string    `json:"cluster"`
-		Namespace string    `json:"namespace"`
-		Node      string    `json:"node"`
-		Pod       string    `json:"pod"`
-		CPU       struct {
-			CPUUsageNanoCores string `json:"CPUUsageNanoCores"`
-		} `json:"cpu"`
-		Memory struct {
-			MemoryAvailableBytes  string `json:"MemoryAvailableBytes"`
-			MemoryUsageBytes      string `json:"MemoryUsageBytes"`
-			MemoryWorkingSetBytes string `json:"MemoryWorkingSetBytes"`
-		} `json:"memory"`
-		Fs struct {
-			FsAvailableBytes string `json:"FsAvailableBytes"`
-			FsCapacityBytes  string `json:"FsCapacityBytes"`
-			FsUsedBytes      string `json:"FsUsedBytes"`
-		} `json:"fs"`
-		Network struct {
-			NetworkRxBytes string `json:"NetworkRxBytes"`
-			NetworkTxBytes string `json:"NetworkTxBytes"`
-		} `json:"network"`
-	} `json:"podmetrics"`
-}
-
-type NodeMetric struct {
-	Nodemetrics []struct {
-		Time    time.Time `json:"time"`
-		Cluster string    `json:"cluster"`
-		Node    string    `json:"node"`
-		CPU     struct {
-			CPUUsageNanoCores string `json:"CPUUsageNanoCores"`
-		} `json:"cpu"`
-		Memory struct {
-			MemoryAvailableBytes  string `json:"MemoryAvailableBytes"`
-			MemoryUsageBytes      string `json:"MemoryUsageBytes"`
-			MemoryWorkingSetBytes string `json:"MemoryWorkingSetBytes"`
-		} `json:"memory"`
-		Fs struct {
-			FsAvailableBytes string `json:"FsAvailableBytes"`
-			FsCapacityBytes  string `json:"FsCapacityBytes"`
-			FsUsedBytes      string `json:"FsUsedBytes"`
-		} `json:"fs"`
-		Network struct {
-			NetworkRxBytes string `json:"NetworkRxBytes"`
-			NetworkTxBytes string `json:"NetworkTxBytes"`
-		} `json:"network"`
-	} `json:"nodemetrics"`
-}
-
 func Calculate_Node_Metric(cluster_name string) {
-	var jsonarray NodeMetric
+	var jsonarray metric.NodeMetric
 	nodeNum := 2
 	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
 	stringArray := string(jsonByteArray[:])
@@ -303,79 +231,79 @@ func Calculate_Node_Metric(cluster_name string) {
 
 	for i := 0; i < nodeNum; i++ {
 
-		fmt.Println("------------------------------------------------------------------")
-		fmt.Println("[", i+1, "] Node:", jsonarray.Nodemetrics[i].Node, " Metric Information")
-		fmt.Println("NodeMetric        :", jsonarray.Nodemetrics[i].Node)
-		fmt.Println("Time              :", jsonarray.Nodemetrics[i].Time)
-		fmt.Println("Cpu               :", jsonarray.Nodemetrics[i].CPU)
-		fmt.Println("Cluster           :", jsonarray.Nodemetrics[i].Cluster)
-		fmt.Println("Memory           :", jsonarray.Nodemetrics[i].Memory)
+		klog.Info("------------------------------------------------------------------")
+		klog.Info("[", i+1, "] Node:", jsonarray.Nodemetrics[i].Node, " Metric Information")
+		klog.Info("NodeMetric        :", jsonarray.Nodemetrics[i].Node)
+		klog.Info("Time              :", jsonarray.Nodemetrics[i].Time)
+		klog.Info("Cpu               :", jsonarray.Nodemetrics[i].CPU)
+		klog.Info("Cluster           :", jsonarray.Nodemetrics[i].Cluster)
+		klog.Info("Memory           :", jsonarray.Nodemetrics[i].Memory)
 
 		// memoryusage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
 		// if err != nil {
 		// 	// handle error
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// 	os.Exit(2)
 		// }
 
 		// // memoryusage, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "Mi"), 32)
 		// // if err != nil {
 		// // 	// handle error
-		// // 	fmt.Println(err)
+		// // 	klog.Error(err)
 		// // 	os.Exit(2)
 		// // }
 		// memorytotal, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
 		// if err != nil {
 		// 	// handle error
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// 	os.Exit(2)
 		// }
 
 		// memorytotal, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "Mi"), 32)
 		// if err != nil {
 		// 	// handle error
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// 	os.Exit(2)
 		// }
 
 		CpuUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
 		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
-		fmt.Println("MemoryUsage: ", MemoryUsage)
+		klog.Info("MemoryUsage: ", MemoryUsage)
 		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
 
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
-		fmt.Println("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
+		klog.Info("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
 		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
-		fmt.Println("MemoryAvailableBytes: ", MemoryAvailableBytes)
+		klog.Info("MemoryAvailableBytes: ", MemoryAvailableBytes)
 		CpuUsage = CpuUsage / 1000000000
 		MemoryUsage = MemoryUsage / (MemoryWorkingSetBytes + MemoryAvailableBytes)
-		fmt.Println("-------------CpuUsage:", CpuUsage, "---------------")
-		fmt.Println("-------------MemoryUsage:", MemoryUsage, "---------------")
+		klog.Info("-------------CpuUsage:", CpuUsage, "---------------")
+		klog.Info("-------------MemoryUsage:", MemoryUsage, "---------------")
 
 	}
 }
 
 func Calculate_Cluster_Metric(cluster_name string) {
-	var jsonarray NodeMetric
+	var jsonarray metric.NodeMetric
 	node_num := 2
 	jsonByteArray := handler.GetResource(1, "eks-cluster", "nodes")
 	stringArray := string(jsonByteArray[:])
@@ -387,135 +315,135 @@ func Calculate_Cluster_Metric(cluster_name string) {
 	ClusterMemoryUsage := 0.0
 	var Usage float64
 	for i := 0; i < node_num; i++ {
-		fmt.Println("ClusterMemoryTotal: ", ClusterMemoryTotal)
+		klog.Info("ClusterMemoryTotal: ", ClusterMemoryTotal)
 
 		MemoryUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
-		fmt.Println("MemoryUsage: ", MemoryUsage)
+		klog.Info("MemoryUsage: ", MemoryUsage)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
 
 		MemoryWorkingSetBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryWorkingSetBytes, "KiMi"), 32)
-		fmt.Println("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
+		klog.Info("MemoryWorkingSetBytes: ", MemoryWorkingSetBytes)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
 
 		MemoryAvailableBytes, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Nodemetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
-		fmt.Println("MemoryAvailableBytes: ", MemoryAvailableBytes)
+		klog.Info("MemoryAvailableBytes: ", MemoryAvailableBytes)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
 
 		ClusterMemoryTotal = MemoryWorkingSetBytes + MemoryAvailableBytes + ClusterMemoryTotal
-		fmt.Println("ClusterMemoryTotal: ", ClusterMemoryTotal)
+		klog.Info("ClusterMemoryTotal: ", ClusterMemoryTotal)
 		ClusterMemoryUsage = ClusterMemoryUsage + MemoryUsage
 
 	}
 
 	Usage = ClusterMemoryUsage / ClusterMemoryTotal
 
-	fmt.Println("-------------------Cluster:", cluster_name, "Metric information-------------------")
-	fmt.Println("Print Cluster : ", cluster_name)
-	fmt.Println("Cluster total Memory            : ", ClusterMemoryTotal)
-	fmt.Println("Cluster USED Memory            : ", ClusterMemoryUsage)
-	fmt.Println("Cluster", cluster_name, "Memory Usage: ", Usage)
+	klog.Info("-------------------Cluster:", cluster_name, "Metric information-------------------")
+	klog.Info("Print Cluster : ", cluster_name)
+	klog.Info("Cluster total Memory            : ", ClusterMemoryTotal)
+	klog.Info("Cluster USED Memory            : ", ClusterMemoryUsage)
+	klog.Info("Cluster", cluster_name, "Memory Usage: ", Usage)
 }
 
 func Calculate_WatchingLevel(podNum int, clusterName string) {
 	var watchingLevel = 0
-	var jsonarray PodMetric
+	var jsonarray metric.PodMetric
 	jsonByteArray := handler.GetResource(podNum, clusterName, "pods")
 	stringArray := string(jsonByteArray[:])
 	if err := json.Unmarshal([]byte(stringArray), &jsonarray); err != nil {
 		panic(err)
 	}
-	fmt.Println("----------------------------------------------------------")
-	fmt.Println("Print Cluster : ", clusterName)
-	fmt.Println("")
+	klog.Info("----------------------------------------------------------")
+	klog.Info("Print Cluster : ", clusterName)
+	klog.Info("")
 
 	//파드 개수를 가져와서 for문의 변수로 넣어주어야 함
 
 	for i := 0; i < podNum; i++ {
 
-		fmt.Println("------------------------------------------------------------------")
-		fmt.Println("[", i+1, "] Pod:", jsonarray.Podmetrics[i].Pod, " Metric Information")
-		fmt.Println("PodMetric         :", jsonarray.Podmetrics[i].Pod)
-		fmt.Println("Time              :", jsonarray.Podmetrics[i].Time)
-		fmt.Println("Cpu               :", jsonarray.Podmetrics[i].CPU)
-		fmt.Println("Cluster           :", jsonarray.Podmetrics[i].Cluster)
-		fmt.Println("Memory            :", jsonarray.Podmetrics[i].Memory)
-		fmt.Println("Namespace         :", jsonarray.Podmetrics[i].Namespace)
+		klog.Info("------------------------------------------------------------------")
+		klog.Info("[", i+1, "] Pod:", jsonarray.Podmetrics[i].Pod, " Metric Information")
+		klog.Info("PodMetric         :", jsonarray.Podmetrics[i].Pod)
+		klog.Info("Time              :", jsonarray.Podmetrics[i].Time)
+		klog.Info("Cpu               :", jsonarray.Podmetrics[i].CPU)
+		klog.Info("Cluster           :", jsonarray.Podmetrics[i].Cluster)
+		klog.Info("Memory            :", jsonarray.Podmetrics[i].Memory)
+		klog.Info("Namespace         :", jsonarray.Podmetrics[i].Namespace)
 
 		// memoryusage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "KiMi"), 32)
 		// if err != nil {
 		// 	// handle error
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// 	os.Exit(2)
 		// }
 
 		// // memoryusage, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryUsageBytes, "Mi"), 32)
 		// // if err != nil {
 		// // 	// handle error
-		// // 	fmt.Println(err)
+		// // 	klog.Error(err)
 		// // 	os.Exit(2)
 		// // }
 		// memorytotal, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "KiMi"), 32)
 		// if err != nil {
 		// 	// handle error
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// 	os.Exit(2)
 		// }
 
 		// memorytotal, err = strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].Memory.MemoryAvailableBytes, "Mi"), 32)
 		// if err != nil {
 		// 	// handle error
-		// 	fmt.Println(err)
+		// 	klog.Error(err)
 		// 	os.Exit(2)
 		// }
 
 		CpuUsage, err := strconv.ParseFloat(strings.TrimRight(jsonarray.Podmetrics[i].CPU.CPUUsageNanoCores, "n"), 32)
 		if err != nil {
 			// handle error
-			fmt.Println(err)
+			klog.Error(err)
 			os.Exit(2)
 		}
 		CpuUsage = CpuUsage / 1000000000
 		if CpuUsage != 0 {
-			fmt.Println("CpuUsage          : ", CpuUsage)
+			klog.Info("CpuUsage          : ", CpuUsage)
 			switch {
 			case CpuUsage <= 0.2:
 				watchingLevel = 1
-				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				klog.Info("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
 			case CpuUsage <= 0.4:
 				watchingLevel = 2
-				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				klog.Info("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
 			case CpuUsage <= 0.6:
 				watchingLevel = 3
-				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				klog.Info("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
 			case CpuUsage <= 0.8:
 				watchingLevel = 4
-				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				klog.Info("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
 			case CpuUsage <= 1:
 				watchingLevel = 5
-				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				klog.Info("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
 			case CpuUsage > 1:
 				watchingLevel = 5
-				fmt.Println("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
-				fmt.Println("Watching Level is over 5")
-				fmt.Println("!!!!!!!!!!!!!!!", jsonarray.Podmetrics[i].Pod, "!!!!!!!!!!!!!!!!!!!")
+				klog.Info("Pod Name ", jsonarray.Podmetrics[i].Pod, "watching Level is ", watchingLevel)
+				klog.Info("Watching Level is over 5")
+				klog.Info("!!!!!!!!!!!!!!!", jsonarray.Podmetrics[i].Pod, "!!!!!!!!!!!!!!!!!!!")
 			}
 		} else {
-			fmt.Println("This Pod use 0 Cpu nanocores")
+			klog.Info("This Pod use 0 Cpu nanocores")
 		}
 	}
-	fmt.Println("------------------------------------------")
+	klog.Info("------------------------------------------")
 }
 
 func AutoSacling() {

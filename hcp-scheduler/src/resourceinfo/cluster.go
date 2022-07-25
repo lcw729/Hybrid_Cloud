@@ -4,11 +4,11 @@ import (
 	"Hybrid_Cloud/pkg/apis/hcpcluster/v1alpha1"
 	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"context"
-	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/rest"
+	"k8s.io/klog"
 )
 
 func NewClusterInfoList() *ClusterInfoList {
@@ -16,7 +16,7 @@ func NewClusterInfoList() *ClusterInfoList {
 	var clusterInfo_list ClusterInfoList
 	joinCluster_list, err := JoinClusterList()
 	if err != nil {
-		fmt.Println(err)
+		klog.Errorln(err)
 		return nil
 	}
 
@@ -51,7 +51,7 @@ func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 	var joinCluster_list []v1alpha1.HCPCluster
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		fmt.Println("err")
+		klog.Errorln(err)
 		return nil, err
 	}
 
@@ -59,7 +59,7 @@ func JoinClusterList() ([]v1alpha1.HCPCluster, error) {
 
 	cluster_list, err := cluster_client.HcpV1alpha1().HCPClusters("hcp").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		fmt.Println("err")
+		klog.Errorln(err)
 		return nil, err
 	}
 
@@ -90,6 +90,6 @@ func CreateImageExistenceMap(clusterinfoList *ClusterInfoList) map[string]sets.S
 			}
 		}
 	}
-	fmt.Println()
+	klog.Infoln()
 	return imageExistenceMap
 }

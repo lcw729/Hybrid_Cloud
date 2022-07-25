@@ -4,9 +4,9 @@ import (
 	"Hybrid_Cloud/hcp-scheduler/src/framework/plugins"
 	"Hybrid_Cloud/hcp-scheduler/src/resourceinfo"
 	"Hybrid_Cloud/hcp-scheduler/src/util"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog"
 )
 
 type NodeResourcesFit struct{}
@@ -22,20 +22,20 @@ func (p1 *NodeResourcesFit) Filter(pod *v1.Pod, status *resourceinfo.CycleStatus
 	for _, nodeInfo := range clusterInfo.Nodes {
 		insufficientResources := fitsRequest(pod, nodeInfo)
 		if len(insufficientResources) == 0 {
-			fmt.Println("All resources is sufficient")
+			klog.Infoln("All resources is sufficient")
 			return false
 		} else {
 			for _, insufficientResource := range insufficientResources {
 				reason := insufficientResource.Reason
-				fmt.Printf("Reason: %s\n", reason)
+				klog.Infof("Reason: %s\n", reason)
 				if reason == "Too many pods" {
-					fmt.Printf("Current Pod Number: %d\n", insufficientResource.Used)
-					fmt.Printf("Allowed Pod Number: %d\n", insufficientResource.Capacity)
-					fmt.Println()
+					klog.Infof("Current Pod Number: %d\n", insufficientResource.Used)
+					klog.Infof("Allowed Pod Number: %d\n", insufficientResource.Capacity)
+					klog.Infoln()
 				} else {
-					fmt.Printf("%s RequestedResources: %d\n", insufficientResource.ResourceName, insufficientResource.RequestedResources)
-					fmt.Printf("%s Used: %d\n", insufficientResource.ResourceName, insufficientResource.Used)
-					fmt.Printf("%s Capacity: %d\n", insufficientResource.ResourceName, insufficientResource.Capacity)
+					klog.Infof("%s RequestedResources: %d\n", insufficientResource.ResourceName, insufficientResource.RequestedResources)
+					klog.Infof("%s Used: %d\n", insufficientResource.ResourceName, insufficientResource.Used)
+					klog.Infof("%s Capacity: %d\n", insufficientResource.ResourceName, insufficientResource.Capacity)
 				}
 			}
 		}
