@@ -45,3 +45,19 @@ spec:
   selector:
     matchLabels:
       app: nks-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: init
+  namespace: hcp
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: cluster-manager
+  selector:
+    matchLabels:
+      app: init

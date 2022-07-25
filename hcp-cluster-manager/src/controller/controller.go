@@ -7,6 +7,7 @@ import (
 	informer "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/informers/externalversions/hcpcluster/v1alpha1"
 	lister "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/listers/hcpcluster/v1alpha1"
 	hcpclusterscheme "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	"Hybrid_Cloud/util"
 	"Hybrid_Cloud/util/clientset"
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
@@ -339,6 +340,13 @@ func JoinCluster(clustername string,
 
 	master_client := kubernetes.NewForConfigOrDie(master_config)
 	join_cluster_client := kubernetes.NewForConfigOrDie(join_cluster_config)
+
+	str, err := util.CmdExec("/root/.vpa/hack/vpa-up.sh " + clustername)
+	if err != nil {
+		klog.Errorln(err)
+	} else {
+		klog.Info(str)
+	}
 
 	ns := "kube-federation-system"
 	// 1. CREATE namespace "kube-federation-system"

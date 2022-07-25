@@ -40,6 +40,8 @@ spec:
             mountPath: /root/.aws
           - name: nksconfig 
             mountPath: /root/.ncloud
+          - name: init
+            mountPath: /root/.vpa
       volumes:
       - name: kubeconfig
         persistentVolumeClaim: 
@@ -50,6 +52,9 @@ spec:
       - name: nksconfig
         persistentVolumeClaim:
           claimName: pvc-nks-config
+      - name: init
+        persistentVolumeClaim:
+          claimName: init
       tolerations:
         - key: node.kubernetes.io/not-ready
           effect: NoExecute
