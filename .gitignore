@@ -55,6 +55,7 @@ go.work
 /old-code-generator/
 /main/main
 /.vscode/
+_output/bin/
 
 dist/
 imports/*
