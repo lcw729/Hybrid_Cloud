@@ -1,7 +1,7 @@
 package handler
 
 import (
-	resourcev1alpha1 "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"encoding/json"
@@ -11,7 +11,9 @@ import (
 	"github.com/gorilla/mux"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	vpaclientset "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/client/clientset/versioned"
 	"k8s.io/klog"
 )
 
@@ -61,7 +63,7 @@ func CreateDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		hcp_resource := deploymentToHCPDeployment(real_resource)
-		hcp_resource.Spec.SchedulingResult.Targets = append(hcp_resource.Spec.SchedulingResult.Targets, resourcev1alpha1.Target{
+		hcp_resource.Spec.SchedulingResult.Targets = append(hcp_resource.Spec.SchedulingResult.Targets, v1alpha1.Target{
 			Cluster:  resource.TargetCluster,
 			Replicas: real_resource.Spec.Replicas,
 		})
@@ -143,7 +145,7 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 	// TargetCluster가 지정되지 않은 경우
 	if resource.TargetCluster == "undefined" {
 		// HCPDeployment 생성하기
-		hcp_resource := resourcev1alpha1.HCPPod{
+		hcp_resource := v1alpha1.HCPPod{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "HCPPod",
 				APIVersion: "hcp.crd.com/v1alpha1",
@@ -151,7 +153,7 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: real_resource.Name,
 			},
-			Spec: resourcev1alpha1.HCPPodSpec{
+			Spec: v1alpha1.HCPPodSpec{
 				RealPodSpec:     real_resource.Spec,
 				RealPodMetadata: real_resource.ObjectMeta,
 
@@ -166,7 +168,7 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 			klog.Error(err)
 			return
 		} else {
-			klog.Info("request scheduling to scheduler : %s \n", r.Name)
+			klog.Infof("request scheduling to scheduler : %s \n", r.Name)
 		}
 	} else {
 		// TargetCluster가 지정된 경우
@@ -185,18 +187,130 @@ func CreatePodHandler(w http.ResponseWriter, r *http.Request) {
 			klog.Error(err)
 			return
 		} else {
-			klog.Info("Succeed to create pod %s \n", r.Name)
+			klog.Infof("Succeed to create pod %s \n", r.Name)
 		}
 	}
 }
 
-func CreateHCPHASHandler() {
+func CreateHCPHASHandler(w http.ResponseWriter, r *http.Request) {
+	klog.Info("Called CreateHCPHASHandler")
+	var resource Resource
 
+	jsonDataFromHttp, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(jsonDataFromHttp, &resource)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	// RealResource 읽어오기
+	var real_resource *v1alpha1.HCPHybridAutoScaler
+	bytes, _ := json.Marshal(resource.RealResource)
+	json.Unmarshal(bytes, &real_resource)
+
+	cm, _ := clusterManager.NewClusterManager()
+
+	name := real_resource.Spec.ScalingOptions.HpaTemplate.Spec.ScaleTargetRef.Name
+	klog.Infof("[1]Get HCPDeployment %s\n", name)
+	_, err = cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		klog.Error(err)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		// has 삭제
+		klog.Infof("[2]Create HCPHAS %s\n", real_resource.ObjectMeta.Name)
+		real_resource.Status.ResourceStatus = "CREATED"
+		r, err := cm.HCPResource_Client.HcpV1alpha1().HCPHybridAutoScalers("hcp").Create(context.TODO(), real_resource, metav1.CreateOptions{})
+		if err != nil {
+			klog.Error(err)
+			w.Write([]byte(err.Error()))
+			return
+		} else {
+			str := "Succeed to create hcphas " + r.ObjectMeta.Name
+			klog.Info(str)
+			w.Write([]byte(str + "\n"))
+		}
+
+	}
 }
 
-func deploymentToHCPDeployment(real_resource *appsv1.Deployment) resourcev1alpha1.HCPDeployment {
+func DeleteHCPHASHandler(w http.ResponseWriter, r *http.Request) {
+	klog.Info("Called DeleteHCPHASHandler")
+	vars := mux.Vars(r)
+	name := vars["name"]
+	cm, _ := clusterManager.NewClusterManager()
+
+	klog.Infof("[1]Get HCPDeployment %s", name)
+	hcpdeployment, err := cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+
+		targets := hcpdeployment.Spec.SchedulingResult.Targets
+		deployment := hcpdeployment.Spec.RealDeploymentMetadata
+		var namespace string
+		if deployment.Namespace == "" {
+			namespace = "default"
+		} else {
+			namespace = deployment.Namespace
+		}
+		for _, target := range targets {
+
+			target_clientset := cm.Cluster_kubeClients[target.Cluster]
+			target_config := cm.Cluster_configs[target.Cluster]
+			vpa_clientset, _ := vpaclientset.NewForConfig(target_config)
+
+			// hpa 삭제
+			klog.Infof("[2-1]Delete HPA %s in cluster %s\n", name, target.Cluster)
+			_, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+			if !errors.IsNotFound(err) {
+				err = target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+				if err != nil {
+					w.Write([]byte(err.Error() + "\n"))
+				} else {
+					klog.Infof("Succeed to delete hpa %s \n", name)
+				}
+			} else {
+				klog.Error(err)
+				w.Write([]byte(err.Error()))
+			}
+
+			// vpa 삭제
+			klog.Infof("[2-1]Delete VPA %s in cluster %s\n", name, target.Cluster)
+			_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+			if !errors.IsNotFound(err) {
+				err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+				if err != nil {
+					w.Write([]byte(err.Error() + "\n"))
+				} else {
+					klog.Infof("Succeed to delete vpa %s \n", name)
+				}
+			} else {
+				klog.Error(err)
+				w.Write([]byte(err.Error()))
+			}
+
+			// has 삭제
+			klog.Infof("[2-2]Delete HCPHAS %s", name)
+			err = cm.HCPResource_Client.HcpV1alpha1().HCPHybridAutoScalers("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
+			if err != nil {
+				w.Write([]byte(err.Error() + "\n"))
+			} else {
+				str := "Succeed to create hcphas " + name
+				klog.Infof("Succeed to delete hcphas %s \n", name)
+				w.Write([]byte(str + "\n"))
+			}
+		}
+	}
+}
+
+func deploymentToHCPDeployment(real_resource *appsv1.Deployment) v1alpha1.HCPDeployment {
 	// HCPDeployment 생성하기
-	hcp_resource := resourcev1alpha1.HCPDeployment{
+	hcp_resource := v1alpha1.HCPDeployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HCPDeployment",
 			APIVersion: "hcp.crd.com/v1alpha1",
@@ -204,7 +318,7 @@ func deploymentToHCPDeployment(real_resource *appsv1.Deployment) resourcev1alpha
 		ObjectMeta: metav1.ObjectMeta{
 			Name: real_resource.Name,
 		},
-		Spec: resourcev1alpha1.HCPDeploymentSpec{
+		Spec: v1alpha1.HCPDeploymentSpec{
 			RealDeploymentSpec:     real_resource.Spec,
 			RealDeploymentMetadata: real_resource.ObjectMeta,
 

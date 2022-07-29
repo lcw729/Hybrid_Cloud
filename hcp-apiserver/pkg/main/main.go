@@ -133,6 +133,8 @@ func handlerRequests() http.Handler {
 	// HCPResource
 	mux.HandleFunc("/resources/namespaces/{namespace}/deployments", handler.CreateDeploymentHandler).Methods("POST")
 	mux.HandleFunc("/resources/namespaces/{namespace}/deployments/{name}", handler.DeleteDeploymentHandler).Methods("DELETE")
+	mux.HandleFunc("/resources/namespaces/{namespace}/hcphybridautoscalers", handler.CreateHCPHASHandler).Methods("POST")
+	mux.HandleFunc("/resources/namespaces/{namespace}/hcphybridautoscalers/{name}", handler.DeleteHCPHASHandler).Methods("DELETE")
 	mux.HandleFunc("/resources/pod", handler.CreatePodHandler).Methods("POST")
 
 	return mux
