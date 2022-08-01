@@ -94,11 +94,6 @@ func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 	hcpdeployment, err := cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
 
 	if !hcpdeployment.Spec.SchedulingNeed && hcpdeployment.Spec.SchedulingComplete {
-		// if target_cluster != "" {
-		// 	config, _ := cobrautil.BuildConfigFromFlags(target_cluster, "/root/.kube/config")
-		// 	clientset, _ := kubernetes.NewForConfig(config)
-		// 	err = clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-		// } else {
 		targets := hcpdeployment.Spec.SchedulingResult.Targets
 		for _, target := range targets {
 			// TODO : cluster unregister한 경우
@@ -106,7 +101,6 @@ func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 			clientset := cm.Cluster_kubeClients[target.Cluster]
 			err = clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 		}
-		// }
 	}
 
 	if err != nil {
@@ -114,6 +108,10 @@ func DeleteDeploymentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		klog.Info("Succeed to delete deployment %s \n", name)
+
+		cm.HCPResource_Client.HcpV1alpha1().HCPHybridAutoScalers("hcp").Get(context.TODO(), name, metav1.GetOptions{})
+		deleteHCPHAS(hcpdeployment, name)
+
 		err = cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
 		if err != nil {
 			klog.Error(err)
@@ -242,6 +240,7 @@ func DeleteHCPHASHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
 	cm, _ := clusterManager.NewClusterManager()
+	var msg string
 
 	klog.Infof("[1]Get HCPDeployment %s", name)
 	hcpdeployment, err := cm.HCPResource_Client.HcpV1alpha1().HCPDeployments("hcp").Get(context.TODO(), name, metav1.GetOptions{})
@@ -249,63 +248,135 @@ func DeleteHCPHASHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	} else {
+		msg = deleteHCPHAS(hcpdeployment, name)
+		// targets := hcpdeployment.Spec.SchedulingResult.Targets
+		// deployment := hcpdeployment.Spec.RealDeploymentMetadata
+		// var namespace string
+		// if deployment.Namespace == "" {
+		// 	namespace = "default"
+		// } else {
+		// 	namespace = deployment.Namespace
+		// }
+		// for _, target := range targets {
 
-		targets := hcpdeployment.Spec.SchedulingResult.Targets
-		deployment := hcpdeployment.Spec.RealDeploymentMetadata
-		var namespace string
-		if deployment.Namespace == "" {
-			namespace = "default"
-		} else {
-			namespace = deployment.Namespace
-		}
-		for _, target := range targets {
+		// 	target_clientset := cm.Cluster_kubeClients[target.Cluster]
+		// 	target_config := cm.Cluster_configs[target.Cluster]
+		// 	vpa_clientset, _ := vpaclientset.NewForConfig(target_config)
 
-			target_clientset := cm.Cluster_kubeClients[target.Cluster]
-			target_config := cm.Cluster_configs[target.Cluster]
-			vpa_clientset, _ := vpaclientset.NewForConfig(target_config)
+		// 	// hpa 삭제
+		// 	klog.Infof("[2-1]Delete HPA %s in cluster %s\n", name, target.Cluster)
+		// 	_, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		// 	if !errors.IsNotFound(err) {
+		// 		err = target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+		// 		if err != nil {
+		// 			msg += err.Error() + "\n"
+		// 		} else {
+		// 			str := "Succeed to delete hpa " + name
+		// 			klog.Infof("Succeed to delete hpa %s \n", name)
+		// 			msg += str + "\n"
+		// 		}
+		// 	} else {
+		// 		klog.Error(err)
+		// 		msg += err.Error() + "\n"
+		// 	}
 
-			// hpa 삭제
-			klog.Infof("[2-1]Delete HPA %s in cluster %s\n", name, target.Cluster)
-			_, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-			if !errors.IsNotFound(err) {
-				err = target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-				if err != nil {
-					w.Write([]byte(err.Error() + "\n"))
-				} else {
-					klog.Infof("Succeed to delete hpa %s \n", name)
-				}
-			} else {
-				klog.Error(err)
-				w.Write([]byte(err.Error()))
-			}
+		// 	// vpa 삭제
+		// 	klog.Infof("[2-1]Delete VPA %s in cluster %s\n", name, target.Cluster)
+		// 	_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		// 	if !errors.IsNotFound(err) {
+		// 		err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+		// 		if err != nil {
+		// 			msg += err.Error() + "\n"
+		// 		} else {
+		// 			str := "Succeed to delete vpa " + name
+		// 			klog.Infof("Succeed to delete vpa %s \n", name)
+		// 			msg += str + "\n"
+		// 		}
+		// 	} else {
+		// 		klog.Error(err)
+		// 		msg += err.Error() + "\n"
+		// 	}
 
-			// vpa 삭제
-			klog.Infof("[2-1]Delete VPA %s in cluster %s\n", name, target.Cluster)
-			_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-			if !errors.IsNotFound(err) {
-				err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-				if err != nil {
-					w.Write([]byte(err.Error() + "\n"))
-				} else {
-					klog.Infof("Succeed to delete vpa %s \n", name)
-				}
-			} else {
-				klog.Error(err)
-				w.Write([]byte(err.Error()))
-			}
+		// 	// has 삭제
+		// 	klog.Infof("[2-2]Delete HCPHAS %s", name)
+		// 	err = cm.HCPResource_Client.HcpV1alpha1().HCPHybridAutoScalers("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
+		// 	if err != nil {
+		// 		msg += err.Error() + "\n"
+		// 	} else {
+		// 		str := "Succeed to delete hcphas " + name
+		// 		klog.Infof("Succeed to delete hcphas %s \n", name)
+		// 		msg += str + "\n"
+		// 	}
 
-			// has 삭제
-			klog.Infof("[2-2]Delete HCPHAS %s", name)
-			err = cm.HCPResource_Client.HcpV1alpha1().HCPHybridAutoScalers("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
+		w.Write([]byte(msg))
+		// }
+	}
+}
+
+func deleteHCPHAS(hcpdeployment *v1alpha1.HCPDeployment, name string) string {
+
+	var msg string
+
+	targets := hcpdeployment.Spec.SchedulingResult.Targets
+	deployment := hcpdeployment.Spec.RealDeploymentMetadata
+	var namespace string
+	if deployment.Namespace == "" {
+		namespace = "default"
+	} else {
+		namespace = deployment.Namespace
+	}
+	for _, target := range targets {
+
+		target_clientset := cm.Cluster_kubeClients[target.Cluster]
+		target_config := cm.Cluster_configs[target.Cluster]
+		vpa_clientset, _ := vpaclientset.NewForConfig(target_config)
+
+		// hpa 삭제
+		klog.Infof("[2-1]Delete HPA %s in cluster %s\n", name, target.Cluster)
+		_, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		if !errors.IsNotFound(err) {
+			err = target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 			if err != nil {
-				w.Write([]byte(err.Error() + "\n"))
+				msg += err.Error() + "\n"
 			} else {
-				str := "Succeed to create hcphas " + name
-				klog.Infof("Succeed to delete hcphas %s \n", name)
-				w.Write([]byte(str + "\n"))
+				str := "Succeed to delete hpa " + name
+				klog.Infof("Succeed to delete hpa %s \n", name)
+				msg += str + "\n"
 			}
+		} else {
+			klog.Error(err)
+			msg += err.Error() + "\n"
+		}
+
+		// vpa 삭제
+		klog.Infof("[2-1]Delete VPA %s in cluster %s\n", name, target.Cluster)
+		_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		if !errors.IsNotFound(err) {
+			err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+			if err != nil {
+				msg += err.Error() + "\n"
+			} else {
+				str := "Succeed to delete vpa " + name
+				klog.Infof("Succeed to delete vpa %s \n", name)
+				msg += str + "\n"
+			}
+		} else {
+			klog.Error(err)
+			msg += err.Error() + "\n"
+		}
+
+		// has 삭제
+		klog.Infof("[2-2]Delete HCPHAS %s", name)
+		err = cm.HCPResource_Client.HcpV1alpha1().HCPHybridAutoScalers("hcp").Delete(context.TODO(), name, metav1.DeleteOptions{})
+		if err != nil {
+			msg += err.Error() + "\n"
+		} else {
+			str := "Succeed to delete hcphas " + name
+			klog.Infof("Succeed to delete hcphas %s \n", name)
+			msg += str + "\n"
 		}
 	}
+	return msg
 }
 
 func deploymentToHCPDeployment(real_resource *appsv1.Deployment) v1alpha1.HCPDeployment {

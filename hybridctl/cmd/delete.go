@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"Hybrid_Cloud/hybridctl/util"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
+	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	resourcev1alpha1scheme "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -9,7 +12,14 @@ import (
 
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/kubernetes/scheme"
+
+	// appsv1 "k8s.io/api/apps/v1"
+	// v1 "k8s.io/api/core/v1"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -23,35 +33,22 @@ var DeleteCmd = &cobra.Command{
 	hybridctl delete -f <filename> `,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
-		file_name = util.Option_file
-		if file_name == "" {
-			if len(args) < 2 {
-				fmt.Println(cmd.Help())
-			} else {
-				LINK := "/resources"
-				namespace, _ := cmd.Flags().GetString("namespace")
-				if namespace == "" {
-					namespace = "default"
-				}
-				LINK += "/namespaces/" + namespace
+	},
+}
 
-				util.Option_Resource = args[0]
-				util.Option_Name = args[1]
-				LINK += "/deployments/" + util.Option_Name
-
-				_, err := util.GetResponseBody("DELETE", LINK, nil)
-				if err != nil {
-					fmt.Println(err)
-				}
-			}
-		} else {
-			DeleteResource()
-		}
+var DeleteResourceCmd = &cobra.Command{
+	Use:   "resource",
+	Short: "A brief description of your command",
+	Long:  ` `,
+	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Work your own magic here
+		DeleteResource()
 	},
 }
 
 func DeleteResource() {
 
+	utilruntime.Must(resourcev1alpha1scheme.AddToScheme(scheme.Scheme))
 	yaml, err := ReadFile()
 	if err != nil {
 		println(err)
@@ -68,24 +65,18 @@ func DeleteResource() {
 }
 
 func RequestDeleteResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]byte, error) {
-
 	LINK := "/resources"
+
 	// check context flag
-	//	flag_context := util.Option_context
-	// var target_cluster string
-	// var resource Resource
+	flag_context := cobrautil.Option_context
+	var target_cluster string
+	var resource HCPResource
 
-	// config, _ := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-	// 	&clientcmd.ClientConfigLoadingRules{ExplicitPath: "/root/.kube/config"},
-	// 	&clientcmd.ConfigOverrides{
-	// 		CurrentContext: "",
-	// 	}).RawConfig()
-
-	// if flag_context == "" {
-	// 	target_cluster = ""
-	// } else {
-	// 	target_cluster = flag_context
-	// }
+	if flag_context == "" {
+		target_cluster = ""
+	} else {
+		target_cluster = flag_context
+	}
 
 	// match obj kind
 	switch gvk.Kind {
@@ -95,13 +86,29 @@ func RequestDeleteResource(obj runtime.Object, gvk *schema.GroupVersionKind) ([]
 		if namespace == "" {
 			namespace = "default"
 		}
-		LINK += "/namespaces/" + namespace + "/deployments/" + real_resource.Name
+		resource.TargetCluster = target_cluster
+		resource.RealResource = real_resource
+		LINK += "/namespaces/" + namespace + "/deployments/" + real_resource.ObjectMeta.Name
+	case "Pod":
+		LINK += "/pod"
+		real_resource := obj.(*v1.Pod)
+		resource.TargetCluster = target_cluster
+		resource.RealResource = real_resource
+	case "HCPHybridAutoScaler":
+		real_resource := obj.(*v1alpha1.HCPHybridAutoScaler)
+		namespace := "hcp" // hcp로 고정
+		real_resource.Namespace = namespace
+		resource.TargetCluster = "master"
+		resource.RealResource = real_resource
+		LINK += "/namespaces/" + namespace + "/hcphybridautoscalers/" + real_resource.ObjectMeta.Name
 	}
 
 	fmt.Println(LINK)
-	bytes, err := util.GetResponseBody("DELETE", LINK, nil)
+	bytes, err := cobrautil.GetResponseBody("DELETE", LINK, &resource)
 	if err != nil {
 		fmt.Println(err)
+	} else {
+		fmt.Println(string(bytes))
 	}
 
 	return bytes, err
@@ -417,12 +424,13 @@ func delete_eks(info Cli) {
 
 func init() {
 	RootCmd.AddCommand(DeleteCmd)
+	DeleteCmd.AddCommand(DeleteResourceCmd)
 	DeleteCmd.AddCommand(deleteClusterCmd)
 	DeleteCmd.AddCommand(deleteNodeCmd)
-	DeleteCmd.Flags().StringVarP(&util.Option_file, "file", "f", "", "FILENAME")
-	DeleteCmd.MarkFlagRequired("file")
-	DeleteCmd.Flags().StringVarP(&util.Option_context, "context", "", "", "CLUSTERNAME")
-	DeleteCmd.Flags().StringP("namespace", "n", "default", "enter the namespace")
+	DeleteResourceCmd.Flags().StringVarP(&util.Option_file, "file", "f", "", "FILENAME")
+	DeleteResourceCmd.MarkFlagRequired("file")
+	DeleteResourceCmd.Flags().StringVarP(&util.Option_context, "context", "", "", "CLUSTERNAME")
+	DeleteResourceCmd.Flags().StringP("namespace", "n", "default", "enter the namespace")
 
 	deleteClusterCmd.Flags().String("platform", "", "input your platform name")
 	deleteClusterCmd.Flags().String("cluster-name", "", "input your cluster name")

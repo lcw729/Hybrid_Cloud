@@ -3,6 +3,7 @@ package cmd
 import (
 	cobrautil "Hybrid_Cloud/hybridctl/util"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
+	resourcev1alpha1scheme "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +15,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
@@ -38,7 +40,7 @@ to quickly create a Cobra application.`,
 	},
 }
 
-var ResourceCmd = &cobra.Command{
+var CreateResourceCmd = &cobra.Command{
 	Use:   "resource",
 	Short: "A brief description of your command",
 	Long:  ` `,
@@ -54,6 +56,8 @@ func CreateResource() {
 		println(err)
 		return
 	}
+
+	fmt.Println("here")
 	obj, gvk, err := GetObject(yaml)
 	if err != nil {
 		println(err)
@@ -76,6 +80,7 @@ func ReadFile() ([]byte, error) {
 
 func GetObject(yaml []byte) (runtime.Object, *schema.GroupVersionKind, error) {
 
+	utilruntime.Must(resourcev1alpha1scheme.AddToScheme(scheme.Scheme))
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 
 	obj, gvk, err := decode([]byte(yaml), nil, nil)
@@ -575,13 +580,13 @@ func create_gke(info Cli) {
 
 func init() {
 	RootCmd.AddCommand(Createcmd)
-	Createcmd.AddCommand(ResourceCmd)
+	Createcmd.AddCommand(CreateResourceCmd)
 	Createcmd.AddCommand(createClusterCmd)
 	Createcmd.AddCommand(createNodeCmd)
 	Createcmd.AddCommand(uniCmd)
-	ResourceCmd.Flags().StringVarP(&cobrautil.Option_file, "file", "f", "", "FILENAME")
-	ResourceCmd.MarkFlagRequired("file")
-	ResourceCmd.Flags().StringVarP(&cobrautil.Option_context, "context", "", "", "CLUSTERNAME")
+	CreateResourceCmd.Flags().StringVarP(&cobrautil.Option_file, "file", "f", "", "FILENAME")
+	CreateResourceCmd.MarkFlagRequired("file")
+	CreateResourceCmd.Flags().StringVarP(&cobrautil.Option_context, "context", "", "", "CLUSTERNAME")
 
 	uniCmd.Flags().String("pod-name", "", "input your uni-pod name")
 	createClusterCmd.Flags().String("platform", "", "input your platform name")

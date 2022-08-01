@@ -30,6 +30,9 @@ case "$1" in
     "gke")
         gcloud container clusters get-credentials "$2"
         ;;
+    "nks")
+        ncp-iam-authenticator create-kubeconfig --region "$3" --clusterUuid "$2" --output ~/.kube/kubeconfig
+        ;;
 esac
 
 if [ "$?" -ne 0 ]; then

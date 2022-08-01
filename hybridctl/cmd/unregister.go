@@ -20,6 +20,7 @@ import (
 	"Hybrid_Cloud/util/clientset"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -104,25 +105,27 @@ var unregisterCmd = &cobra.Command{
 						if err != nil {
 							log.Println(err)
 						}
+
 						if cluster.Spec.JoinStatus == "UNJOINING" {
+							timer := time.NewTimer(time.Second * 7)
+							<-timer.C
+							fmt.Printf("Failed to UNJOIN cluster %s", clustername)
+						}
 
-							fmt.Println("yet unjoining")
+						fmt.Println(">>> delete config in kubeconfig")
+						err = cobrautil.DeleteConfig(platform, clustername)
+						if err != nil {
+							fmt.Println(err)
+						}
+
+						err = clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Delete(context.TODO(), clustername, metav1.DeleteOptions{})
+						if err != nil {
+							log.Println(err)
 						} else {
-
-							fmt.Println(">>> delete config in kubeconfig")
-							err = cobrautil.DeleteConfig(platform, clustername)
-							if err != nil {
-								fmt.Println(err)
-							}
-
-							err := clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Delete(context.TODO(), clustername, metav1.DeleteOptions{})
-							if err != nil {
-								log.Println(err)
-							} else {
-								break
-							}
+							break
 						}
 					}
+
 				} else {
 					fmt.Printf("%s does not exist\n", clustername)
 				}
