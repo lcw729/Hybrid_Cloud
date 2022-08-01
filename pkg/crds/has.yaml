@@ -36,8 +36,9 @@ spec:
               resourceStatus:
                 type: string
                 enum:
+                - CREATED
                 - WAITING
-                - DOING
+                - TERMINATING
                 - DONE
               lastSpec:
                 x-kubernetes-preserve-unknown-fields: true
