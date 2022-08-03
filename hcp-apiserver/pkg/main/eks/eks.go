@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/service/eks"
-	"k8s.io/klog"
 )
 
 func CreateAddon(w http.ResponseWriter, req *http.Request) {
@@ -78,7 +77,6 @@ func DescribeAddonVersions(w http.ResponseWriter, req *http.Request) {
 func ListAddon(w http.ResponseWriter, req *http.Request) {
 
 	var listAddonInput eks.ListAddonsInput
-	klog.Infoln("ListAddon")
 	util.Parser(req, &listAddonInput)
 	out, err := handler.EKSListAddon(listAddonInput)
 	var jsonData []byte
@@ -89,7 +87,6 @@ func ListAddon(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(jsonData))
-
 }
 
 func UpdateAddon(w http.ResponseWriter, req *http.Request) {

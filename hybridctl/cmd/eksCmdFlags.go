@@ -16,9 +16,9 @@ func eksFlags() {
 
 	EKSCreateAddonCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to create the add-on for.")
 	EKSCreateAddonCmd.MarkFlagRequired("cluster-name")
-	EKSCreateAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by DescribeAddonVersions")
+	EKSCreateAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by \"hybridctl eks addon describe-versions\" CLI")
 	EKSCreateAddonCmd.MarkFlagRequired("addon-name")
-	EKSCreateAddonCmd.Flags().StringP("addon-version", "", "", "The version of the add-on. The version must match one of the versions returned by DescribeAddonVersions")
+	EKSCreateAddonCmd.Flags().StringP("addon-version", "", "", "The version of the add-on. The version must match one of the versions returned by \"hybridctl eks addon describe-versions\" CLI")
 	EKSCreateAddonCmd.Flags().StringP("service-account-role-arn", "", "", "The Amazon Resource Name (ARN) of an existing IAM role to bind to the add-on's service account.")
 	EKSCreateAddonCmd.Flags().StringP("resolve-conflicts", "", "", "How to resolve parameter value conflicts when migrating an existing add-on to an Amazon EKS add-on. Possible values: OVERWRITE, NONE")
 	EKSCreateAddonCmd.Flags().StringP("client-request-token", "", "", "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request.")
@@ -26,15 +26,15 @@ func eksFlags() {
 
 	EKSDeleteAddonCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to delete the add-on from.")
 	EKSDeleteAddonCmd.MarkFlagRequired("cluster-name")
-	EKSDeleteAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons")
+	EKSDeleteAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons.")
 	EKSDeleteAddonCmd.MarkFlagRequired("addon-name")
 
 	EKSDescribeAddonCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster.")
 	EKSDescribeAddonCmd.MarkFlagRequired("cluster-name")
-	EKSDescribeAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons")
+	EKSDescribeAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons.")
 	EKSDescribeAddonCmd.MarkFlagRequired("addon-name")
 
-	EKSDescribeAddonVersionsCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons")
+	EKSDescribeAddonVersionsCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons.")
 	EKSDescribeAddonVersionsCmd.Flags().StringP("kubernetes-version", "", "", "The Kubernetes versions that the add-on can be used with.")
 	EKSDescribeAddonVersionsCmd.Flags().Int64P("max-results", "", 0, "The maximum number of results to return.")
 	EKSDescribeAddonVersionsCmd.Flags().StringP("next-token", "", "", "The nextToken value returned from a previous paginated DescribeAddonVersionsRequest where maxResults was used and the results exceeded the value of that parameter.")
@@ -54,8 +54,8 @@ func eksFlags() {
 
 	EKSListAddonCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster.")
 	EKSListAddonCmd.MarkFlagRequired("cluster-name")
-	EKSListAddonCmd.Flags().Int64P("max-result", "", 0, "The maximum number of add-on results returned by ListAddonsRequest in paginated")
-	EKSListAddonCmd.Flags().StringP("next-token", "", "", "The nextToken value returned from a previous paginated ListAddonsRequest")
+	EKSListAddonCmd.Flags().Int64P("max-results", "", 0, "The maximum number of add-on results returned by ListAddonsRequest in paginated.")
+	EKSListAddonCmd.Flags().StringP("next-token", "", "", "The nextToken value returned from a previous paginated ListAddonsRequest.")
 
 	EKSListIdentityProviderConfigsCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster.")
 	EKSListIdentityProviderConfigsCmd.MarkFlagRequired("cluster-name")
@@ -67,7 +67,8 @@ func eksFlags() {
 	EKSDescribeIdentityProviderConfigCmd.Flags().StringP("identity-provider-config", "", "", "An object that represents an identity provider configuration.")
 	EKSDescribeIdentityProviderConfigCmd.MarkFlagRequired("identity-provider-config")
 
-	EKSListTagsForResourceCmd.Flags().StringP("resource-arn", "", "", "Enter resource-arn")
+	EKSListTagsForResourceCmd.Flags().StringP("resource-arn", "", "", "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags.")
+	EKSListTagsForResourceCmd.MarkFlagRequired("resource-arn")
 
 	EKSListUpdateCmd.Flags().StringP("name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
 	EKSListUpdateCmd.MarkFlagRequired("name")
@@ -76,19 +77,19 @@ func eksFlags() {
 	EKSListUpdateCmd.Flags().Int64P("max-result", "", 0, "enter maxresult")
 	EKSListUpdateCmd.Flags().StringP("next-token", "", "", "enter next token")
 
-	EKSTagResourceCmd.Flags().StringP("tags", "t", "", "enter your tags Jsonfile name")
-	EKSTagResourceCmd.MarkPersistentFlagRequired("tags")
-	EKSTagResourceCmd.Flags().StringP("resource-arn", "", "", "Enter resource-arn")
-	EKSTagResourceCmd.MarkPersistentFlagRequired("resource-arn")
+	EKSTagResourceCmd.Flags().StringP("tags", "t", "", "The tags to add to the resource. A tag is an array of key-value pairs. ")
+	EKSTagResourceCmd.MarkFlagRequired("tags")
+	EKSTagResourceCmd.Flags().StringP("resource-arn", "", "", "The Amazon Resource Name (ARN) of the resource to which to add tags. Shorthand Syntax: KeyName1=string,KeyName2=string")
+	EKSTagResourceCmd.MarkFlagRequired("resource-arn")
 
-	EKSUntagResourceCmd.Flags().StringP("resource-arn", "", "", "Enter resource-arn")
-	EKSUntagResourceCmd.Flags().StringP("tag-keys", "t", "", "enter your tag-keys list")
-	EKSUntagResourceCmd.MarkPersistentFlagRequired("tag-keys")
-	EKSUntagResourceCmd.MarkPersistentFlagRequired("resource-arn")
+	EKSUntagResourceCmd.Flags().StringP("resource-arn", "", "", "The Amazon Resource Name (ARN) of the resource from which to delete tags.")
+	EKSUntagResourceCmd.Flags().StringP("tag-keys", "t", "", "The keys of the tags to be removed. Syntax: KeyName1,KeyName2")
+	EKSUntagResourceCmd.MarkFlagRequired("tag-keys")
+	EKSUntagResourceCmd.MarkFlagRequired("resource-arn")
 
 	EKSUpdateAddonCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster.")
 	EKSUpdateAddonCmd.MarkFlagRequired("cluster-name")
-	EKSUpdateAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons")
+	EKSUpdateAddonCmd.Flags().StringP("addon-name", "a", "", "The name of the add-on. The name must match one of the names returned by ListAddons.")
 	EKSUpdateAddonCmd.MarkFlagRequired("addon-name")
 	EKSUpdateAddonCmd.Flags().StringP("addon-version", "", "", "The version of the add-on. The version must match one of the versions returned by DescribeAddonVersions")
 	EKSUpdateAddonCmd.Flags().StringP("service-account-role-arn", "", "", "The Amazon Resource Name (ARN) of an existing IAM role to bind to the add-on's service account.")

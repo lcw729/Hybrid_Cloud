@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 // addon
@@ -19,6 +20,7 @@ func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 		return nil, err
 	}
 
+	klog.Info("[1] ", cluster.Spec.Region)
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(cluster.Spec.Region),
 	}))
@@ -29,11 +31,12 @@ func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 
 func EKSCreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error) {
 
-	// println(*addonInput.ClusterName)
+	klog.Info("Called EKSCreateAddon")
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
 		return nil, err
 	}
+
 	newAddonInput := &eks.CreateAddonInput{
 		AddonName:             addonInput.AddonName,
 		AddonVersion:          addonInput.AddonVersion,
@@ -43,6 +46,7 @@ func EKSCreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, er
 		ServiceAccountRoleArn: addonInput.ServiceAccountRoleArn,
 		Tags:                  addonInput.Tags,
 	}
+
 	out, err := eksSvc.CreateAddon(newAddonInput)
 
 	return out, err
@@ -50,6 +54,7 @@ func EKSCreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, er
 
 func EKSDeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, error) {
 
+	klog.Info("Called EKSDeleteAddon")
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
 		return nil, err
@@ -65,6 +70,7 @@ func EKSDeleteAddon(addonInput eks.DeleteAddonInput) (*eks.DeleteAddonOutput, er
 
 func EKSDescribeAddon(addonInput eks.DescribeAddonInput) (*eks.DescribeAddonOutput, error) {
 
+	klog.Info("Called EKSDescribeAddon")
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
 		return nil, err
@@ -80,14 +86,19 @@ func EKSDescribeAddon(addonInput eks.DescribeAddonInput) (*eks.DescribeAddonOutp
 
 func EKSDescribeAddonVersions(addonInput eks.DescribeAddonVersionsInput) (*eks.DescribeAddonVersionsOutput, error) {
 
+	klog.Info("Called EKSDescribeAddonVersions")
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	eksSvc := eks.New(sess)
 
 	newAddonInput := &eks.DescribeAddonVersionsInput{
-		AddonName: addonInput.AddonName,
+		AddonName:         addonInput.AddonName,
+		KubernetesVersion: addonInput.KubernetesVersion,
+		MaxResults:        addonInput.MaxResults,
+		NextToken:         addonInput.NextToken,
 	}
+	klog.Info(&newAddonInput.MaxResults)
 	out, err := eksSvc.DescribeAddonVersions(newAddonInput)
 
 	return out, err
@@ -95,12 +106,16 @@ func EKSDescribeAddonVersions(addonInput eks.DescribeAddonVersionsInput) (*eks.D
 
 func EKSListAddon(addonInput eks.ListAddonsInput) (*eks.ListAddonsOutput, error) {
 
+	klog.Info("Called EKSListAddon")
 	eksSvc, err := GetEKSClient(addonInput.ClusterName)
 	if eksSvc == nil {
 		return nil, err
 	}
+
 	newAddonInput := &eks.ListAddonsInput{
 		ClusterName: addonInput.ClusterName,
+		MaxResults:  addonInput.MaxResults,
+		NextToken:   addonInput.NextToken,
 	}
 	out, err := eksSvc.ListAddons(newAddonInput)
 
@@ -114,8 +129,12 @@ func EKSUpdateAddon(addonInput eks.UpdateAddonInput) (*eks.UpdateAddonOutput, er
 		return nil, err
 	}
 	newAddonInput := &eks.UpdateAddonInput{
-		ClusterName: addonInput.ClusterName,
-		AddonName:   addonInput.AddonName,
+		ClusterName:           addonInput.ClusterName,
+		AddonName:             addonInput.AddonName,
+		AddonVersion:          addonInput.AddonVersion,
+		ServiceAccountRoleArn: addonInput.ServiceAccountRoleArn,
+		ResolveConflicts:      addonInput.ResolveConflicts,
+		ClientRequestToken:    addonInput.ClientRequestToken,
 	}
 	out, err := eksSvc.UpdateAddon(newAddonInput)
 
@@ -211,6 +230,7 @@ func EKSListIdentityProviderConfigs(input eks.ListIdentityProviderConfigsInput) 
 
 func EKSListTagsForResource(listTagsForResourceInput eks.ListTagsForResourceInput) (*eks.ListTagsForResourceOutput, error) {
 
+	klog.Info("Called EKSListTagsForResource")
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -226,6 +246,7 @@ func EKSListTagsForResource(listTagsForResourceInput eks.ListTagsForResourceInpu
 
 func EKSTagResource(input eks.TagResourceInput) (*eks.TagResourceOutput, error) {
 
+	klog.Info("Called EKSTagResource")
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -242,6 +263,7 @@ func EKSTagResource(input eks.TagResourceInput) (*eks.TagResourceOutput, error) 
 
 func EKSUntagResource(input eks.UntagResourceInput) (*eks.UntagResourceOutput, error) {
 
+	klog.Info("Called EKSUntagResource")
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))

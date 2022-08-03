@@ -217,6 +217,8 @@ func CreateHCPCluster(platform string, clustername string, region string) bool {
 			JoinStatus:      "UNJOIN",
 		},
 	}
+
+	fmt.Println(cluster.Spec.Region)
 	newhcpcluster, err := clientset.HCPClusterClientset.HcpV1alpha1().HCPClusters(HCP_NAMESPACE).Create(context.TODO(), &cluster, metav1.CreateOptions{})
 
 	if err != nil {

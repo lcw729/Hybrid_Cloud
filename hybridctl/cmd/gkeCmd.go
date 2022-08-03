@@ -64,7 +64,7 @@ var GKEContainerGetServerConfigCmd = &cobra.Command{
 			input.Zone = zone
 		}
 
-		httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/server-config/get"
+		httpPostUrl := GKE_CONTAINER_PATH + "/server-config/get"
 		bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 
 		var output util.Output
@@ -141,7 +141,7 @@ var GKEImagesAddTagCmd = &cobra.Command{
 				DEST_IMAGE: temp,
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/images/tag/add"
+			httpPostUrl := GKE_CONTAINER_PATH + "/images/tag/add"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -171,7 +171,7 @@ var GKEImagesDeleteCmd = &cobra.Command{
 			bol, _ := cmd.Flags().GetBool("force-delete-tags")
 			input.FORCE_DELETE_TAGS = bol
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/images/delete"
+			httpPostUrl := GKE_CONTAINER_PATH + "/images/delete"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -197,7 +197,7 @@ var GKEImagesDescribeCmd = &cobra.Command{
 			input := &cobrautil.GKEImages{
 				IMAGE_NAME: temp,
 			}
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/images/describe"
+			httpPostUrl := GKE_CONTAINER_PATH + "/images/describe"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -250,7 +250,7 @@ var GKEImagesListCmd = &cobra.Command{
 			bol, _ := cmd.Flags().GetBool("uri")
 			input.URI = bol
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/images/list"
+			httpPostUrl := GKE_CONTAINER_PATH + "/images/list"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -297,7 +297,7 @@ var GKEImagesListTagsCmd = &cobra.Command{
 				input.SORT_BY = str
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/images/tag/list"
+			httpPostUrl := GKE_CONTAINER_PATH + "/images/tag/list"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -322,7 +322,7 @@ var GKEImagesUnTagCmd = &cobra.Command{
 			var input cobrautil.GKEImages
 			input.IMAGE_NAME = args
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/images/untags"
+			httpPostUrl := GKE_CONTAINER_PATH + "/images/untags"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -359,7 +359,7 @@ var GKEOperationDescribeCmd = &cobra.Command{
 				input.Zone = zone
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/operations/describe"
+			httpPostUrl := GKE_CONTAINER_PATH + "/operations/describe"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 
 			var output util.Output
@@ -410,7 +410,7 @@ var GKEOperationsListCmd = &cobra.Command{
 				input.Zone = zone
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/operations/list"
+			httpPostUrl := GKE_CONTAINER_PATH + "/operations/list"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 
 			var output util.Output
@@ -458,7 +458,7 @@ var GKEOperationsWaitCmd = &cobra.Command{
 				input.ZONE = zone
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/operations/wait"
+			httpPostUrl := GKE_CONTAINER_PATH + "/operations/wait"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -510,7 +510,7 @@ var GKENodePoolsRollbackCmd = &cobra.Command{
 				input.Zone = zone
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_CONTAINER_PATH + "/nodepool-upgrade/rollback"
+			httpPostUrl := GKE_CONTAINER_PATH + "/nodepool-upgrade/rollback"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 
 			var output util.Output
@@ -559,7 +559,7 @@ var GKEAuthConfigureDockerCmd = &cobra.Command{
 				input.REGISTRIES = append(input.REGISTRIES, temp...)
 			*/
 
-			httpPostUrl := "http://localhost:8080" + GKE_AUTH_PATH + "/configure-docker"
+			httpPostUrl := GKE_AUTH_PATH + "/configure-docker"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -603,7 +603,7 @@ var GKEAuthListCmd = &cobra.Command{
 				input.SORT_BY = str
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_AUTH_PATH + "/list"
+			httpPostUrl := GKE_AUTH_PATH + "/list"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -631,7 +631,7 @@ var GKEAuthRevokeCmd = &cobra.Command{
 			bol, _ := cmd.Flags().GetBool("all")
 			input.ALL = bol
 
-			httpPostUrl := "http://localhost:8080" + GKE_AUTH_PATH + "/revoke"
+			httpPostUrl := GKE_AUTH_PATH + "/revoke"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -663,7 +663,7 @@ var GKEAuthLoginCmd = &cobra.Command{
 			str, _ := cmd.Flags().GetString("cred-file")
 			input.CRED_FILE = str
 
-			httpPostUrl := "http://localhost:8080" + GKE_AUTH_PATH + "/login"
+			httpPostUrl := GKE_AUTH_PATH + "/login"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -697,7 +697,7 @@ var GKEDockerCmd = &cobra.Command{
 				input.DOCKER_ARGS = append(input.DOCKER_ARGS, docker_args...)
 			}
 
-			httpPostUrl := "http://localhost:8080/gke/docker"
+			httpPostUrl := "/gke/docker"
 			bytes, err := cobrautil.GetResponseBody("POST", httpPostUrl, input)
 			cobrautil.CheckERR(err)
 			cobrautil.PrintOutput(bytes)
@@ -802,7 +802,7 @@ var GKEConfigSetCmd = &cobra.Command{
 			bol, _ := cmd.Flags().GetBool("installation")
 			input.INSTALLATION = bol
 
-			httpPostUrl := "http://localhost:8080/gke/config/set"
+			httpPostUrl := "/gke/config/set"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -871,7 +871,7 @@ var GKEProjectConfigsUpdateCmd = &cobra.Command{
 				input.UPDATE_TOPIC = str
 			}
 
-			httpPostUrl := "http://localhost:8080" + GKE_SOURCE_PATH + "/update"
+			httpPostUrl := GKE_SOURCE_PATH + "/update"
 			bytes := cobrautil.HTTPPostRequest(input, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}
@@ -885,7 +885,7 @@ var GKEProjectConfigsDescribeCmd = &cobra.Command{
 		if len(args) > 0 {
 			cmd.Help()
 		} else {
-			httpPostUrl := "http://localhost:8080" + GKE_SOURCE_PATH + "/describe"
+			httpPostUrl := GKE_SOURCE_PATH + "/describe"
 			bytes := cobrautil.HTTPPostRequest(nil, httpPostUrl)
 			cobrautil.PrintOutput(bytes)
 		}

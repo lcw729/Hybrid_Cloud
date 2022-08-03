@@ -4,19 +4,22 @@ import (
 	"Hybrid_Cloud/hybridctl/util"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/spf13/cobra"
 )
 
-func EKSCommonPrintOption(output interface{}, bytes []byte) {
-	niloutput := output
+func EKSCommonPrintOption(generic interface{}, bytes []byte) {
+	ptr := reflect.New(reflect.TypeOf(generic))
+	output := ptr.Elem().Interface()
 	json.Unmarshal(bytes, &output)
-	if output == niloutput {
+	str, _ := json.MarshalIndent(output, "", "    ")
+	if output == "" {
 		util.PrintErrMsg(bytes)
 	} else {
-		fmt.Println(output)
+		fmt.Println(string(str))
 	}
 }
 
@@ -74,11 +77,26 @@ var EKSCreateAddonCmd = &cobra.Command{
 		}
 
 		tags, _ := cmd.Flags().GetString("tags")
-		var tagsMap map[string]*string
+		var tagsMap = map[string]*string{}
 		if tags != "" {
 			byteValue := util.OpenAndReadJsonFile(tags)
-			json.Unmarshal(byteValue, &tagsMap)
-			createAddonInput.Tags = tagsMap
+			fmt.Println(byteValue)
+			if len(byteValue) == 0 {
+				tagList := strings.Split(tags, ",")
+				for _, tag := range tagList {
+					pair := strings.Split(tag, "=")
+					if len(pair) != 2 {
+						fmt.Println("Flag Tags format is wrong")
+						return
+					}
+					str := pair[1]
+					tagsMap[pair[0]] = &str
+				}
+				createAddonInput.Tags = tagsMap
+			} else {
+				json.Unmarshal(byteValue, &tagsMap)
+				createAddonInput.Tags = tagsMap
+			}
 		}
 
 		var output eks.CreateAddonOutput
@@ -135,8 +153,7 @@ var EKSDescribeAddonCmd = &cobra.Command{
 		var output eks.DescribeAddonOutput
 		httpPostUrl := "/eks/addon/describe"
 		bytes := util.HTTPPostRequest(describeAddonInput, httpPostUrl)
-		EKSCommonPrintOption(output, bytes)
-
+		EKSCommonPrintOption(reflect.TypeOf(output), bytes)
 	},
 }
 
@@ -158,7 +175,6 @@ var EKSDescribeAddonVersionsCmd = &cobra.Command{
 		addonName, _ := cmd.Flags().GetString("addon-name")
 		if addonName != "" {
 			describeAddonVersionsInput.AddonName = &addonName
-			fmt.Println(addonName)
 		}
 
 		kubernetesVersion, _ := cmd.Flags().GetString("kubernetes-version")
@@ -168,7 +184,12 @@ var EKSDescribeAddonVersionsCmd = &cobra.Command{
 
 		maxResults, _ := cmd.Flags().GetInt64("max-results")
 		if maxResults != 0 {
-			describeAddonVersionsInput.MaxResults = &maxResults
+			if maxResults < 1 || maxResults > 100 {
+				fmt.Println("MaxResults can be between 1 and 100.")
+				return
+			} else {
+				describeAddonVersionsInput.MaxResults = &maxResults
+			}
 		}
 		nextToken, _ := cmd.Flags().GetString("next-token")
 		if nextToken != "" {
@@ -226,7 +247,7 @@ var EKSListAddonCmd = &cobra.Command{
 		if output.Addons == nil {
 			util.PrintErrMsg(bytes)
 		} else {
-			fmt.Println(output)
+			fmt.Println(output.String())
 		}
 	},
 }
@@ -248,7 +269,7 @@ var EKSUpdateAddonCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		name, _ := cmd.Flags().GetString("name")
+		name, _ := cmd.Flags().GetString("cluster-name")
 		updateAddonInput.ClusterName = &name
 
 		addonName, _ := cmd.Flags().GetString("addon-name")
@@ -278,7 +299,6 @@ var EKSUpdateAddonCmd = &cobra.Command{
 		httpPostUrl := "/eks/addon/update"
 		bytes := util.HTTPPostRequest(updateAddonInput, httpPostUrl)
 		EKSCommonPrintOption(output, bytes)
-
 	},
 }
 
@@ -321,19 +341,32 @@ var EKSAssociateIdentityProviderConfigCmd = &cobra.Command{
 		var tagsMap map[string]*string
 		if tags != "" {
 			byteValue := util.OpenAndReadJsonFile(tags)
-			json.Unmarshal(byteValue, &tagsMap)
-			associateIdentityProviderConfigInput.Tags = tagsMap
+			if byteValue == nil {
+				tagList := strings.Split(tags, ",")
+				for _, tag := range tagList {
+					pair := strings.Split(tag, "=")
+					if len(pair) != 2 {
+						fmt.Println("Flag Tags format is wrong")
+						return
+					}
+					tagsMap[pair[0]] = tagsMap[pair[1]]
+				}
+			} else {
+				json.Unmarshal(byteValue, &tagsMap)
+				associateIdentityProviderConfigInput.Tags = tagsMap
+			}
 		}
+		fmt.Println(tagsMap)
 
-		var output eks.AssociateIdentityProviderConfigOutput
-		httpPostUrl := "/eks/identity-provider-config/associate"
-		bytes := util.HTTPPostRequest(associateIdentityProviderConfigInput, httpPostUrl)
-		json.Unmarshal(bytes, &output)
-		if output.Tags == nil {
-			util.PrintErrMsg(bytes)
-		} else {
-			fmt.Println(output)
-		}
+		// var output eks.AssociateIdentityProviderConfigOutput
+		// httpPostUrl := "/eks/identity-provider-config/associate"
+		// bytes := util.HTTPPostRequest(associateIdentityProviderConfigInput, httpPostUrl)
+		// json.Unmarshal(bytes, &output)
+		// if output.Tags == nil {
+		// 	util.PrintErrMsg(bytes)
+		// } else {
+		// 	fmt.Println(output)
+		// }
 
 	},
 }
@@ -511,7 +544,7 @@ var EKSListTagsForResourceCmd = &cobra.Command{
 		listTagsForResourceInput.ResourceArn = &resourceArn
 
 		var output eks.ListTagsForResourceOutput
-		httpPostUrl := "/eks/resource/list-tags"
+		httpPostUrl := "/eks/resource/list"
 		bytes := util.HTTPPostRequest(listTagsForResourceInput, httpPostUrl)
 		json.Unmarshal(bytes, &output)
 		if output.Tags == nil {
@@ -542,19 +575,32 @@ var EKSTagResourceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var tagResourceInput eks.TagResourceInput
 		resourceArn, err := cmd.Flags().GetString("resource-arn")
-		util.CheckERR(err)
-		if resourceArn == "" || resourceArn == "--tags" {
-			fmt.Println("resourceArn must not be nil")
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 		tagResourceInput.ResourceArn = &resourceArn
 
-		tags, err := cmd.Flags().GetString("tags")
-		util.CheckERR(err)
-		var tagsMap map[string]*string
+		tags, _ := cmd.Flags().GetString("tags")
+		var tagsMap = map[string]*string{}
 		if tags != "" {
 			byteValue := util.OpenAndReadJsonFile(tags)
-			json.Unmarshal(byteValue, &tagsMap)
-			tagResourceInput.Tags = tagsMap
+			if len(byteValue) == 0 {
+				tagList := strings.Split(tags, ",")
+				for _, tag := range tagList {
+					pair := strings.Split(tag, "=")
+					if len(pair) != 2 {
+						fmt.Println("Flag Tags format is wrong")
+						return
+					}
+					str := pair[1]
+					tagsMap[pair[0]] = &str
+				}
+				tagResourceInput.Tags = tagsMap
+			} else {
+				json.Unmarshal(byteValue, &tagsMap)
+				tagResourceInput.Tags = tagsMap
+			}
 		}
 
 		httpPostUrl := "/eks/resource/tag"
@@ -578,14 +624,17 @@ var EKSUntagResourceCmd = &cobra.Command{
 
 		var untagResourceInput eks.UntagResourceInput
 		resourceArn, err := cmd.Flags().GetString("resource-arn")
-		util.CheckERR(err)
-		if resourceArn == "" || resourceArn == "--tag-keys" {
-			fmt.Println("resourceArn must not be nil")
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 		untagResourceInput.ResourceArn = &resourceArn
 
 		keys, err := cmd.Flags().GetString("tag-keys")
-		util.CheckERR(err)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		slice := strings.Split(keys, ",")
 		keyList := []*string{}
 		for i := 0; i < len(slice); i++ {
