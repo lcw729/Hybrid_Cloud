@@ -61,3 +61,36 @@ spec:
   selector:
     matchLabels:
       app: init
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-aks-config
+  namespace: hcp
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: cluster-manager
+  selector:
+    matchLabels:
+      app: aks-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-gke-config
+  namespace: hcp
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: cluster-manager
+  selector:
+    matchLabels:
+      app: gke-config
+---

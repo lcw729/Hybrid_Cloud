@@ -40,8 +40,12 @@ spec:
             mountPath: /root/.aws
           - name: nksconfig 
             mountPath: /root/.ncloud
+          - name: gkeconfig 
+            mountPath: /root/.google      
           - name: init
             mountPath: /root/.vpa
+          - name: aksconfig
+            mountPath: /root/.azure
       volumes:
       - name: kubeconfig
         persistentVolumeClaim: 
@@ -52,9 +56,15 @@ spec:
       - name: nksconfig
         persistentVolumeClaim:
           claimName: pvc-nks-config
+      - name: gkeconfig
+        persistentVolumeClaim:
+          claimName: pvc-gke-config
       - name: init
         persistentVolumeClaim:
           claimName: init
+      - name: aksconfig
+        persistentVolumeClaim:
+          claimName: pvc-aks-config
       tolerations:
         - key: node.kubernetes.io/not-ready
           effect: NoExecute
