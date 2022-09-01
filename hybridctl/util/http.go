@@ -29,13 +29,9 @@ func GetResponseBody(method string, URL string, input interface{}) ([]byte, erro
 
 func HTTPPostRequest(input interface{}, httpPostUrl string) []byte {
 	bytes, err := GetResponseBody("POST", httpPostUrl, input)
-	CheckERR(err)
-	return bytes
-}
-
-func CheckERR(err error) {
 	if err != nil {
 		log.Println(err)
-		return
+		return bytes
 	}
+	return bytes
 }

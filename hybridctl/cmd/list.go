@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"Hybrid_Cloud/hybridctl/pkg/nks"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -291,6 +292,8 @@ to quickly create a Cobra application.`,
 				fmt.Println("[", i+1, "]", data.Value[i].Name)
 			}
 
+		} else if cli.PlatformName == "nks" {
+			nks.NksgetClusterlist()
 		} else {
 			fmt.Println("Error : please enter your flag")
 		}

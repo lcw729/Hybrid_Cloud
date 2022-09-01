@@ -1,5 +1,7 @@
 package util
 
+import "github.com/aws/aws-sdk-go/service/eks"
+
 type Config struct {
 	Properties struct {
 		TimeInWeek []struct {
@@ -174,4 +176,15 @@ type GKESetProperty struct {
 	PROPERTY     string
 	VALUE        string
 	INSTALLATION bool
+}
+
+// modified eks Input Structure
+type HCPCreateClusterInput struct {
+	Region                string                 `json: region`
+	EKSCreateClusterInput eks.CreateClusterInput `json: CreateClusterInput`
+}
+
+type HCPDeleteClusterInput struct {
+	Region                string                 `json: region`
+	EKSDeleteClusterInput eks.DeleteClusterInput `json: DeleteClusterInput`
 }

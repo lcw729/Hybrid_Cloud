@@ -3,6 +3,7 @@ package cmd
 import (
 	"Hybrid_Cloud/hcp-apiserver/pkg/util"
 	cobrautil "Hybrid_Cloud/hybridctl/util"
+	"log"
 
 	// cobrautil "Hybrid_Cloud/hybridctl/util"
 	"encoding/json"
@@ -699,7 +700,10 @@ var GKEDockerCmd = &cobra.Command{
 
 			httpPostUrl := "/gke/docker"
 			bytes, err := cobrautil.GetResponseBody("POST", httpPostUrl, input)
-			cobrautil.CheckERR(err)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 			cobrautil.PrintOutput(bytes)
 		}
 	},

@@ -1,6 +1,21 @@
 package cmd
 
 func eksFlags() {
+
+	EKSCreateClusterCmd.Flags().StringP("cluster-name", "c", "", "The unique name to give to your cluster.")
+	EKSCreateClusterCmd.MarkFlagRequired("cluster-name")
+	EKSCreateClusterCmd.Flags().StringP("role-arn", "", "", "The Amazon Resource Name (ARN) of the IAM role that provides permissions for the Kubernetes control plane to make calls to Amazon Web Services API operations on your behalf.")
+	EKSCreateClusterCmd.MarkFlagRequired("role-arn")
+	EKSCreateClusterCmd.Flags().StringP("resources-vpc-config", "", "", "The VPC configuration that’s used by the cluster control plane.")
+	EKSCreateClusterCmd.MarkFlagRequired("resources-vpc-config")
+	EKSCreateClusterCmd.Flags().StringP("kubernetes-version", "", "", "The desired Kubernetes version for your cluster.")
+	EKSCreateClusterCmd.Flags().StringP("region", "", "", "The region to place your cluster")
+
+	EKSDeleteClusterCmd.Flags().StringP("cluster-name", "c", "", "The unique name to give to your cluster.")
+	EKSDeleteClusterCmd.MarkFlagRequired("cluster-name")
+	EKSDeleteClusterCmd.Flags().StringP("region", "", "", "The region to place your cluster")
+	EKSDeleteClusterCmd.MarkFlagRequired("region")
+
 	EKSAssociateEncryptionConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster that you are associating with encryption configuration.")
 	EKSAssociateEncryptionConfigCmd.MarkFlagRequired("cluster-name")
 	EKSAssociateEncryptionConfigCmd.Flags().StringP("encryption-config", "", "", "The configuration you are using for encryption.")
@@ -9,10 +24,31 @@ func eksFlags() {
 
 	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to associate the configuration to.")
 	EKSAssociateIdentityProviderConfigCmd.MarkFlagRequired("cluster-name")
-	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("oidc", "", "", "An object that represents an OpenID Connect (OIDC) identity provider configuration.")
+	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("oidc", "", "", `An object that represents an OpenID Connect (OIDC) identity provider configuration. 
+- JSON Syntax (Enter the path of the json file.) : 
+{
+	"identityProviderConfigName": "string",
+	"issuerUrl": "string",
+	"clientId": "string",
+	"usernameClaim": "string",
+	"usernamePrefix": "string",
+	"groupsClaim": "string",
+	"groupsPrefix": "string",
+	"requiredClaims": {"string": "string"
+	...}
+}`)
 	EKSAssociateIdentityProviderConfigCmd.MarkFlagRequired("oidc")
-	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("client-request-token", "", "", "enter client request token")
-	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("tags", "", "", "enter your tags Jsonfile name")
+	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("client-request-token", "", "", "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request.")
+	EKSAssociateIdentityProviderConfigCmd.Flags().StringP("tags", "", "", `The metadata to apply to the configuration to assist with categorization and organization. 
+Each tag consists of a key and an optional value. 
+You define both. 
+> key -> (string) 
+> value -> (string) 
+- Shorthand Syntax: 
+	KeyName1=string,KeyName2=string
+- JSON Syntax (Enter the path of the json file.) : 
+	{"string": "string"...} 
+`)
 
 	EKSCreateAddonCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to create the add-on for.")
 	EKSCreateAddonCmd.MarkFlagRequired("cluster-name")
@@ -48,7 +84,19 @@ func eksFlags() {
 
 	EKSDisassociateIdentityProviderConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to disassociate an identity provider from.")
 	EKSDisassociateIdentityProviderConfigCmd.MarkFlagRequired("cluster-name")
-	EKSDisassociateIdentityProviderConfigCmd.Flags().StringP("identity-provider-config", "", "", "An object that represents an identity provider configuration.")
+	EKSDisassociateIdentityProviderConfigCmd.Flags().StringP("identity-provider-config", "", "", `An object that represents an identity provider configuration.
+> type -> (string)
+  The type of the identity provider configuration. The only type available is oidc .
+> name -> (string)
+  The name of the identity provider configuration.
+- Shorthand Syntax
+  type=string,name=string
+- JSON Syntax (Enter the path of the json file.) : 
+   {
+	  "type": "string",
+	  "name": "string"
+   }
+`)
 	EKSDisassociateIdentityProviderConfigCmd.MarkFlagRequired("identity-provider-config")
 	EKSDisassociateIdentityProviderConfigCmd.Flags().StringP("client-request-token", "", "", "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request.")
 
@@ -57,14 +105,26 @@ func eksFlags() {
 	EKSListAddonCmd.Flags().Int64P("max-results", "", 0, "The maximum number of add-on results returned by ListAddonsRequest in paginated.")
 	EKSListAddonCmd.Flags().StringP("next-token", "", "", "The nextToken value returned from a previous paginated ListAddonsRequest.")
 
-	EKSListIdentityProviderConfigsCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster.")
+	EKSListIdentityProviderConfigsCmd.Flags().StringP("cluster-name", "c", "", "The cluster name that you want to list identity provider configurations for.")
 	EKSListIdentityProviderConfigsCmd.MarkFlagRequired("cluster-name")
-	EKSListIdentityProviderConfigsCmd.Flags().Int64P("max-result", "", 0, "enter maxresult")
-	EKSListIdentityProviderConfigsCmd.Flags().StringP("next-token", "", "", "enter next token")
+	EKSListIdentityProviderConfigsCmd.Flags().Int64P("max-results", "", 0, "The maximum number of add-on results returned by ListAddonsRequest in paginated.")
+	EKSListIdentityProviderConfigsCmd.Flags().StringP("next-token", "", "", "The nextToken value returned from a previous paginated IdentityProviderConfigsRequest")
 
 	EKSDescribeIdentityProviderConfigCmd.Flags().StringP("cluster-name", "c", "", "The cluster name that the identity provider configuration is associated to.")
 	EKSDescribeIdentityProviderConfigCmd.MarkFlagRequired("cluster-name")
-	EKSDescribeIdentityProviderConfigCmd.Flags().StringP("identity-provider-config", "", "", "An object that represents an identity provider configuration.")
+	EKSDescribeIdentityProviderConfigCmd.Flags().StringP("identity-provider-config", "", "", `An object that represents an identity provider configuration.
+> type -> (string)
+  The type of the identity provider configuration. The only type available is oidc .
+> name -> (string)
+  The name of the identity provider configuration.
+- Shorthand Syntax
+  type=string,name=string
+- JSON Syntax (Enter the path of the json file.) : 
+   {
+	  "type": "string",
+	  "name": "string"
+   }
+   `)
 	EKSDescribeIdentityProviderConfigCmd.MarkFlagRequired("identity-provider-config")
 
 	EKSListTagsForResourceCmd.Flags().StringP("resource-arn", "", "", "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags.")
@@ -96,11 +156,12 @@ func eksFlags() {
 	EKSUpdateAddonCmd.Flags().StringP("resolve-conflicts", "", "", "How to resolve parameter value conflicts when migrating an existing add-on to an Amazon EKS add-on. Possible values: OVERWRITE, NONE")
 	EKSUpdateAddonCmd.Flags().StringP("client-request-token", "", "", "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request.")
 
-	EKSUpdateClusterConfigCmd.Flags().StringP("name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
-	EKSUpdateClusterConfigCmd.MarkFlagRequired("name")
-	EKSUpdateClusterConfigCmd.Flags().StringP("resource-vpc-config", "", "", "enter resource-vpc-config jsonfile name")
-	EKSUpdateClusterConfigCmd.Flags().StringP("logging", "", "", "enter logging jsonfile name")
-	EKSUpdateClusterConfigCmd.Flags().StringP("client-request-token", "", "", "enter client request token")
+	EKSUpdateClusterConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the Amazon EKS cluster associated with the update.")
+	EKSUpdateClusterConfigCmd.MarkFlagRequired("cluster-name")
+	EKSUpdateClusterConfigCmd.Flags().StringP("resource-vpc-config", "", "", "An object representing the VPC configuration to use for an Amazon EKS cluster.")
+	EKSUpdateClusterConfigCmd.Flags().StringP("logging", "", "", "Enable or disable exporting the Kubernetes control plane logs for your cluster to CloudWatch Logs.")
+	EKSUpdateClusterConfigCmd.Flags().StringP("client-request-token", "", "", `Unique, case-sensitive identifier that you provide to ensure the idempotency of the request.
+	By default, cluster control plane logs aren't exported to CloudWatch Logs.`)
 
 	EKSUpdateNodegroupConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster.")
 	EKSUpdateNodegroupConfigCmd.MarkFlagRequired("cluster-name")

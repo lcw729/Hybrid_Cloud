@@ -22,13 +22,6 @@ var GKE_CONTAINER_PATH = "/gke/container"
 var GKE_AUTH_PATH = "/gke/auth"
 var GKE_CONFIG_PATH = "/gke/config"
 
-func checkErr(err error) {
-	if err != nil {
-		log.Println(err)
-		return
-	}
-}
-
 // images
 type Images struct {
 	SRC_IMAGE  string
@@ -43,7 +36,10 @@ func (i *Images) AddTag() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/images/addTag"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, i)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -53,7 +49,10 @@ func (i *Images) Delete() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/images/delete"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, i)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -63,14 +62,20 @@ func (i *Images) Describe() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/images/describe"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, i)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
 func (i *Images) List() {
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/images/list"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, i)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -80,7 +85,10 @@ func (i *Images) ListTags() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/images/listTags"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, i)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -90,7 +98,10 @@ func (i *Images) UnTags() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/images/unTags"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, i)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -98,7 +109,10 @@ func (i *Images) UnTags() {
 func ConfigureDocker() {
 	httpPostUrl := "http://localhost:3080" + GKE_AUTH_PATH + "/configureDocker"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, nil)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -109,14 +123,20 @@ type Auth struct {
 func (a *Auth) List() {
 	httpPostUrl := "http://localhost:3080" + GKE_AUTH_PATH + "/list"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, nil)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
 func (a *Auth) Revoke() {
 	httpPostUrl := "http://localhost:3080" + GKE_AUTH_PATH + "/revoke"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, nil)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -126,7 +146,10 @@ func (a *Auth) Login() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_AUTH_PATH + "/login"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, a)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -168,7 +191,10 @@ func GetServerConfig() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/getServerConfig"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, input)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	var output apiserverutil.Output
 	json.Unmarshal(bytes, &output)
@@ -194,7 +220,10 @@ func RollbackNodePoolUpgrade() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/rollbackNodePoolUpgrade"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, input)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	var output apiserverutil.Output
 	json.Unmarshal(bytes, &output)
@@ -220,7 +249,10 @@ func OperationsDescribe() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/operations/describe"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, op)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	var output apiserverutil.Output
 	json.Unmarshal(bytes, &output)
@@ -246,7 +278,10 @@ func OperationsList() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/operations/list"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, op)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	var output apiserverutil.Output
 	json.Unmarshal(bytes, &output)
@@ -285,7 +320,10 @@ func OperationWait() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONTAINER_PATH + "/operations/wait"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, op)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -301,7 +339,10 @@ func (d *Docker) Docker() {
 	}
 	httpPostUrl := "http://localhost:3080/gke/docker"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, d)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 
@@ -391,7 +432,10 @@ func ConfigSet() {
 	}
 	httpPostUrl := "http://localhost:3080" + GKE_CONFIG_PATH + "/set"
 	bytes, err := util.GetResponseBody("POST", httpPostUrl, input)
-	checkErr(err)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	util.PrintOutput(bytes)
 }
 

@@ -1,5 +1,5 @@
 {
-  "identityProviderConfigName": "string",
+  "identityProviderConfigName": "string2",
   "issuerUrl": "https://example.com",
   "clientId": "string",
   "usernameClaim": "string",

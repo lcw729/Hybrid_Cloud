@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"Hybrid_Cloud/hybridctl/pkg/nks"
 	cobrautil "Hybrid_Cloud/hybridctl/util"
 	"Hybrid_Cloud/pkg/apis/resource/v1alpha1"
 	resourcev1alpha1scheme "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/scheme"
@@ -17,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
+	klog "k8s.io/klog/v2"
 )
 
 type HCPResource struct {
@@ -192,6 +194,9 @@ to quickly create a Cobra application.`,
 		} else if platform_name == "gke" {
 			fmt.Println("call create_gke func")
 			create_gke(cli)
+		} else if platform_name == "nks" {
+			klog.Infoln("call create_nks func")
+			nks.NksCreateCluster(cli.ClusterName)
 		} else {
 			fmt.Println("Error: please enter the correct --platform arguments")
 		}
@@ -288,14 +293,14 @@ func createNodepool_eks(info Cli) {
 		panic(err)
 	}
 
-	err = ioutil.WriteFile("/root/go/src/Hybrid_Cloud/terraform/eks/"+info.ClusterName+"-"+info.NodeName+".tf.json", []byte(string(send)), os.FileMode(0644))
+	err = ioutil.WriteFile("/root/go/src/Hybrid_LCW/Hybrid_Cloud/terraform/eks/"+info.ClusterName+"-"+info.NodeName+".tf.json", []byte(string(send)), os.FileMode(0644))
 	if err != nil {
 		panic(err)
 	}
 
 	cmd := exec.Command("terraform", "apply", "-auto-approve")
 	// cmd := exec.Command("terraform", "plan")
-	cmd.Dir = "../terraform/eks/"
+	cmd.Dir = "../../../terraform/eks/"
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -432,20 +437,23 @@ func create_eks(info Cli) {
 		panic(err)
 	}
 
-	err = ioutil.WriteFile("/root/go/src/Hybrid_Cloud/terraform/eks/"+info.ClusterName+".tf.json", []byte(string(send)), os.FileMode(0644))
+	err = ioutil.WriteFile("/root/go/src/Hybrid_LCW/Hybrid_Cloud/terraform/eks/"+info.ClusterName+".tf.json", []byte(string(send)), os.FileMode(0644))
 	if err != nil {
 		panic(err)
 	}
 
 	cmd := exec.Command("terraform", "apply", "-auto-approve")
 	// cmd := exec.Command("terraform", "plan")
-	cmd.Dir = "../terraform/eks"
+	cmd.Dir = "../../../terraform/eks"
 
 	output, err := cmd.Output()
 	if err != nil {
 		fmt.Println(err)
+		klog.Infoln(err)
+		klog.Infoln(string(output))
 	} else {
 		fmt.Println(string(output))
+		klog.Infoln(string(output))
 	}
 }
 func create_aks(info Cli) {
@@ -499,18 +507,20 @@ func create_aks(info Cli) {
 		panic(err)
 	}
 
-	err = ioutil.WriteFile("/root/go/src/Hybrid_Cloud/terraform/aks/"+info.ClusterName+".tf.json", []byte(string(send)), os.FileMode(0644))
+	err = ioutil.WriteFile("/root/go/src/Hybrid_LCW/Hybrid_Cloud/terraform/aks/"+info.ClusterName+".tf.json", []byte(string(send)), os.FileMode(0644))
 	if err != nil {
 		panic(err)
 	}
 
 	cmd := exec.Command("terraform", "apply", "-auto-approve")
 	// cmd := exec.Command("terraform", "plan")
-	cmd.Dir = "../terraform/aks/"
+	cmd.Dir = "../../../terraform/aks/"
 
 	output, err := cmd.Output()
 	if err != nil {
 		fmt.Println(err)
+		klog.Infoln(err)
+		klog.Infoln(string(output))
 	} else {
 		fmt.Println(string(output))
 	}
@@ -561,7 +571,7 @@ func create_gke(info Cli) {
 
 	// src, _ := json.Marshal([]byte(string(resource)))
 
-	err = ioutil.WriteFile("/root/go/src/Hybrid_Cloud/terraform/gke/"+cluster+"/"+info.ClusterName+".tf.json", []byte(string(send)), os.FileMode(0644))
+	err = ioutil.WriteFile("/root/go/src/Hybrid_LCW/Hybrid_Cloud/terraform/gke/"+cluster+"/"+info.ClusterName+".tf.json", []byte(string(send)), os.FileMode(0644))
 	if err != nil {
 		panic(err)
 	}

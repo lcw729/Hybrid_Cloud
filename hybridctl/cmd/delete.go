@@ -10,12 +10,15 @@ import (
 	"os/exec"
 	"strings"
 
+	"Hybrid_Cloud/hybridctl/pkg/nks"
+
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
+	klog "k8s.io/klog/v2"
 
 	// appsv1 "k8s.io/api/apps/v1"
 	// v1 "k8s.io/api/core/v1"
@@ -195,6 +198,16 @@ to quickly create a Cobra application.`,
 		} else if platform_name == "gke" {
 			fmt.Println("call delete_gke func")
 			delete_gke(cli)
+
+		} else if platform_name == "nks" {
+			klog.Infoln("call delete_nks func")
+			real_clustername, err := nks.NksGetClusterName(cli.ClusterName)
+			if err != nil {
+				klog.Errorln(err)
+			}
+			if real_clustername != "" {
+				nks.NksDeleteCluster(real_clustername)
+			}
 		} else {
 			fmt.Println("Error: please enter the correct --platform arguments")
 		}
@@ -391,7 +404,7 @@ func delete_gke(info Cli) {
 
 func delete_eks(info Cli) {
 	cmd_rm_cluster := exec.Command("rm", info.ClusterName+".tf.json")
-	cmd_rm_cluster.Dir = "../terraform/eks"
+	cmd_rm_cluster.Dir = "../../../terraform/eks"
 
 	output, err := cmd_rm_cluster.Output()
 	if err != nil {
@@ -401,7 +414,7 @@ func delete_eks(info Cli) {
 	}
 
 	cmd_rm_nodepool := exec.Command("rm", info.ClusterName+"nodepool.tf.json")
-	cmd_rm_nodepool.Dir = "../terraform/eks"
+	cmd_rm_nodepool.Dir = "../../../terraform/eks"
 
 	output, err = cmd_rm_nodepool.Output()
 	if err != nil {
@@ -412,7 +425,7 @@ func delete_eks(info Cli) {
 
 	//cmd := exec.Command("terraform", "destroy", "-auto-approve")
 	cmd := exec.Command("terraform", "apply", "-auto-approve")
-	cmd.Dir = "../terraform/eks"
+	cmd.Dir = "../../../terraform/eks"
 
 	output, err = cmd.Output()
 	if err != nil {

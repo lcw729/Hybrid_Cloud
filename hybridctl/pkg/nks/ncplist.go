@@ -39,6 +39,7 @@ func NksgetClusterlist() {
 		sublist.Name = *nksClusterlist.Clusters[i].Name
 		sublist.Capacity = *nksClusterlist.Clusters[i].Capacity
 		sublist.ClusterType = *nksClusterlist.Clusters[i].ClusterType
+		klog.Infoln("clustertype : ", sublist.ClusterType)
 		sublist.NodeCount = *nksClusterlist.Clusters[i].NodeCount
 		sublist.NodeMaxCount = *nksClusterlist.Clusters[i].NodeMaxCount
 		sublist.CpuCount = *nksClusterlist.Clusters[i].CpuCount
@@ -47,6 +48,7 @@ func NksgetClusterlist() {
 		sublist.Endpoint = *nksClusterlist.Clusters[i].Endpoint
 		sublist.K8sVersion = *nksClusterlist.Clusters[i].K8sVersion
 		sublist.RegionCode = *nksClusterlist.Clusters[i].RegionCode
+		klog.Infoln("regioncode : ", sublist.RegionCode)
 		sublist.Status = *nksClusterlist.Clusters[i].Status
 		sublist.KubeNetworkPlugin = *nksClusterlist.Clusters[i].KubeNetworkPlugin
 		sublist.SubnetLbName = *nksClusterlist.Clusters[i].SubnetLbName
@@ -59,14 +61,19 @@ func NksgetClusterlist() {
 		if lenSubnoList > 0 {
 			for j := 0; j < lenSubnoList; j++ {
 				sublist.SubnetNoList = append(sublist.SubnetNoList, *nksClusterlist.Clusters[i].SubnetNoList[j])
+				klog.Infoln(*nksClusterlist.Clusters[i].SubnetNoList[j])
 			}
 		}
+		klog.Infoln("subnoliust : ", sublist.SubnetNoList)
 		sublist.UpdatedAt = *nksClusterlist.Clusters[i].UpdatedAt
 		sublist.VpcName = *nksClusterlist.Clusters[i].VpcName
 		sublist.VpcNo = *nksClusterlist.Clusters[i].VpcNo
+		klog.Infoln("vpcno : ", sublist.VpcNo)
+
 		sublist.ZoneCode = *nksClusterlist.Clusters[i].ZoneCode
 		sublist.ZoneNo = *nksClusterlist.Clusters[i].ZoneNo
 		sublist.LoginKeyName = *nksClusterlist.Clusters[i].LoginKeyName
+		klog.Infoln("loginkeyName : ", sublist.LoginKeyName)
 		sublist.Log.Audit = nksClusterlist.Clusters[i].Log.Audit
 		sublist.PublicNetwork = *nksClusterlist.Clusters[i].PublicNetwork
 		// NodePool 추가 부분
@@ -224,6 +231,8 @@ func NksCreateCluster(clustername string) {
 	}
 	inputdata.SubnetLbNo = &clusterset.SubnetLbNo
 
+	klog.Infoln(clusterset)
+
 	// klog.Infoln(inputdata)
 	// var sublist = Cluster{}
 	ncpclient := SetNksClient()
@@ -231,6 +240,7 @@ func NksCreateCluster(clustername string) {
 	if err != nil {
 		klog.Error(err)
 		klog.Infoln(&nksClusterlist)
+		klog.Infoln(nksClusterlist)
 	}
 	// klog.Infoln("uuid : ", &nksClusterlist)
 }

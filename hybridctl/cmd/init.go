@@ -90,6 +90,11 @@ func init() {
 
 	// EKS
 	RootCmd.AddCommand(EKSCmd)
+
+	EKSCmd.AddCommand(EKSClusterCmd)
+	EKSClusterCmd.AddCommand(EKSCreateClusterCmd)
+	EKSClusterCmd.AddCommand(EKSDeleteClusterCmd)
+
 	EKSCmd.AddCommand(EKSAddonCmd)
 	EKSAddonCmd.AddCommand(EKSCreateAddonCmd)
 	EKSAddonCmd.AddCommand(EKSDeleteAddonCmd)
@@ -112,7 +117,8 @@ func init() {
 	EKSResourceCmd.AddCommand(EKSUntagResourceCmd)
 	EKSResourceCmd.AddCommand(EKSListTagsForResourceCmd)
 
-	EKSCmd.AddCommand(EKSUpdateClusterConfigCmd)
+	EKSCmd.AddCommand(EKSClusterConfigCmd)
+	EKSClusterConfigCmd.AddCommand(EKSUpdateClusterConfigCmd)
 	//EKSUpdateClusterConfigCmd.AddCommand(EKSUpdateClusterConfigCmd)
 
 	EKSCmd.AddCommand(EKSNodegroupConfigCmd)

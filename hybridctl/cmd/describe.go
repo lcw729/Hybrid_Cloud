@@ -15,8 +15,11 @@
 package cmd
 
 import (
+	"Hybrid_Cloud/hybridctl/pkg/nks"
 	"fmt"
 	"os/exec"
+
+	klog "k8s.io/klog/v2"
 
 	"github.com/spf13/cobra"
 )
@@ -89,8 +92,19 @@ to quickly create a Cobra application.`,
 				fmt.Printf("Cluster Name: %s\n", cli.ClusterName)
 				describeCluster_aks(cli.ClusterName)
 			}
+		} else if cli.PlatformName == "nks" {
+			if cli.ClusterName == "" {
+				klog.Infoln("Run 'hybridctl describeCluster --help' to view all commands")
+			} else {
+				real_clustername, err := nks.NksGetClusterName(cli.ClusterName)
+				if err != nil {
+					klog.Error(err)
+				}
+				if real_clustername != "" {
+					nks.NksDescribeCluster(real_clustername)
+				}
+			}
 		}
-
 	},
 }
 

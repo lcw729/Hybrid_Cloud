@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx-deploy
   labels:
     app: nginx-app
 spec:
@@ -15,7 +15,7 @@ spec:
       labels:
         app: nginx-app
     spec:
-      nodeName: keti-test-nodepool-w-1hp9
+      nodeName: ip-172-31-31-38.ap-northeast-2.compute.internal
       containers:
       - name: nginx-pod
         image: nginx:1.14 
