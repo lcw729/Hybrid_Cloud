@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"Hybrid_Cloud/hybridctl/util"
 	"Hybrid_Cloud/util/clusterManager"
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,6 +30,45 @@ func GetEKSClient(clusterName *string) (*eks.EKS, error) {
 
 	eksSvc := eks.New(sess)
 	return eksSvc, nil
+}
+
+func InitializeEKSClient(region string) *eks.EKS {
+
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config: aws.Config{
+			Credentials: credentials.NewSharedCredentials("/root/.aws/credentials", "default"),
+			Region:      aws.String(region),
+		},
+	}))
+	eksSvc := eks.New(sess, aws.NewConfig().WithRegion(region))
+	return eksSvc
+}
+
+func EKSCreateCluster(Input util.HCPCreateClusterInput) (*eks.CreateClusterOutput, error) {
+	klog.Info("Called EKSCreateCluster")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	fmt.Println(Input.EKSCreateClusterInput)
+
+	out, err := eksSvc.CreateCluster(&Input.EKSCreateClusterInput)
+	return out, err
+}
+
+func EKSDeleteCluster(Input util.HCPDeleteClusterInput) (*eks.DeleteClusterOutput, error) {
+	klog.Info("Called EKSDeleteCluster")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	out, err := eksSvc.DeleteCluster(&Input.EKSDeleteClusterInput)
+	return out, err
 }
 
 func EKSCreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error) {

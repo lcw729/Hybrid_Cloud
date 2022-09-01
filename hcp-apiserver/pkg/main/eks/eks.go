@@ -3,11 +3,46 @@ package eks
 import (
 	"Hybrid_Cloud/hcp-apiserver/pkg/handler"
 	"Hybrid_Cloud/hcp-apiserver/pkg/util"
+	cobrautil "Hybrid_Cloud/hybridctl/util"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/service/eks"
 )
+
+func CreateCluster(w http.ResponseWriter, req *http.Request) {
+
+	var hcpCreateClusterInput cobrautil.HCPCreateClusterInput
+
+	util.Parser(req, &hcpCreateClusterInput)
+	out, err := handler.EKSCreateCluster(hcpCreateClusterInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
+func DeleteCluster(w http.ResponseWriter, req *http.Request) {
+
+	var hcpDeleteClusterInput cobrautil.HCPDeleteClusterInput
+
+	util.Parser(req, &hcpDeleteClusterInput)
+	fmt.Println(hcpDeleteClusterInput)
+	out, err := handler.EKSDeleteCluster(hcpDeleteClusterInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
 
 func CreateAddon(w http.ResponseWriter, req *http.Request) {
 

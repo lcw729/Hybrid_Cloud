@@ -11,26 +11,33 @@ COPY _output/bin/hcp-apiserver ${OPERATOR}
 
 COPY bin /usr/local/bin
 
-# install azure-cli
-# RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
-#     echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" \
-#     > /etc/yum.repos.d/azure-cli.repo
-    
-# RUN yum install -y azure-cli
-
 RUN apt update -y && apt upgrade -y
 
 RUN apt install curl -y
 
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+RUN apt-get -y install openssl
 
-RUN curl https://sdk.cloud.google.com > install.sh
+RUN apt-get -y install unzip
 
-RUN bash install.sh --disable-prompts --install-dir=/root
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 
-RUN cp -r /root/google-cloud-sdk/lib/* /usr/local/lib
+RUN unzip awscliv2.zip
 
-RUN cp -r /root/google-cloud-sdk/bin/* /usr/local/bin
+RUN ./aws/install
+
+# RUN apt update -y && apt upgrade -y
+
+# RUN apt install curl -y
+
+# RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+# RUN curl https://sdk.cloud.google.com > install.sh
+
+# RUN bash install.sh --disable-prompts --install-dir=/root
+
+# RUN cp -r /root/google-cloud-sdk/lib/* /usr/local/lib
+
+# RUN cp -r /root/google-cloud-sdk/bin/* /usr/local/bin
 
 RUN  /usr/local/bin/user_setup
 
