@@ -11,10 +11,10 @@ var associateEncryptionConfigInput eks.AssociateEncryptionConfigInput
 var associateIdentityProviderConfigInput eks.AssociateIdentityProviderConfigInput
 var oidcRequest eks.OidcIdentityProviderConfigRequest
 var createClusterInput util.HCPCreateClusterInput
-var createNodegroupInput eks.CreateNodegroupInput
+var createNodegroupInput util.HCPCreateNodegroupInput
 var createAddonInput eks.CreateAddonInput
 var deleteClusterInput util.HCPDeleteClusterInput
-var deleteNodegroupInput eks.DeleteNodegroupInput
+var deleteNodegroupInput util.HCPDeleteNodegroupInput
 var deleteAddonInput eks.DeleteAddonInput
 var describeAddonInput eks.DescribeAddonInput
 var describeAddonVersionsInput eks.DescribeAddonVersionsInput

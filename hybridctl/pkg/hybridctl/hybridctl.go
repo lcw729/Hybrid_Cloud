@@ -13,7 +13,9 @@
 // limitations under the License.
 package main
 
-import "Hybrid_Cloud/hybridctl/cmd"
+import (
+	"Hybrid_Cloud/hybridctl/cmd"
+)
 
 func main() {
 	cmd.Execute()

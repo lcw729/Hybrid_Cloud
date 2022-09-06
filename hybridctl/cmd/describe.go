@@ -100,6 +100,7 @@ to quickly create a Cobra application.`,
 				if err != nil {
 					klog.Error(err)
 				}
+				klog.Infoln(real_clustername)
 				if real_clustername != "" {
 					nks.NksDescribeCluster(real_clustername)
 				}

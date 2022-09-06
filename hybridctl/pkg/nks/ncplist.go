@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	ncpapi "github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vnks"
+
 	// monitoring "github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/monitoring"
 	klog "k8s.io/klog/v2"
 )
@@ -199,6 +200,7 @@ func NksDescribeCluster(clustername string) {
 		sublist.NodePool = append(sublist.NodePool, *l)
 		// uuid_String := *uuid
 		klog.Infoln("Cluster", sublist.Name, "Infomation : ", sublist)
+		klog.Infoln(sublist.SubnetNoList)
 	}
 }
 
@@ -227,8 +229,11 @@ func NksCreateCluster(clustername string) {
 	if lensub > 0 {
 		for i := 0; i < lensub; i++ {
 			inputdata.SubnetNoList = append(inputdata.SubnetNoList, &clusterset.SubnetNoList[i])
+			klog.Infoln(clusterset.SubnetNoList[i])
 		}
 	}
+
+	klog.Infoln(inputdata.SubnetNoList)
 	inputdata.SubnetLbNo = &clusterset.SubnetLbNo
 
 	klog.Infoln(clusterset)
@@ -442,3 +447,79 @@ func NksRegisterConfig(uuid string) {
 }
 
 // func NcpRegister
+
+// func NksCreateClustertest(clustername string) {
+// 	var client = &http.Client{}
+// 	getKey := ncloud.Keys()
+// 	ak := getKey.AccessKey
+// 	sk := getKey.SecretKey
+
+// 	clusterType := "SVR.VNKS.STAND.C002.M008.NET.SSD.B050.G002"
+// 	lk := "keti-nks"
+// 	regionCode := "KR"
+// 	// vpcnum := 25793
+// 	var vpcnum int32 = 25793
+// 	var subno int32 = 54819
+// 	var lbno int32 = 54820
+// 	zoneCode := "KR-1"
+
+// 	var inputdata = ncpapi.ClusterInputBody{}
+
+// 	inputdata.Name = &clustername
+// 	inputdata.ClusterType = &clusterType
+// 	inputdata.LoginKeyName = &lk
+// 	inputdata.RegionCode = &regionCode
+// 	inputdata.VpcNo = &vpcnum
+// 	inputdata.SubnetNoList = append(inputdata.SubnetNoList, &subno)
+// 	inputdata.SubnetLbNo = &lbno
+// 	inputdata.ZoneCode = &zoneCode
+
+// 	js, err := json.Marshal(inputdata)
+// 	if err != nil {
+// 		klog.Errorln(err)
+// 	}
+// 	buff := bytes.NewBuffer(js)
+
+// 	method := "POST"
+// 	url := "https://nks.apigw.ntruss.com/vnks/v2/clusters"
+// 	signature, timestamp := NcrCreateSigKey(method, url, ak, sk)
+
+// 	req, err := http.NewRequest(method, url, buff)
+// 	if err != nil {
+// 		klog.Errorln(err)
+// 	}
+// 	req.Header.Add("x-ncp-apigw-timestamp", timestamp)
+// 	req.Header.Add("x-ncp-iam-access-key", ak)
+// 	req.Header.Add("x-ncp-apigw-signature-v1", signature)
+// 	req.Header.Add("Content-Type", "application/json")
+
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		klog.Errorln(err)
+// 	}
+// 	bytes, _ := ioutil.ReadAll(resp.Body)
+// 	str := string(bytes)
+// 	klog.Infoln(str)
+// }
+
+// func NcrCreateSigKey(Method string, Url string, ak string, sk string) (signature string, timestamp string) {
+// 	// getKey := ncloud.Keys()
+// 	timestamp = strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
+// 	signer := hmac.NewSigner(sk, crypto.SHA256)
+// 	signature, _ = signer.Sign(Method, Url, ak, timestamp)
+
+// 	return signature, timestamp
+// }
+
+// func Ncptestfunc() {
+// 	ncpclient := SetVpcClient()
+// 	subreq := vpc.GetSubnetListRequest{}
+// 	rgcode := "KR"
+// 	subreq.RegionCode = &rgcode
+
+// 	nksClusterlist, err := ncpclient.V2Api.GetSubnetList(&subreq)
+// 	if err != nil {
+// 		klog.Error(err)
+// 	}
+// 	klog.Infoln(nksClusterlist)
+// }

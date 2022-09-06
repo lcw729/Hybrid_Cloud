@@ -100,21 +100,78 @@ var EKSDeleteClusterCmd = &cobra.Command{
 // nodegroup
 
 var EKSNodegroupCmd = &cobra.Command{
-	Use:   "nodegroup",
-	Short: "Creates a managed node group for an Amazon EKS cluster. ",
+	Use: "nodegroup",
+}
+
+var EKSCreateNodegroupCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Creates a managed node group for an Amazon EKS cluster.",
 	Long: `
-	
+
 	hybridctl eks nodegroup create
 
 	- flags
 		--cluster-name <value>
-		--addon-name <value>
-		[--addon-version <value>]
-		[--service-account-role-arn <value>]
-		[--resolve-conflicts <value>]
-		[--client-request-token <value>]
-		[--tags <value>]
-	`,
+		--region <value>
+		--nodegroup-name <value>
+		--node-role <value>
+		--subnets <value>
+		`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		region, _ := cmd.Flags().GetString("region")
+		nodegroupName, _ := cmd.Flags().GetString("nodegroup-name")
+		nodeRole, _ := cmd.Flags().GetString("node-role")
+		subnets, _ := cmd.Flags().GetStringArray("subnets")
+
+		createNodegroupInput.EKSCreateNodegroupInput.NodegroupName = &nodegroupName
+		createNodegroupInput.EKSCreateNodegroupInput.ClusterName = &clusterName
+		createNodegroupInput.EKSCreateNodegroupInput.NodeRole = &nodeRole
+		createNodegroupInput.Region = region
+		for _, subnet := range subnets {
+			list := strings.Split(subnet, ",")
+
+			for _, m := range list {
+				var tmp string = m
+				createNodegroupInput.EKSCreateNodegroupInput.Subnets = append(createNodegroupInput.EKSCreateNodegroupInput.Subnets, &tmp)
+			}
+		}
+
+		var output eks.CreateNodegroupOutput
+		httpPostUrl := "/eks/nodegroup/create"
+		bytes := util.HTTPPostRequest(createNodegroupInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+	},
+}
+
+var EKSDeleteNodegroupCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Deletes an Amazon EKS node group for a cluster.",
+	Long: `
+
+	hybridctl eks nodegroup delete
+
+	- flags
+		--cluster-name <value>
+		--nodegroup-name <value>
+		--region <value>
+		`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		region, _ := cmd.Flags().GetString("region")
+		nodegroupName, _ := cmd.Flags().GetString("nodegroup-name")
+
+		deleteNodegroupInput.EKSDeleteNodegroupInput.NodegroupName = &nodegroupName
+		deleteNodegroupInput.EKSDeleteNodegroupInput.ClusterName = &clusterName
+		deleteNodegroupInput.Region = region
+
+		var output eks.DeleteNodegroupInput
+		httpPostUrl := "/eks/nodegroup/delete"
+		bytes := util.HTTPPostRequest(deleteNodegroupInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+	},
 }
 
 var EKSAddonCmd = &cobra.Command{

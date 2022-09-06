@@ -188,3 +188,13 @@ type HCPDeleteClusterInput struct {
 	Region                string                 `json: region`
 	EKSDeleteClusterInput eks.DeleteClusterInput `json: DeleteClusterInput`
 }
+
+type HCPCreateNodegroupInput struct {
+	Region                  string
+	EKSCreateNodegroupInput eks.CreateNodegroupInput
+}
+
+type HCPDeleteNodegroupInput struct {
+	Region                  string
+	EKSDeleteNodegroupInput eks.DeleteNodegroupInput
+}

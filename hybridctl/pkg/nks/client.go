@@ -15,3 +15,13 @@ func SetNksClient() *ncpapi.APIClient {
 	}
 	return apiclient
 }
+
+// func SetVpcClient() *vpcapi.APIClient {
+// 	keys := ncloud.Keys()
+// 	configure := vpcapi.NewConfiguration(keys)
+// 	apiclient := vpcapi.NewAPIClient(configure)
+// 	if apiclient == nil {
+// 		klog.Infoln("vpc api is empty")
+// 	}
+// 	return apiclient
+// }
