@@ -79,6 +79,10 @@ func handlerRequests() http.Handler {
 	mux.HandleFunc("/eks/cluster/create", eksFunc.CreateCluster)
 	mux.HandleFunc("/eks/cluster/delete", eksFunc.DeleteCluster)
 
+	// nodegroup
+	mux.HandleFunc("/eks/nodegroup/create", eksFunc.CreateNodegroup)
+	mux.HandleFunc("/eks/nodegroup/delete", eksFunc.DeleteNodegroup)
+
 	// addon
 	mux.HandleFunc("/eks/addon/create", eksFunc.CreateAddon)
 

@@ -71,6 +71,30 @@ func EKSDeleteCluster(Input util.HCPDeleteClusterInput) (*eks.DeleteClusterOutpu
 	return out, err
 }
 
+func EKSCreateNodegroup(Input util.HCPCreateNodegroupInput) (*eks.CreateNodegroupOutput, error) {
+	klog.Info("Called EKSCreateNodegroup")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	out, err := eksSvc.CreateNodegroup(&Input.EKSCreateNodegroupInput)
+	return out, err
+}
+
+func EKSDeleteNodegroup(Input util.HCPDeleteNodegroupInput) (*eks.DeleteNodegroupOutput, error) {
+	klog.Info("Called EKSCreateNodegroup")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	out, err := eksSvc.DeleteNodegroup(&Input.EKSDeleteNodegroupInput)
+	return out, err
+}
+
 func EKSCreateAddon(addonInput eks.CreateAddonInput) (*eks.CreateAddonOutput, error) {
 
 	klog.Info("Called EKSCreateAddon")

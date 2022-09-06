@@ -44,6 +44,38 @@ func DeleteCluster(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
+func CreateNodegroup(w http.ResponseWriter, req *http.Request) {
+
+	var hcpcreateNodegroupInput cobrautil.HCPCreateNodegroupInput
+
+	util.Parser(req, &hcpcreateNodegroupInput)
+	out, err := handler.EKSCreateNodegroup(hcpcreateNodegroupInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
+func DeleteNodegroup(w http.ResponseWriter, req *http.Request) {
+
+	var hcpdeleteNodegroupInput cobrautil.HCPDeleteNodegroupInput
+
+	util.Parser(req, &hcpdeleteNodegroupInput)
+	out, err := handler.EKSDeleteNodegroup(hcpdeleteNodegroupInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
 func CreateAddon(w http.ResponseWriter, req *http.Request) {
 
 	var createAddonInput eks.CreateAddonInput
