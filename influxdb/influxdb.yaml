@@ -33,7 +33,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - hcp-worker1
+          - hcp-worker2
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

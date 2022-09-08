@@ -6,5 +6,8 @@
 ./create_cluster/6.install_fedaration.sh
 
 # create CRD
-kubectl apply -f /root/go/src/KETI-Hybrid_Cloud/pkg/crds
+kubectl apply -f /root/go/src/Hybrid_LCW/Hybrid_Cloud/pkg/crds
+
+# create namespace
+kubectl create namespace hcp
 

@@ -10,16 +10,14 @@ import (
 
 func main() {
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String("us-east-2"),
+		Region: aws.String("ap-northeast-2"),
 	}))
-	eksSvc := eks.New(sess, aws.NewConfig().WithRegion("us-east-2"))
+	eksSvc := eks.New(sess, aws.NewConfig().WithRegion("ap-northeast-2"))
 	input := &eks.CreateClusterInput{
 		ResourcesVpcConfig: &eks.VpcConfigRequest{
 			SubnetIds: []*string{
-				aws.String("subnet-0ea4f397a0207f679"),
-				aws.String("subnet-0794e08bd9f4f1de4"),
-				aws.String("subnet-0ee1e8932a11517f7"),
-				aws.String("subnet-02fabab8ef21f3297"),
+				aws.String("subnet-03aa22fb97d10c5c4"),
+				aws.String("subnet-065719eab58988c8c"),
 			},
 		},
 		Name:    aws.String("eks-cluster"),
@@ -33,21 +31,21 @@ func main() {
 		fmt.Println(result)
 	}
 
-	result2, err := eksSvc.CreateNodegroup(&eks.CreateNodegroupInput{
-		NodegroupName: aws.String("nodegroup1"),
-		ClusterName:   aws.String("eks-cluster"),
-		NodeRole:      aws.String("arn:aws:iam::741566967679:role/AmazonEKSNodeRole"),
-		InstanceTypes: []*string{aws.String("t3.micro")},
-		Subnets: []*string{
-			aws.String("subnet-0ea4f397a0207f679"),
-			aws.String("subnet-0794e08bd9f4f1de4"),
-			aws.String("subnet-0ee1e8932a11517f7"),
-			aws.String("subnet-02fabab8ef21f3297"),
-		},
-	})
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(result2)
-	}
+	// result2, err := eksSvc.CreateNodegroup(&eks.CreateNodegroupInput{
+	// 	NodegroupName: aws.String("nodegroup1"),
+	// 	ClusterName:   aws.String("eks-cluster"),
+	// 	NodeRole:      aws.String("arn:aws:iam::741566967679:role/AmazonEKSNodeRole"),
+	// 	InstanceTypes: []*string{aws.String("t3.micro")},
+	// 	Subnets: []*string{
+	// 		aws.String("subnet-0ea4f397a0207f679"),
+	// 		aws.String("subnet-0794e08bd9f4f1de4"),
+	// 		aws.String("subnet-0ee1e8932a11517f7"),
+	// 		aws.String("subnet-02fabab8ef21f3297"),
+	// 	},
+	// })
+	// if err != nil {
+	// 	fmt.Println(err)
+	// } else {
+	// 	fmt.Println(result2)
+	// }
 }

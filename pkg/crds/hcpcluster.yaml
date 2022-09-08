@@ -21,12 +21,15 @@ spec:
           spec:
             type: object
             properties:
+              region: 
+                type: string
               platform: 
                 type: string
                 enum: 
                 - aks
                 - eks
                 - gke
+                - nks
               kubeconfiginfo:
                 type: string
               joinstatus:

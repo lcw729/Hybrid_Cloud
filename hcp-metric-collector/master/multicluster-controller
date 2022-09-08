@@ -1,0 +1,10 @@
+<html>
+	<head>
+		<meta name="go-import" content="admiralty.io/multicluster-controller
+										git https://github.com/admiraltyio/multicluster-controller">
+		<meta name="go-source" content="admiralty.io/multicluster-controller
+										https://github.com/admiraltyio/multicluster-controller
+										https://github.com/admiraltyio/multicluster-controller/tree/master{/dir}
+										https://github.com/admiraltyio/multicluster-controller/blob/master{/dir}/{file}#L{line}">
+	</head>
+</html>
