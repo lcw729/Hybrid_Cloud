@@ -15,6 +15,14 @@ type Config struct {
 	} `json:"properties"`
 }
 
+type HCPConfig struct {
+	Section           string `json:"section"`
+	MaxClusterCpu     int    `json:"maxClusterCpu"`
+	MaxClusterMem     int    `json;"maxClusterMem"`
+	DefaultNodeOption string `json:"defaultNodeOption"`
+	Extra             int    `json: "extra"`
+}
+
 type Error struct {
 	Error struct {
 		Code    string `json:"code"`
