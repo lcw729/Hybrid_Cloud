@@ -7,26 +7,26 @@ import (
 	"context"
 	"net"
 
-	"google.golang.org/grpc"
-	"k8s.io/klog"
-
 	// "openmcp/openmcp/klog"
 	// "openmcp/openmcp/openmcp-metric-collector/master/pkg/influx"
 	// "openmcp/openmcp/hcp-metric-collector/master/pkg/protobuf"
 	// "openmcp/openmcp/util/clusterManager"
 
 	"time"
+
+	"google.golang.org/grpc"
+	"k8s.io/klog"
 )
 
 type MetricCollector struct {
-	ClusterManager clusterManager.ClusterManager
+	ClusterManager *clusterManager.ClusterManager
 	Influx         influx.Influx
 }
 
 func NewMetricCollector(cm *clusterManager.ClusterManager, INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD string) *MetricCollector {
 	klog.V(4).Info("NewMetricCollector Called")
 	mc := &MetricCollector{}
-	mc.ClusterManager = *cm
+	mc.ClusterManager = cm
 	mc.Influx = *influx.NewInflux(INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
 
 	return mc

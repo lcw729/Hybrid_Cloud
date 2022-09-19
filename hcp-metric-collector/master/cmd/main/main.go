@@ -3,95 +3,84 @@ package main
 import (
 	"Hybrid_Cloud/hcp-metric-collector/master/pkg/metricCollector"
 	"Hybrid_Cloud/util/clusterManager"
-	"Hybrid_Cloud/util/controller/reshape"
+	"context"
 	"fmt"
-	"log"
 	"os"
-
 	"runtime"
+	"sync"
 
-	"admiralty.io/multicluster-controller/pkg/cluster"
-	"admiralty.io/multicluster-controller/pkg/manager"
+	"k8s.io/klog"
+
+	"github.com/jinzhu/copier"
+	"k8s.io/client-go/rest"
+	"k8s.io/sample-controller/pkg/signals"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
+	genericclient "sigs.k8s.io/kubefed/pkg/client/generic"
 )
 
 const (
 	GRPC_PORT = "2051"
 )
 
+var prev_length int = 0
+var mc *metricCollector.MetricCollector
+
 func main() {
-	// logLevel.KetiLogInit()
-	// fmt.Println("!")
+	var wg sync.WaitGroup
+
 	cm, _ := clusterManager.NewClusterManager()
 
-	go MasterMetricCollector(cm)
+	stopCh := signals.SetupSignalHandler()
 
+	wg.Add(2)
+	go MasterMetricCollector(cm, stopCh)
+	go reshapeCluster(stopCh)
+	wg.Wait()
+}
+
+func reshapeCluster(stopCh <-chan struct{}) {
 	for {
-
-		host_ctx := "hcp"
-		namespace := "hcp"
-
-		host_cfg := cm.Host_config
-		//live := cluster.New(host_ctx, host_cfg, cluster.Options{CacheOptions: cluster.CacheOptions{Namespace: namespace}})
-		live := cluster.New(host_ctx, host_cfg, cluster.Options{})
-		fmt.Println("live : ", live)
-
-		ghosts := []*cluster.Cluster{}
-		fmt.Println("ghosts: ", ghosts)
-
-		for _, ghost_cluster := range cm.Cluster_list.Items {
-			ghost_ctx := ghost_cluster.Name
-			fmt.Println("ghost_ctx", ghost_ctx)
-			ghost_cfg := cm.Cluster_configs[ghost_ctx]
-			fmt.Println("ghost_cfg", ghost_cfg)
-
-			//ghost := cluster.New(ghost_ctx, ghost_cfg, cluster.Options{CacheOptions: cluster.CacheOptions{Namespace: namespace}})
-			ghost := cluster.New(ghost_ctx, ghost_cfg, cluster.Options{})
-			fmt.Println("ghost", ghost)
-			ghosts = append(ghosts, ghost)
-			fmt.Println("ghosts", ghosts)
+		host_config, err := rest.InClusterConfig()
+		if err != nil {
+			<-stopCh
 		}
 
-		reshape_cont, _ := reshape.NewController(live, ghosts, namespace, cm)
-		fmt.Println("reshpae_cont", reshape_cont)
-		// loglevel_cont, _ := logLevel.NewController(live, ghosts, namespace)
-		// fmt.Println("loglevel_cont", loglevel_cont)
+		namespace := "kube-federation-system"
+		host_client := genericclient.NewForConfigOrDie(host_config)
+		tempClusterList := &fedv1b1.KubeFedClusterList{}
 
-		m := manager.New()
-		m.AddController(reshape_cont)
-		// m.AddController(loglevel_cont)
+		err = host_client.List(context.TODO(), tempClusterList, namespace, &client.ListOptions{})
 
-		stop := reshape.SetupSignalHandler()
-		fmt.Println("stop", stop)
+		if err != nil {
+			fmt.Printf("Error retrieving list of federated clusters: %+v\n", err)
+			<-stopCh
+		}
+		temp_length := len(tempClusterList.Items)
 
-		if err := m.Start(stop); err != nil {
-			log.Fatal(err)
+		if temp_length != prev_length {
+			klog.Infof("temp_length : %d, prev_length", temp_length, prev_length)
+			newCm, err := clusterManager.NewClusterManager()
+
+			if err != nil {
+				klog.Errorln(err)
+				<-stopCh
+			}
+
+			copier.Copy(mc.ClusterManager, newCm)
+			prev_length = temp_length
 		}
 	}
-
 }
-func MasterMetricCollector(cm *clusterManager.ClusterManager) {
-	// klog.V(4).Info("MasterMetricCollector Called")
+
+func MasterMetricCollector(cm *clusterManager.ClusterManager, stopCh <-chan struct{}) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	INFLUX_IP := os.Getenv("INFLUX_IP")
 	INFLUX_PORT := os.Getenv("INFLUX_PORT")
 	INFLUX_USERNAME := os.Getenv("INFLUX_USERNAME")
 	INFLUX_PASSWORD := os.Getenv("INFLUX_PASSWORD")
 
-	// klog.V(5).Info("INFLUX_IP: ", INFLUX_IP)
-	// klog.V(5).Info("INFLUX_PORT: ", INFLUX_PORT)
-	// klog.V(5).Info("INFLUX_USERNAME: ", INFLUX_USERNAME)
-	// klog.V(5).Info("INFLUX_PASSWORD: ", INFLUX_PASSWORD)
-
-	mc := metricCollector.NewMetricCollector(cm, INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
-	// klog.V(2).Info("Created NewMetricCollector Structure")
-
-	// fmt.Println(INFLUX_IP, ":", INFLUX_PORT)
+	mc = metricCollector.NewMetricCollector(cm, INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
 	mc.Influx.CreateDatabase()
-	// mc.Influx.CreateMeasurements()
-
 	mc.StartGRPC(GRPC_PORT)
-
-	// mc = &metricCollector.MetricCollector{} //
-	// mc.StartGRPC(GRPC_PORT)                 //
-
 }

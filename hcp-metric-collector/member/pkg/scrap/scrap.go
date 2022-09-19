@@ -75,7 +75,7 @@ func Scrap(config *rest.Config, kubelet_client *kubeletClient.KubeletClient, nod
 func CollectNode(config *rest.Config, kubelet_client *kubeletClient.KubeletClient, node corev1.Node) (*storage.MetricsBatch, error) {
 	fmt.Println("Func CollectNode Called")
 	fmt.Println("Collect Node Start goroutine : '", node.Name, "'")
-	host := node.Status.Addresses[0].Address
+	host := node.Status.Addresses[1].Address
 	token := config.BearerToken
 	summary, err := kubelet_client.GetSummary(host, token)
 	fmt.Println("summary : ", summary)

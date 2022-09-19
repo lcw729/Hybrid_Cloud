@@ -20,7 +20,7 @@ spec:
       containers:
         - name: hcp-metric-collector
           # Replace this with the built image name
-          image: ketidevit2/hcp-metric-collector:v0.0.23
+          image: ketidevit2/hcp-metric-collector:v0.0.31
           ports:
           - containerPort: 2051
           command:

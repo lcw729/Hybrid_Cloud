@@ -39,7 +39,7 @@ spec:
               value: "32051"
               # value: "30004"
             - name: CLUSTER_NAME
-              value: "eks-cluster"
+              value: "eks-keti-cluster2"
             - name: OPERATOR_NAME
               value: "hcp-metric-collector"
       tolerations:
