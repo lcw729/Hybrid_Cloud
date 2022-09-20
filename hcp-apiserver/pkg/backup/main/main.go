@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"Hybrid_Cloud/hcp-apiserver/pkg/util"
 	"encoding/json"
@@ -117,3 +118,4 @@ func main() {
 		fmt.Println("[", i+1, "]", data.Value[i].Name)
 	}
 }
+*/

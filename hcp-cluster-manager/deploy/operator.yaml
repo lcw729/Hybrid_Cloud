@@ -18,7 +18,7 @@ spec:
       - name: regcred
       containers:
         - name: hcp-cluster-manager
-          image: ketidevit2/hcp-cluster-manager:v0.0.1
+          image: ketidevit2/hcp-cluster-manager:v0.0.3
           command:
           - hcp-cluster-manager
           imagePullPolicy: Always

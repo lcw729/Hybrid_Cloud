@@ -1,5 +1,6 @@
 package backup
 
+/*
 import (
 	cobrautil "Hybrid_Cloud/hybridctl/util"
 
@@ -40,7 +41,7 @@ import (
 	// "k8s.io/client-go/tools/clientcmd"
 )
 
-/*
+
 func Join(info mappingTable.ClusterInfo) bool {
 
 	master_config, _ := cobrautil.BuildConfigFromFlags("master", "/root/.kube/config")
@@ -134,7 +135,7 @@ func Join(info mappingTable.ClusterInfo) bool {
 	fmt.Println("---joinHandler end---")
 	return true
 }
-*/
+
 
 func JoinCluster(info ClusterInfo, join_cluster_client *kubernetes.Clientset, APIEndPoint string) bool {
 
@@ -298,7 +299,7 @@ func JoinCluster(info ClusterInfo, join_cluster_client *kubernetes.Clientset, AP
 	} else {
 		fmt.Println("< Step 6 > Create KubefedCluster Resource [" + newkubefedcluster.Name + "] in hcp")
 	}
-	/*
+
 		kubefedcluster := &fedv1b1.KubeFedCluster{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "kubefedcluster",
@@ -331,6 +332,7 @@ func JoinCluster(info ClusterInfo, join_cluster_client *kubernetes.Clientset, AP
 		} else {
 			fmt.Println("< Step 6 > Create KubefedCluster Resource [" + newkubefedcluster.Name + "] in hcp")
 		}
-	*/
+
 	return true
 }
+*/

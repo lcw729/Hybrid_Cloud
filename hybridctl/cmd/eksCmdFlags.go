@@ -16,6 +16,21 @@ func eksFlags() {
 	EKSDeleteClusterCmd.Flags().StringP("region", "", "", "The region to place your cluster")
 	EKSDeleteClusterCmd.MarkFlagRequired("region")
 
+	EKSDescribeClusterCmd.Flags().StringP("cluster-name", "c", "", "The unique name to give to your cluster.")
+	EKSDescribeClusterCmd.MarkFlagRequired("cluster-name")
+	EKSDescribeClusterCmd.Flags().StringP("region", "", "", "The region to place your cluster")
+	EKSDescribeClusterCmd.MarkFlagRequired("region")
+
+	EKSListClusterCmd.Flags().StringP("region", "", "", "The region to place your cluster")
+	EKSListClusterCmd.MarkFlagRequired("region")
+
+	EKSUpgradeClusterCmd.Flags().StringP("cluster-name", "c", "", "The unique name to give to your cluster.")
+	EKSUpgradeClusterCmd.MarkFlagRequired("cluster-name")
+	EKSUpgradeClusterCmd.Flags().StringP("region", "", "", "The region to place your cluster")
+	EKSUpgradeClusterCmd.MarkFlagRequired("region")
+	EKSUpgradeClusterCmd.Flags().StringP("version", "", "", "The k8s version upgrade your cluster ")
+	EKSUpgradeClusterCmd.MarkFlagRequired("version")
+
 	EKSCreateNodegroupCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster to create the node group in.")
 	EKSCreateNodegroupCmd.MarkFlagRequired("cluster-name")
 	EKSCreateNodegroupCmd.Flags().StringP("nodegroup-name", "", "", "The unique name to give your node group.")
@@ -33,6 +48,18 @@ func eksFlags() {
 	EKSDeleteNodegroupCmd.MarkFlagRequired("nodegroup-name")
 	EKSDeleteNodegroupCmd.Flags().StringP("region", "", "", "The region to use.")
 	EKSDeleteNodegroupCmd.MarkFlagRequired("region")
+
+	EKSDescribeNodegroupCmd.Flags().StringP("cluster-name", "c", "", "The name of the Amazon EKS cluster that is associated with your node group.")
+	EKSDescribeNodegroupCmd.MarkFlagRequired("cluster-name")
+	EKSDescribeNodegroupCmd.Flags().StringP("nodegroup-name", "", "", "The name of the node group to describe.")
+	EKSDescribeNodegroupCmd.MarkFlagRequired("nodegroup-name")
+	EKSDescribeNodegroupCmd.Flags().StringP("region", "", "", "The region to use.")
+	EKSDescribeNodegroupCmd.MarkFlagRequired("region")
+
+	EKSListNodegroupCmd.Flags().StringP("cluster-name", "c", "", "The name of the Amazon EKS cluster that is associated with your node group.")
+	EKSListNodegroupCmd.MarkFlagRequired("cluster-name")
+	EKSListNodegroupCmd.Flags().StringP("region", "", "", "The region to use.")
+	EKSListNodegroupCmd.MarkFlagRequired("region")
 
 	EKSAssociateEncryptionConfigCmd.Flags().StringP("cluster-name", "c", "", "The name of the cluster that you are associating with encryption configuration.")
 	EKSAssociateEncryptionConfigCmd.MarkFlagRequired("cluster-name")

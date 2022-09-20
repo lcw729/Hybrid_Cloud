@@ -71,6 +71,52 @@ func EKSDeleteCluster(Input util.HCPDeleteClusterInput) (*eks.DeleteClusterOutpu
 	return out, err
 }
 
+func EKSDescribeCluster(Input util.HCPDescribeClusterInput) (*eks.DescribeClusterOutput, error) {
+	klog.Infoln("Called EksDescribeCluster")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	fmt.Println(Input.EKSDescribeClusterInput)
+
+	out, err := eksSvc.DescribeCluster(&Input.EKSDescribeClusterInput)
+	return out, err
+}
+
+func EKSListCluster(Input util.HCPListClusterInput) (*eks.ListClustersOutput, error) {
+	klog.Infoln("Called EKSListCluster")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	input := &eks.ListClustersInput{}
+	result, err := eksSvc.ListClusters(input)
+	if err != nil {
+		klog.Infoln(err)
+	}
+	klog.Infoln(result)
+
+	// out, err := eksSvc.ListClusters(&Input.EKSListClusterInput)
+	return result, err
+}
+
+func EKSUpgradeCluster(Input util.HCPUpdateClusterVersionInput) (*eks.UpdateClusterVersionOutput, error) {
+	klog.Infoln("Called EKS Cluster Version Upgrade")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+
+	fmt.Println(Input.EKSUpdateClusterVersionInput)
+	out, err := eksSvc.UpdateClusterVersion(&Input.EKSUpdateClusterVersionInput)
+	return out, err
+}
+
 func EKSCreateNodegroup(Input util.HCPCreateNodegroupInput) (*eks.CreateNodegroupOutput, error) {
 	klog.Info("Called EKSCreateNodegroup")
 
@@ -92,6 +138,28 @@ func EKSDeleteNodegroup(Input util.HCPDeleteNodegroupInput) (*eks.DeleteNodegrou
 	}
 
 	out, err := eksSvc.DeleteNodegroup(&Input.EKSDeleteNodegroupInput)
+	return out, err
+}
+
+func EKSDescribeNodegroup(Input util.HCPDescribeNodegroupInput) (*eks.DescribeNodegroupOutput, error) {
+	klog.Infoln("Called EKSDescribeNodegroup")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+	out, err := eksSvc.DescribeNodegroup(&Input.EKSDescribeNodegroupInput)
+	return out, err
+}
+
+func EKSListNodegroup(Input util.HCPListNodegroupInput) (*eks.ListNodegroupsOutput, error) {
+	klog.Infoln("Called EKSListNodegroup")
+
+	eksSvc := InitializeEKSClient(Input.Region)
+	if eksSvc == nil {
+		return nil, nil
+	}
+	out, err := eksSvc.ListNodegroups(&Input.EKSListNodegroupInput)
 	return out, err
 }
 

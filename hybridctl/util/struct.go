@@ -197,6 +197,21 @@ type HCPDeleteClusterInput struct {
 	EKSDeleteClusterInput eks.DeleteClusterInput `json: DeleteClusterInput`
 }
 
+type HCPDescribeClusterInput struct {
+	Region                  string                   `json: region`
+	EKSDescribeClusterInput eks.DescribeClusterInput `json: DescribeClusterInput`
+}
+
+type HCPListClusterInput struct {
+	Region string `json: region`
+	// EKSListClusterInput eks.ListClustersInput `json: ListClusterInput`
+}
+
+type HCPUpdateClusterVersionInput struct {
+	Region                       string                        `json: region`
+	EKSUpdateClusterVersionInput eks.UpdateClusterVersionInput `json: UpdateClusterVersionInput`
+}
+
 type HCPCreateNodegroupInput struct {
 	Region                  string
 	EKSCreateNodegroupInput eks.CreateNodegroupInput
@@ -205,4 +220,14 @@ type HCPCreateNodegroupInput struct {
 type HCPDeleteNodegroupInput struct {
 	Region                  string
 	EKSDeleteNodegroupInput eks.DeleteNodegroupInput
+}
+
+type HCPDescribeNodegroupInput struct {
+	Region                    string
+	EKSDescribeNodegroupInput eks.DescribeNodegroupInput
+}
+
+type HCPListNodegroupInput struct {
+	Region                string
+	EKSListNodegroupInput eks.ListNodegroupsInput
 }

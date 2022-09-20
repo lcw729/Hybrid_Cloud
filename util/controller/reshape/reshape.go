@@ -36,13 +36,15 @@ func NewController(live *cluster.Cluster, ghosts []*cluster.Cluster, ghostNamesp
 	}
 	ghostclients := []client.Client{}
 
-	for _, ghost := range ghosts {
-		ghostclient, err := ghost.GetDelegatingClient()
-		if err != nil {
-			return nil, fmt.Errorf("getting delegating client for ghost cluster: %v", err)
+	/*
+		for _, ghost := range ghosts {
+			ghostclient, err := ghost.GetDelegatingClient()
+			if err != nil {
+				return nil, fmt.Errorf("getting delegating client for ghost cluster: %v", err)
+			}
+			ghostclients = append(ghostclients, ghostclient)
 		}
-		ghostclients = append(ghostclients, ghostclient)
-	}
+	*/
 
 	co := controller.New(&reconciler{live: liveclient, ghosts: ghostclients, ghostNamespace: ghostNamespace}, controller.Options{})
 	if err := fedapis.AddToScheme(live.GetScheme()); err != nil {

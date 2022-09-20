@@ -94,10 +94,15 @@ func init() {
 	EKSCmd.AddCommand(EKSClusterCmd)
 	EKSClusterCmd.AddCommand(EKSCreateClusterCmd)
 	EKSClusterCmd.AddCommand(EKSDeleteClusterCmd)
+	EKSClusterCmd.AddCommand(EKSDescribeClusterCmd)
+	EKSClusterCmd.AddCommand(EKSListClusterCmd)
+	EKSClusterCmd.AddCommand(EKSUpgradeClusterCmd)
 
 	EKSCmd.AddCommand(EKSNodegroupCmd)
 	EKSNodegroupCmd.AddCommand(EKSCreateNodegroupCmd)
 	EKSNodegroupCmd.AddCommand(EKSDeleteNodegroupCmd)
+	EKSNodegroupCmd.AddCommand(EKSDescribeNodegroupCmd)
+	EKSNodegroupCmd.AddCommand(EKSListNodegroupCmd)
 
 	EKSCmd.AddCommand(EKSAddonCmd)
 	EKSAddonCmd.AddCommand(EKSCreateAddonCmd)

@@ -1,72 +1,21 @@
-package handler
+package util
 
 import (
-	"Hybrid_Cloud/hcp-analytic-engine/influx"
 	"bytes"
 	"encoding/json"
-	"net/http"
 	"os"
 
 	"github.com/influxdata/influxdb/client/v2"
 	"k8s.io/klog"
 )
 
-type PodMetricList struct {
-	Items []PodMetric `json:"podmetrics"`
-}
-type NodeMetricList struct {
-	Items []NodeMetric `json:"nodemetrics"`
-}
-type PodMetric struct {
-	Time      string        `json:"time"`
-	Cluster   string        `json:"cluster"`
-	Namespace string        `json:"namespace"`
-	Node      string        `json:"node"`
-	Pod       string        `json:"pod"`
-	Cpu       CpuMetric     `json:"cpu"`
-	Memory    MemoryMetric  `json:"memory"`
-	Fs        FsMetric      `json:"fs"`
-	Network   NetworkMetric `json:"network"`
-}
-type NodeMetric struct {
-	Time    string        `json:"time"`
-	Cluster string        `json:"cluster"`
-	Node    string        `json:"node"`
-	Cpu     CpuMetric     `json:"cpu"`
-	Memory  MemoryMetric  `json:"memory"`
-	Fs      FsMetric      `json:"fs"`
-	Network NetworkMetric `json:"network"`
-}
-
-type CpuMetric struct {
-	CPUUsageNanoCores string `json:"CPUUsageNanoCores"`
-}
-type MemoryMetric struct {
-	MemoryAvailableBytes  string `json:"MemoryAvailableBytes"`
-	MemoryUsageBytes      string `json:"MemoryUsageBytes"`
-	MemoryWorkingSetBytes string `json:"MemoryWorkingSetBytes"`
-}
-type FsMetric struct {
-	FsAvailableBytes string `json:"FsAvailableBytes"`
-	FsCapacityBytes  string `json:"FsCapacityBytes"`
-	FsUsedBytes      string `json:"FsUsedBytes"`
-}
-type NetworkMetric struct {
-	NetworkRxBytes string `json:"NetworkRxBytes"`
-	NetworkTxBytes string `json:"NetworkTxBytes"`
-}
-
-func GetNodeMetric(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func GetResource(podNum int, clusterName string, objectType string) []byte {
+func GetResource(Name string, clusterName string, objectType string) []byte {
 	INFLUX_IP := os.Getenv("INFLUX_IP")
 	INFLUX_PORT := os.Getenv("INFLUX_PORT")
 	INFLUX_USERNAME := os.Getenv("INFLUX_USERNAME")
 	INFLUX_PASSWORD := os.Getenv("INFLUX_PASSWORD")
 
-	inf := influx.NewInflux(INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
+	inf := NewInflux(INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
 
 	if objectType == "pods" {
 

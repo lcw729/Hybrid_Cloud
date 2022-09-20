@@ -73,7 +73,7 @@ func (in *Influx) SaveMetrics(clusterName string, data *protobuf.Collection) {
 	klog.V(2).Info("[Save InfluxDB] ClusterName: '", clusterName, "'")
 
 	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
-		//Precision:        "rfc3339", // yyyy-MM-ddTHH:mm:ss
+		Precision:        "rfc3339", // yyyy-MM-ddTHH:mm:ss
 		Database:         "Metrics",
 		RetentionPolicy:  "",
 		WriteConsistency: "",

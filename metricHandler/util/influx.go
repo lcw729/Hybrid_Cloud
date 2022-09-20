@@ -1,4 +1,4 @@
-package influx
+package util
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ func InfluxDBClient(INFLUX_IP, INFLUX_PORT, username, password string) client.Cl
 	return c
 }
 
-func (in *Influx) GetPodData(podNum int, clusterName string) []client.Result {
+func (in *Influx) GetPodData(Name string, clusterName string) []client.Result {
 	// klog.V(4).Info("Func GetPodData Called")
 	// klog.V(5).Info("timeStart=", timeStart, ", timeEnd=", timeEnd)
 	pod_Num := fmt.Sprint(podNum)
@@ -41,7 +41,6 @@ func (in *Influx) GetPodData(podNum int, clusterName string) []client.Result {
 	response, err := in.inClient.Query(q)
 
 	if err == nil && response.Error() == nil {
-		fmt.Println(response.Results)
 		return response.Results
 	}
 	return nil

@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/eks"
 	"github.com/spf13/cobra"
+	klog "k8s.io/klog/v2"
 )
 
 func EKSCommonPrintOption(generic interface{}, bytes []byte) {
@@ -97,6 +98,87 @@ var EKSDeleteClusterCmd = &cobra.Command{
 	},
 }
 
+var EKSDescribeClusterCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe the Amazon EKS Cluster Control Plane.",
+	Long: `
+	hybridctl eks cluster describe 
+
+	- flags
+	  --cluster-name <value>
+	  --region <value>
+	`,
+	Run: func(cmd *cobra.Command, args []string) {
+		klog.Infoln("describe eks")
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		region, _ := cmd.Flags().GetString("region")
+
+		describeClusterInput.EKSDescribeClusterInput.Name = &clusterName
+		describeClusterInput.Region = region
+
+		fmt.Println(describeClusterInput)
+
+		var output eks.DescribeClusterOutput
+		httpPostUrl := "/eks/cluster/describe"
+		bytes := util.HTTPPostRequest(describeClusterInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+
+	},
+}
+
+var EKSListClusterCmd = &cobra.Command{
+	Use:   "list",
+	Short: "list the Amazon EKS Cluster Control Plane.",
+	Long: `
+	hybridctl eks cluster list
+
+	- flags
+	  --region <value>
+	`,
+	Run: func(cmd *cobra.Command, args []string) {
+		klog.Infoln("list eks")
+		region, _ := cmd.Flags().GetString("region")
+
+		listClusterInput.Region = region
+
+		fmt.Println(listClusterInput)
+
+		var output eks.DescribeClusterOutput
+		httpPostUrl := "/eks/cluster/list"
+		bytes := util.HTTPPostRequest(listClusterInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+	},
+}
+
+var EKSUpgradeClusterCmd = &cobra.Command{
+	Use:   "upgrade",
+	Short: "Upgrade the Amazon EKS Cluster Control Plane.",
+	Long: `
+
+	hybridctl eks cluster upgrade
+
+	- flags
+		--cluster-name <value>
+		--region <value>
+		--version <value>
+		`,
+	Run: func(cmd *cobra.Command, args []string) {
+		klog.Infoln("Upgrade Eks")
+		region, _ := cmd.Flags().GetString("region")
+		cluster, _ := cmd.Flags().GetString("cluster-name")
+		version, _ := cmd.Flags().GetString("version")
+
+		upgradeClusterInput.Region = region
+		upgradeClusterInput.EKSUpdateClusterVersionInput.Name = &cluster
+		upgradeClusterInput.EKSUpdateClusterVersionInput.Version = &version
+
+		var output eks.UpdateClusterVersionInput
+		httpPostUrl := "/eks/cluster/upgrade"
+		bytes := util.HTTPPostRequest(upgradeClusterInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+	},
+}
+
 // nodegroup
 
 var EKSNodegroupCmd = &cobra.Command{
@@ -170,6 +252,61 @@ var EKSDeleteNodegroupCmd = &cobra.Command{
 		var output eks.DeleteNodegroupInput
 		httpPostUrl := "/eks/nodegroup/delete"
 		bytes := util.HTTPPostRequest(deleteNodegroupInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+	},
+}
+
+var EKSDescribeNodegroupCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "describe an Amazon EKS node group for a cluster.",
+	Long: `
+
+	hybridctl eks nodegroup describe
+
+	- flags
+		--cluster-name <value>
+		--nodegroup-name <value>
+		--region <value>
+		`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		region, _ := cmd.Flags().GetString("region")
+		nodegroupName, _ := cmd.Flags().GetString("nodegroup-name")
+
+		describeNodegroupInput.EKSDescribeNodegroupInput.NodegroupName = &nodegroupName
+		describeNodegroupInput.EKSDescribeNodegroupInput.ClusterName = &clusterName
+		describeNodegroupInput.Region = region
+
+		var output eks.DescribeNodegroupInput
+		httpPostUrl := "/eks/nodegroup/describe"
+		bytes := util.HTTPPostRequest(describeNodegroupInput, httpPostUrl)
+		EKSCommonPrintOption(output, bytes)
+	},
+}
+
+var EKSListNodegroupCmd = &cobra.Command{
+	Use:   "list",
+	Short: "list an Amazon EKS node group for a cluster.",
+	Long: `
+
+	hybridctl eks nodegroup list
+
+	- flags
+		--cluster-name <value>
+		--region <value>
+		`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		clusterName, _ := cmd.Flags().GetString("cluster-name")
+		region, _ := cmd.Flags().GetString("region")
+
+		listNodegroupInput.EKSListNodegroupInput.ClusterName = &clusterName
+		listNodegroupInput.Region = region
+
+		var output eks.DescribeNodegroupInput
+		httpPostUrl := "/eks/nodegroup/list"
+		bytes := util.HTTPPostRequest(listNodegroupInput, httpPostUrl)
 		EKSCommonPrintOption(output, bytes)
 	},
 }

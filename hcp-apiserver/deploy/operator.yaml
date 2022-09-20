@@ -18,7 +18,7 @@ spec:
         - name: regcred
       containers:
         - name: hcp-apiserver
-          image: ketidevit2/hcp-apiserver:v0.0.1
+          image: ketidevit2/hcp-apiserver:v0.0.2
           command:
           - hcp-apiserver
           imagePullPolicy: Always

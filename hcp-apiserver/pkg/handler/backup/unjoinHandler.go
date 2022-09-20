@@ -1,5 +1,6 @@
 package backup
 
+/*
 import (
 	util "Hybrid_Cloud/hcp-apiserver/pkg/util"
 	cobrautil "Hybrid_Cloud/hybridctl/util"
@@ -169,3 +170,4 @@ func unjoinCluster(info ClusterInfo, cluster_client *kubernetes.Clientset) bool 
 	}
 	return true
 }
+*/

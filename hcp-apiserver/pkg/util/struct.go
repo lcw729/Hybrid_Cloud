@@ -13,6 +13,10 @@ type Config struct {
 	} `json:"properties"`
 }
 
+type CreateConfig struct {
+	Location string `json:"location"`
+}
+
 type Output struct {
 	Stderr []byte
 	Stdout []byte

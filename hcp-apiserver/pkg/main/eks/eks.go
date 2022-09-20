@@ -44,6 +44,62 @@ func DeleteCluster(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
+func DescribeCluster(w http.ResponseWriter, req *http.Request) {
+
+	var hcpDescribeClusterInput cobrautil.HCPDescribeClusterInput
+
+	util.Parser(req, &hcpDescribeClusterInput)
+	fmt.Println(hcpDescribeClusterInput)
+
+	out, err := handler.EKSDescribeCluster(hcpDescribeClusterInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
+func ListCluster(w http.ResponseWriter, req *http.Request) {
+
+	var hcpListClusterInput cobrautil.HCPListClusterInput
+
+	util.Parser(req, &hcpListClusterInput)
+	fmt.Println(hcpListClusterInput)
+
+	out, err := handler.EKSListCluster(hcpListClusterInput)
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
+func UpgradeCluster(w http.ResponseWriter, req *http.Request) {
+
+	var hcpUpgradeClusterInput cobrautil.HCPUpdateClusterVersionInput
+
+	util.Parser(req, &hcpUpgradeClusterInput)
+	fmt.Println(hcpUpgradeClusterInput)
+
+	out, err := handler.EKSUpgradeCluster(hcpUpgradeClusterInput)
+
+	var jsonData []byte
+
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
 func CreateNodegroup(w http.ResponseWriter, req *http.Request) {
 
 	var hcpcreateNodegroupInput cobrautil.HCPCreateNodegroupInput
@@ -72,6 +128,42 @@ func DeleteNodegroup(w http.ResponseWriter, req *http.Request) {
 	} else {
 		jsonData, _ = json.Marshal(&out)
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
+func DescribeNodegroup(w http.ResponseWriter, req *http.Request) {
+
+	var hcpDescribeNodegroupInput cobrautil.HCPDescribeNodegroupInput
+
+	util.Parser(req, &hcpDescribeNodegroupInput)
+	out, err := handler.EKSDescribeNodegroup(hcpDescribeNodegroupInput)
+
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(jsonData))
+}
+
+func ListNodegroup(w http.ResponseWriter, req *http.Request) {
+
+	var hcpListNodegroupInput cobrautil.HCPListNodegroupInput
+
+	util.Parser(req, &hcpListNodegroupInput)
+	out, err := handler.EKSListNodegroup(hcpListNodegroupInput)
+
+	var jsonData []byte
+	if err != nil {
+		jsonData, _ = json.Marshal(&err)
+	} else {
+		jsonData, _ = json.Marshal(&out)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(jsonData))
 }

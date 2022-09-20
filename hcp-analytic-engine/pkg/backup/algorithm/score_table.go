@@ -1,5 +1,6 @@
 package algorithm
 
+/*
 import (
 	"sort"
 )
@@ -46,3 +47,4 @@ func SortCluster() []string {
 
 	return sorted
 }
+*/

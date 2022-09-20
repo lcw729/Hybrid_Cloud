@@ -9,3 +9,6 @@ go build -o build/_output/bin/$controller_name -gcflags all=-trimpath=`pwd` -asm
 
 docker build -t $docker_id/$controller_name:v0.0.1 build && \
 docker push $docker_id/$controller_name:v0.0.1
+
+#0.0.1 ->> 운용중이던 컨테이너
+#0.0.3 ->> 테스트 컨테이너(제병)

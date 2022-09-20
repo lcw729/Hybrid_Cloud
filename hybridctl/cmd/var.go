@@ -16,6 +16,11 @@ var createAddonInput eks.CreateAddonInput
 var deleteClusterInput util.HCPDeleteClusterInput
 var deleteNodegroupInput util.HCPDeleteNodegroupInput
 var deleteAddonInput eks.DeleteAddonInput
+var describeClusterInput util.HCPDescribeClusterInput
+var describeNodegroupInput util.HCPDescribeNodegroupInput
+var listClusterInput util.HCPListClusterInput
+var listNodegroupInput util.HCPListNodegroupInput
+var upgradeClusterInput util.HCPUpdateClusterVersionInput
 var describeAddonInput eks.DescribeAddonInput
 var describeAddonVersionsInput eks.DescribeAddonVersionsInput
 var describeIdentityProviderConfigInput eks.DescribeIdentityProviderConfigInput

@@ -11,12 +11,12 @@ spec:
           value: 
             - "2" # CPU
             - "4"  # MEM  
-            - "110" # PODS
+            - "30" # PODS
         - type: Middle
           value: 
             - "4" # CPU
             - "8"  # MEM  
-            - "110" # PODS
+            - "55" # PODS
         - type: High
           value: 
             - "8" # CPU

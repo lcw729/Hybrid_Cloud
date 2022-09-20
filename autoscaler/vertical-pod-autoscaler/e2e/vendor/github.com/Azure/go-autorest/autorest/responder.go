@@ -160,7 +160,7 @@ func ByUnmarshallingBytes(v *[]byte) RespondDecorator {
 		return ResponderFunc(func(resp *http.Response) error {
 			err := r.Respond(resp)
 			if err == nil {
-				bytes, errInner := ioutil.ReadAll(resp.Body)
+				bytes, errInner := ioutil.(resp.Body)
 				if errInner != nil {
 					err = fmt.Errorf("Error occurred reading http.Response#Body - Error = '%v'", errInner)
 				} else {
