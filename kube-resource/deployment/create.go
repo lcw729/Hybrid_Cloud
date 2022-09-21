@@ -1,11 +1,13 @@
 package deployment
 
 import (
-	resourcev1alpha1apis "Hybrid_Cloud/pkg/apis/resource/v1alpha1"
-	"Hybrid_Cloud/util/clusterManager"
 	"context"
 
-	ns "Hybrid_Cloud/kube-resource/namespace"
+	"github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+
+	resourcev1alpha1apis "github.com/KETI-Hybrid/hcp-pkg/apis/resource/v1alpha1"
+
+	ns "github.com/KETI-Hybrid/hcp-pkg/kube-resource/namespace"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -1,6 +1,6 @@
 package kubefed
 
-import "Hybrid_Cloud/util/clusterManager"
+import "github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
 
 func IsKubeFedCluster(clustername string) bool {
 	cm, _ := clusterManager.NewClusterManager()

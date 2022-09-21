@@ -1,8 +1,9 @@
 package hcpcluster
 
 import (
-	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	"context"
+
+	hcpclusterv1alpha1 "github.com/KETI-Hybrid/hcp-pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"

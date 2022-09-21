@@ -1,7 +1,7 @@
 package clientset
 
 import (
-	cobrautil "Hybrid_Cloud/hybridctl/util"
+	cobrautil "github.com/KETI-Hybrid/hybridctl-v1/util"
 
 	hcpclusterv1alpha1 "github.com/KETI-Hybrid/hcp-pkg/client/hcpcluster/v1alpha1/clientset/versioned"
 	hcppolicyv1alpha1 "github.com/KETI-Hybrid/hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned"
