@@ -1,9 +1,9 @@
 package reshape
 
 import (
-	"Hybrid_Cloud/util/clusterManager"
 	"context"
 	"fmt"
+	"hcp-pkg/util/clusterManager"
 
 	"admiralty.io/multicluster-controller/pkg/cluster"
 	"admiralty.io/multicluster-controller/pkg/controller"

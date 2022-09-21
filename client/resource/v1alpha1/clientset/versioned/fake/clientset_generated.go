@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
-	hcpv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/typed/resource/v1alpha1"
-	fakehcpv1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned/typed/resource/v1alpha1/fake"
+	clientset "hcp-pkg/client/resource/v1alpha1/clientset/versioned"
+	hcpv1alpha1 "hcp-pkg/client/resource/v1alpha1/clientset/versioned/typed/resource/v1alpha1"
+	fakehcpv1alpha1 "hcp-pkg/client/resource/v1alpha1/clientset/versioned/typed/resource/v1alpha1/fake"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"

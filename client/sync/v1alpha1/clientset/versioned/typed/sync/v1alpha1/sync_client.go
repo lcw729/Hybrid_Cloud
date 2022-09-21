@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "Hybrid_Cloud/pkg/apis/sync/v1alpha1"
-	"Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	v1alpha1 "hcp-pkg/apis/sync/v1alpha1"
+	"hcp-pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 
 	rest "k8s.io/client-go/rest"
 )

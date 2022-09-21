@@ -19,9 +19,9 @@ limitations under the License.
 package externalversions
 
 import (
-	versioned "Hybrid_Cloud/pkg/client/vpa/v1beta2/clientset/versioned"
-	internalinterfaces "Hybrid_Cloud/pkg/client/vpa/v1beta2/informers/externalversions/internalinterfaces"
-	vpa "Hybrid_Cloud/pkg/client/vpa/v1beta2/informers/externalversions/vpa"
+	versioned "hcp-pkg/client/vpa/v1beta2/clientset/versioned"
+	internalinterfaces "hcp-pkg/client/vpa/v1beta2/informers/externalversions/internalinterfaces"
+	vpa "hcp-pkg/client/vpa/v1beta2/informers/externalversions/vpa"
 	reflect "reflect"
 	sync "sync"
 	time "time"

@@ -3,11 +3,11 @@ package clusterManager
 import (
 	// clientV1alpha1 "Hybrid_Cloud/pkg/client/policy/v1alpha1/clientset"
 
-	hcpclusterv1alpha1 "Hybrid_Cloud/pkg/client/hcpcluster/v1alpha1/clientset/versioned"
-	hcppolicyv1alpha1 "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
-	resourcev1alpha1 "Hybrid_Cloud/pkg/client/resource/v1alpha1/clientset/versioned"
 	"context"
 	"fmt"
+	hcpclusterv1alpha1 "hcp-pkg/client/hcpcluster/v1alpha1/clientset/versioned"
+	hcppolicyv1alpha1 "hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	resourcev1alpha1 "hcp-pkg/client/resource/v1alpha1/clientset/versioned"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

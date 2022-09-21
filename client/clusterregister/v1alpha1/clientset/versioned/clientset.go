@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	hcpv1alpha1 "Hybrid_Cloud/pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
+	hcpv1alpha1 "hcp-pkg/client/clusterregister/v1alpha1/clientset/versioned/typed/clusterregister/v1alpha1"
 	"fmt"
 
 	discovery "k8s.io/client-go/discovery"

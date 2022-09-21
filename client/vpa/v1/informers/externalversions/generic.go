@@ -19,7 +19,7 @@ limitations under the License.
 package externalversions
 
 import (
-	v1 "Hybrid_Cloud/pkg/apis/vpa/v1"
+	v1 "hcp-pkg/apis/vpa/v1"
 	"fmt"
 
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

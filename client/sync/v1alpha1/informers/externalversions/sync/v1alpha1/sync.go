@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	syncv1alpha1 "Hybrid_Cloud/pkg/apis/sync/v1alpha1"
-	versioned "Hybrid_Cloud/pkg/client/sync/v1alpha1/clientset/versioned"
-	internalinterfaces "Hybrid_Cloud/pkg/client/sync/v1alpha1/informers/externalversions/internalinterfaces"
-	v1alpha1 "Hybrid_Cloud/pkg/client/sync/v1alpha1/listers/sync/v1alpha1"
+	syncv1alpha1 "hcp-pkg/apis/sync/v1alpha1"
+	versioned "hcp-pkg/client/sync/v1alpha1/clientset/versioned"
+	internalinterfaces "hcp-pkg/client/sync/v1alpha1/informers/externalversions/internalinterfaces"
+	v1alpha1 "hcp-pkg/client/sync/v1alpha1/listers/sync/v1alpha1"
 	"context"
 	time "time"
 

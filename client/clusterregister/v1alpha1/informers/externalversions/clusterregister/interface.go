@@ -19,8 +19,8 @@ limitations under the License.
 package clusterregister
 
 import (
-	v1alpha1 "Hybrid_Cloud/pkg/client/clusterregister/v1alpha1/informers/externalversions/clusterregister/v1alpha1"
-	internalinterfaces "Hybrid_Cloud/pkg/client/clusterregister/v1alpha1/informers/externalversions/internalinterfaces"
+	v1alpha1 "hcp-pkg/client/clusterregister/v1alpha1/informers/externalversions/clusterregister/v1alpha1"
+	internalinterfaces "hcp-pkg/client/clusterregister/v1alpha1/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

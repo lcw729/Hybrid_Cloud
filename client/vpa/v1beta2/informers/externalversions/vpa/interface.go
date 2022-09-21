@@ -19,8 +19,8 @@ limitations under the License.
 package vpa
 
 import (
-	internalinterfaces "Hybrid_Cloud/pkg/client/vpa/v1beta2/informers/externalversions/internalinterfaces"
-	v1beta2 "Hybrid_Cloud/pkg/client/vpa/v1beta2/informers/externalversions/vpa/v1beta2"
+	internalinterfaces "hcp-pkg/client/vpa/v1beta2/informers/externalversions/internalinterfaces"
+	v1beta2 "hcp-pkg/client/vpa/v1beta2/informers/externalversions/vpa/v1beta2"
 )
 
 // Interface provides access to each of this group's versions.

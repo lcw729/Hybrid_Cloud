@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "Hybrid_Cloud/pkg/apis/kubefedcluster/v1alpha1"
-	scheme "Hybrid_Cloud/pkg/client/kubefedcluster/v1alpha1/clientset/versioned/scheme"
+	v1alpha1 "hcp-pkg/apis/kubefedcluster/v1alpha1"
+	scheme "hcp-pkg/client/kubefedcluster/v1alpha1/clientset/versioned/scheme"
 	"context"
 	"time"
 
