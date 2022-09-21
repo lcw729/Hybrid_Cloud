@@ -1,0 +1,51 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: hcpclusters.hcp.crd.com
+spec:
+  group: hcp.crd.com
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          # apiVersion:
+          #   type: string
+          # kind:
+          #   type: string
+          # metadata:
+          #   type: object
+          spec:
+            type: object
+            properties:
+              region: 
+                type: string
+              platform: 
+                type: string
+                enum: 
+                - aks
+                - eks
+                - gke
+                - nks
+              kubeconfiginfo:
+                type: string
+              joinstatus:
+                type: string
+                enum:
+                - UNJOIN
+                - JOIN
+                - UNJOINING
+                - JOINING
+          status:
+            type: object
+  scope: Namespaced
+  names:
+    kind: HCPCluster
+    listKind: HCPClusterList
+    plural: hcpclusters
+    singular: hcpcluster
+    shortNames: 
+    - hc
