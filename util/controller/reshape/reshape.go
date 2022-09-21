@@ -3,7 +3,8 @@ package reshape
 import (
 	"context"
 	"fmt"
-	"hcp-pkg/util/clusterManager"
+
+	"github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
 
 	"admiralty.io/multicluster-controller/pkg/cluster"
 	"admiralty.io/multicluster-controller/pkg/controller"

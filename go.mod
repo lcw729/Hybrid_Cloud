@@ -1,4 +1,4 @@
-module hcp-pkg
+module github.com/KETI-Hybrid/github.com/KETI-Hybrid/hcp-pkg
 
 go 1.18
 

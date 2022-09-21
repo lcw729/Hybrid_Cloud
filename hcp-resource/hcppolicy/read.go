@@ -2,9 +2,10 @@ package resource
 
 import (
 	"context"
-	hcppolicyapis "hcp-pkg/apis/hcppolicy/v1alpha1"
-	hcppolicyv1alpha1 "hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 	"strconv"
+
+	hcppolicyapis "github.com/KETI-Hybrid/hcp-pkg/apis/hcppolicy/v1alpha1"
+	hcppolicyv1alpha1 "github.com/KETI-Hybrid/hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
