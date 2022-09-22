@@ -44,7 +44,6 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/gofrs/flock v0.7.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -104,6 +103,7 @@ replace (
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.9.0
 	k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.23.4
 	k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.23.4
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
 	k8s.io/kube-proxy => k8s.io/kube-proxy v0.23.4
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.23.4
 	k8s.io/kubectl => k8s.io/kubectl v0.23.4
