@@ -1,16 +1,14 @@
 package handler
 
 import (
-	// "Hybrid_Cloud/hcp-analytic-engine/influx"
-	// "Hybrid_Cloud/omcplog"
-
-	"Hybrid_Cloud/test/influx"
 	"bytes"
 	"encoding/json"
 	"os"
 
+	"github.com/KETI-Hybrid/hcp-analytic-engine-v1/influx"
+
 	"github.com/influxdata/influxdb/client/v2"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 )
 
 type PodMetricList struct {
@@ -71,7 +69,7 @@ type NetworkMetric struct {
 // 	fmt.Print("!!!!!!!!!!!!!!!!!!!!!!!!")
 // }
 
-func GetResource(podNum int, ns, clusterName string) []byte {
+func GetResource(podNum int, clusterName string, objectType string) []byte {
 	INFLUX_IP := os.Getenv("INFLUX_IP")
 	INFLUX_PORT := os.Getenv("INFLUX_PORT")
 	INFLUX_USERNAME := os.Getenv("INFLUX_USERNAME")
@@ -79,16 +77,16 @@ func GetResource(podNum int, ns, clusterName string) []byte {
 
 	inf := influx.NewInflux(INFLUX_IP, INFLUX_PORT, INFLUX_USERNAME, INFLUX_PASSWORD)
 
-	// objectType := "nodes"
-	objectType := "pods"
+	// objectType = "nodes"
+	// objectType := "pods"
 
 	if objectType == "pods" {
 
-		results := inf.GetPodData(podNum, ns, clusterName)
+		results := inf.GetPodData(podNum, clusterName)
 
 		pm := setPodMetric(results)
 		// fmt.Print("results: ", results)
-		// fmt.Println("----------------------------------------------------")
+		// klog.Info("----------------------------------------------------")
 		// fmt.Print("pm: ", pm.Items)
 		bytesJson, _ := json.Marshal(pm)
 		var prettyJSON bytes.Buffer
@@ -113,7 +111,7 @@ func GetResource(podNum int, ns, clusterName string) []byte {
 		return prettyJSON.Bytes()
 
 	} else {
-		klog.Info("Error : objectType is only pods or nodes")
+		klog.V(0).Info("Error : objectType is only pods or nodes")
 		return nil
 	}
 

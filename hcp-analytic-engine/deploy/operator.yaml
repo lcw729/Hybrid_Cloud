@@ -49,7 +49,12 @@ spec:
         volumeMounts:
          - name: kubeconfig
            mountPath: /mnt
+         - name: awsconfig 
+           mountPath: /root/.aws
       volumes:
       - name: kubeconfig
         persistentVolumeClaim: 
           claimName: pvc-kubeconfig
+      - name: awsconfig
+        persistentVolumeClaim:
+          claimName: pvc-aws-config

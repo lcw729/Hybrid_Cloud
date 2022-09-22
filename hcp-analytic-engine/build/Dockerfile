@@ -4,6 +4,14 @@ ENV OPERATOR=/usr/local/bin/hcp-analytic-engine \
     USER_UID=root \
     USER_NAME=hcp-analytic-engine
 
+
+RUN microdnf install unzip openssl
+
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+
+RUN unzip awscliv2.zip
+
+RUN ./aws/install
 # install operator binary
 COPY _output/bin/hcp-analytic-engine ${OPERATOR}
 
