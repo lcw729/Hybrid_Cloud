@@ -61,24 +61,24 @@ Deleting Kubernetes objects) or external Events (GitHub Webhooks, polling extern
 
 Example reconcile Logic:
 
-* Read an object and all the Pods it owns.
-* Observe that the object spec specifies 5 replicas but actual cluster contains only 1 Pod replica.
-* Create 4 Pods and set their OwnerReferences to the object.
+	* Read an object and all the Pods it owns.
+	* Observe that the object spec specifies 5 replicas but actual cluster contains only 1 Pod replica.
+	* Create 4 Pods and set their OwnerReferences to the object.
 
 reconcile may be implemented as either a type:
 
-	type reconciler struct {}
+	type reconcile struct {}
 
-	func (reconciler) Reconcile(ctx context.Context, o reconcile.Request) (reconcile.Result, error) {
+	func (reconcile) reconcile(controller.Request) (controller.Result, error) {
 		// Implement business logic of reading and writing objects here
-		return reconcile.Result{}, nil
+		return controller.Result{}, nil
 	}
 
 Or as a function:
 
-	reconcile.Func(func(ctx context.Context, o reconcile.Request) (reconcile.Result, error) {
+	controller.Func(func(o controller.Request) (controller.Result, error) {
 		// Implement business logic of reading and writing objects here
-		return reconcile.Result{}, nil
+		return controller.Result{}, nil
 	})
 
 Reconciliation is level-based, meaning action isn't driven off changes in individual Events, but instead is
@@ -87,7 +87,7 @@ For example if responding to a Pod Delete Event, the Request won't contain that 
 instead the reconcile function observes this when reading the cluster state and seeing the Pod as missing.
 */
 type Reconciler interface {
-	// Reconcile performs a full reconciliation for the object referred to by the Request.
+	// Reconciler performs a full reconciliation for the object referred to by the Request.
 	// The Controller will requeue the Request to be processed again if an error is non-nil or
 	// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 	Reconcile(context.Context, Request) (Result, error)
