@@ -14,6 +14,8 @@ import (
 
 type BalanceAllocation struct{}
 
+var (pl *BalanceAllocation)scoreList ScoreList
+
 func (pl *BalanceAllocation) Name() string {
 	return plugins.BalanceAllocation
 }
@@ -35,6 +37,7 @@ func (pl *BalanceAllocation) Score(pod *v1.Pod, status *resourceinfo.CycleStatus
 		allocatableVolumes := len(node.Node.Status.VolumesAttached) - len(node.Node.Status.VolumesInUse)
 
 		score += balancedResourceScorer(requested, allocable, includeVolumes, requestedVolumes, allocatableVolumes)
+
 	}
 	return score
 }
