@@ -1,1 +1,0 @@
-kubectl create -f deploy/operator/operator-uni-cluster_backup.yaml --context uni-master

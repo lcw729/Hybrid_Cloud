@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hcp-metric-collector
-  namespace: hcp
-data:
-  KUBERNETES_SERVICE_HOST: "10.0.5.43"
-  KUBERNETES_SERVICE_PORT: "6443"

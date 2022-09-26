@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hcp-metric-collector
-  namespace: hcp
-data:
-  GRPC_SERVER: "10.0.5.83"
-  GRPC_PORT: "32051"
