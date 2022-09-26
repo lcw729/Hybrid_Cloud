@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hcp-has-controller
+  namespace: hcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: hcp-has-controller
+  template:
+    metadata:
+      labels:
+        name: hcp-has-controller
+    spec:
+      serviceAccountName: hcp-has-controller
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: hcp-has-controller
+          image: ketidevit2/hcp-has-controller:v0.0.1
+          command:
+          - hcp-has-controller
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              #value: ""
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: INFLUX_IP
+              # value: "10.244.1.76"
+              value: "10.0.5.86"
+            - name: INFLUX_PORT
+              # value: "8086"
+              value: "31051"
+            - name: INFLUX_USERNAME
+              value: "root"
+            - name: INFLUX_PASSWORD
+              value: "root"
+            - name: OPERATOR_NAME
+              value: "hcp-has-controller"
+          ports:
+          # - containerPort: 8086
+          - containerPort: 8086
+            name: http
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          effect: NoExecute
+          tolerationSeconds: 0
+        - key: node.kubernetes.io/unreachable
+          effect: NoExecute
+          tolerationSeconds: 0
