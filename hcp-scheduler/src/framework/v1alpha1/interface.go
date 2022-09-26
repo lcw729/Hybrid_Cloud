@@ -6,6 +6,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+type ScoreList map[string]int64
+
 type HCPFramework interface {
 	RunFilterPluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 	RunScorePluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
@@ -27,7 +29,9 @@ type HCPPostFilterPlugin interface {
 
 type HCPScorePlugin interface {
 	HCPPlugin
+	ScoreList
 	Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64
+	Normalize() int64
 }
 
 /*
