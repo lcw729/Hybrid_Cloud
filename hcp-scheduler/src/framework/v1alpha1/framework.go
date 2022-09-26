@@ -4,18 +4,21 @@ import (
 	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/framework/plugins/predicates"
 	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/framework/plugins/priorities"
 	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/resourceinfo"
+	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/util"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog"
 )
 
 type hcpFramework struct {
-	filterPlugins []HCPFilterPlugin
-	scorePlugins  []HCPScorePlugin
+	pluginScoreList PluginScoreList
+	filterPlugins   []HCPFilterPlugin
+	scorePlugins    []HCPScorePlugin
 }
 
 func NewFramework() *hcpFramework {
 	framework := &hcpFramework{
+		pluginScoreList: make(PluginScoreList),
 		filterPlugins: []HCPFilterPlugin{
 			&predicates.NodeName{},
 			&predicates.NodePorts{},
@@ -79,7 +82,7 @@ func (f *hcpFramework) stringTOHCPFilterPlugin(name string) HCPFilterPlugin {
 }
 
 func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfoList *resourceinfo.ClusterInfoList) {
-	result := make(map[string]int64)
+	// result := new(map[string]int64)
 	var score int64
 	var plugins []HCPScorePlugin
 
@@ -93,20 +96,38 @@ func (f *hcpFramework) RunScorePluginsOnClusters(algorithms []string, pod *v1.Po
 		}
 	}
 
-	for _, cluster := range *clusterInfoList {
+	/*
+		for _, cluster := range *clusterInfoList {
+			score = 0
+			klog.Infoln(">>", cluster.ClusterName)
+			if cluster.IsFiltered {
+				klog.Infoln(cluster.ClusterName, "is already filtered")
+			} else {
+				for _, plugin := range plugins {
+					klog.Infoln("[plugin]", plugin.Name())
+					score = plugin.Score(pod, status, cluster)
+					klog.Infoln(score)
+					result[cluster.ClusterName] += score
+				}
+			}
+			(*cluster).ClusterScore = int32(result[cluster.ClusterName])
+		}
+	*/
+	for _, plugin := range plugins {
 		score = 0
-		klog.Infoln(">>", cluster.ClusterName)
-		if cluster.IsFiltered {
-			klog.Infoln(cluster.ClusterName, "is already filtered")
-		} else {
-			for _, plugin := range plugins {
-				klog.Infoln("[plugin]", plugin.Name())
+		tmp := new(util.TmpEachScore)
+		f.pluginScoreList[plugin.Name()] = *tmp
+		klog.Infoln(">>", plugin.Name())
+		for _, cluster := range *clusterInfoList {
+			klog.Infoln(">>", cluster.ClusterName)
+			if !cluster.IsFiltered {
 				score = plugin.Score(pod, status, cluster)
 				klog.Infoln(score)
-				result[cluster.ClusterName] += score
+				tmp.Total += score
+				tmp.ScoreList[cluster.ClusterName] = score
 			}
+			plugin.Normalize(tmp, clusterInfoList)
 		}
-		(*cluster).ClusterScore = int32(result[cluster.ClusterName])
 	}
 }
 

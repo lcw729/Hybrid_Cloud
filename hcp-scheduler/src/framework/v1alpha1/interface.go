@@ -2,13 +2,14 @@ package v1alpha1
 
 import (
 	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/resourceinfo"
-
+	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/util"
 	v1 "k8s.io/api/core/v1"
 )
 
-type ScoreList map[string]int64
+type PluginScoreList map[string]util.TmpEachScore // key : plugin, value : 각 플러그인에 대한 각 클러스터의 Score 점수
 
 type HCPFramework interface {
+	PluginScoreList
 	RunFilterPluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 	RunScorePluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 }
@@ -29,9 +30,8 @@ type HCPPostFilterPlugin interface {
 
 type HCPScorePlugin interface {
 	HCPPlugin
-	ScoreList
 	Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfo) int64
-	Normalize() int64
+	Normalize(tmpEachScore *util.TmpEachScore, clusterInfoList *resourceinfo.ClusterInfoList)
 }
 
 /*

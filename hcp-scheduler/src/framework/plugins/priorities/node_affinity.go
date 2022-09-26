@@ -21,6 +21,7 @@ import (
 
 	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/framework/plugins"
 	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/resourceinfo"
+	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/util"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -70,6 +71,17 @@ func (pl *NodeAffinity) Score(pod *v1.Pod, status *resourceinfo.CycleStatus, clu
 		}
 	}
 	return int64(count)
+}
+
+func (pl *NodeAffinity) Normalize(tmpEachScore *util.TmpEachScore, clusterInfoList *resourceinfo.ClusterInfoList) {
+	for _, cluster := range *clusterInfoList {
+		klog.Infoln(">>", cluster.ClusterName)
+		if !cluster.IsFiltered {
+			tmpEachScore.ScoreList[cluster.ClusterName] /= tmpEachScore.Total
+			fmt.Println(tmpEachScore.ScoreList[cluster.ClusterName])
+			(*cluster).ClusterScore += int32(tmpEachScore.ScoreList[cluster.ClusterName])
+		}
+	}
 }
 
 // NodeSelectorRequirementsAsSelector converts the []NodeSelectorRequirement api type into a struct that implements
