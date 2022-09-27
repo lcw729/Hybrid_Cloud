@@ -17,8 +17,9 @@ type hcpFramework struct {
 }
 
 func NewFramework() *hcpFramework {
+	pluginScoreList := make(PluginScoreList)
 	framework := &hcpFramework{
-		pluginScoreList: make(PluginScoreList),
+		pluginScoreList: pluginScoreList,
 		filterPlugins: []HCPFilterPlugin{
 			&predicates.NodeName{},
 			&predicates.NodePorts{},

@@ -9,7 +9,7 @@ import (
 type PluginScoreList map[string]util.TmpEachScore // key : plugin, value : 각 플러그인에 대한 각 클러스터의 Score 점수
 
 type HCPFramework interface {
-	PluginScoreList
+	//PluginScoreList{}
 	RunFilterPluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 	RunScorePluginsOnClusters(algorithms []string, pod *v1.Pod, status *resourceinfo.CycleStatus, clusterInfo *resourceinfo.ClusterInfoList)
 }
