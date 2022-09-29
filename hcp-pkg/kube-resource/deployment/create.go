@@ -2,12 +2,15 @@ package deployment
 
 import (
 	"context"
+	"strconv"
 
-	"github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+	"hcp-pkg/util/clusterManager"
 
-	resourcev1alpha1apis "github.com/KETI-Hybrid/hcp-pkg/apis/resource/v1alpha1"
+	"github.com/google/uuid"
 
-	ns "github.com/KETI-Hybrid/hcp-pkg/kube-resource/namespace"
+	resourcev1alpha1apis "hcp-pkg/apis/resource/v1alpha1"
+
+	ns "hcp-pkg/kube-resource/namespace"
 
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,23 +35,29 @@ func CreateDeployment(clientset *kubernetes.Clientset, node string, deployment *
 		klog.Error(err)
 		return err
 	} else {
-		klog.Info("success to create %s [replicas : %d]\n", new_dep.Name, *deployment.Spec.Replicas)
+		klog.Infof("success to create %s [replicas : %d]\n", new_dep.Name, *deployment.Spec.Replicas)
 	}
 
 	return nil
 }
 
-func DeployDeploymentFromHCPDeployment(hcp_resource *resourcev1alpha1apis.HCPDeployment) bool {
+func DeployDeploymentFromHCPDeployment(hcp_resource *resourcev1alpha1apis.HCPDeployment) (int, bool) {
 
+	// uid 생성
+	uid := uuid.ClockSequence()
 	cm, _ := clusterManager.NewClusterManager()
 	targets := hcp_resource.Spec.SchedulingResult.Targets
+
+	// hcp_resource uid 설정
+	hcp_resource.Spec.RealDeploymentMetadata.Labels["uuid"] = strconv.Itoa(uid)
+	hcp_resource.Spec.RealDeploymentSpec.Selector.MatchLabels["uuid"] = strconv.Itoa(uid)
+	hcp_resource.Spec.RealDeploymentSpec.Template.Labels["uuid"] = strconv.Itoa(uid)
+	spec := hcp_resource.Spec.RealDeploymentSpec
 	metadata := hcp_resource.Spec.RealDeploymentMetadata
 
 	if metadata.Namespace == "" {
 		metadata.Namespace = "default"
 	}
-
-	spec := hcp_resource.Spec.RealDeploymentSpec
 
 	// HCPDeployment SchedulingResult에 따라 Deployment 배포
 	for _, target := range targets {
@@ -67,10 +76,10 @@ func DeployDeploymentFromHCPDeployment(hcp_resource *resourcev1alpha1apis.HCPDep
 
 		if err != nil {
 			klog.Error(err)
-			return false
+			return -1, false
 		} else {
-			klog.Info("succeed to deploy deployment %s in %s\n", r.ObjectMeta.Name, target.Cluster)
+			klog.Infof("succeed to deploy deployment %s in %s\n", r.ObjectMeta.Name, target.Cluster)
 		}
 	}
-	return true
+	return uid, true
 }

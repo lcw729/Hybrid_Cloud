@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/resourceinfo"
+	"hcp-scheduler/src/resourceinfo"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

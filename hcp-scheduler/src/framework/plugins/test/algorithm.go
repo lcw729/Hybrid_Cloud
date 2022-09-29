@@ -1,8 +1,8 @@
 package test
 
 import (
-	policy "github.com/KETI-Hybrid/hcp-pkg/hcp-resource/hcppolicy"
-	clusterManager "github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+	policy "hcp-pkg/hcp-resource/hcppolicy"
+	clusterManager "hcp-pkg/util/clusterManager"
 
 	"k8s.io/klog"
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"

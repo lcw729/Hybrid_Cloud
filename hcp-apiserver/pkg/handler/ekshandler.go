@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/KETI-Hybrid/hybridctl-v1/util"
+	"hybridctl/util"
 
-	"github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+	"hcp-pkg/util/clusterManager"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -58,6 +58,8 @@ func EKSCreateCluster(Input util.HCPCreateClusterInput) (*eks.CreateClusterOutpu
 	fmt.Println(Input.EKSCreateClusterInput)
 
 	out, err := eksSvc.CreateCluster(&Input.EKSCreateClusterInput)
+	fmt.Println(out)
+	fmt.Println(err)
 	return out, err
 }
 

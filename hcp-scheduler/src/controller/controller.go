@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	resourcev1alpha1 "github.com/KETI-Hybrid/hcp-pkg/client/resource/v1alpha1/clientset/versioned"
-	informer "github.com/KETI-Hybrid/hcp-pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
-	lister "github.com/KETI-Hybrid/hcp-pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
-	resourcescheme "github.com/KETI-Hybrid/hcp-pkg/client/sync/v1alpha1/clientset/versioned/scheme"
+	resourcev1alpha1 "hcp-pkg/client/resource/v1alpha1/clientset/versioned"
+	informer "hcp-pkg/client/resource/v1alpha1/informers/externalversions/resource/v1alpha1"
+	lister "hcp-pkg/client/resource/v1alpha1/listers/resource/v1alpha1"
+	resourcescheme "hcp-pkg/client/sync/v1alpha1/clientset/versioned/scheme"
 
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/scheduler"
+	"hcp-scheduler/src/scheduler"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

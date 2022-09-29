@@ -20,13 +20,13 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/KETI-Hybrid/hcp-pkg/util/clientset"
+	"hcp-pkg/util/clientset"
 
-	hcpclusterapis "github.com/KETI-Hybrid/hcp-pkg/apis/hcpcluster/v1alpha1"
-	resource "github.com/KETI-Hybrid/hcp-pkg/kube-resource/namespace"
+	hcpclusterapis "hcp-pkg/apis/hcpcluster/v1alpha1"
+	resource "hcp-pkg/kube-resource/namespace"
 
-	"github.com/KETI-Hybrid/hybridctl-v1/pkg/nks"
-	cobrautil "github.com/KETI-Hybrid/hybridctl-v1/util"
+	"hybridctl/pkg/nks"
+	cobrautil "hybridctl/util"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -107,7 +107,7 @@ var registerCmd = &cobra.Command{
 				fallthrough
 			case "gke":
 				command := &exec.Cmd{
-					Path:   "/root/go/src/Hybrid_LCW/github.com/KETI-Hybrid/hybridctl-v1/cmd/register/register",
+					Path:   "../../cmd/register/register",
 					Args:   arguments,
 					Stdout: os.Stdout,
 					Stderr: os.Stderr,
@@ -157,7 +157,7 @@ var registerCmd = &cobra.Command{
 				arguments[2] = real_clustername
 
 				command := &exec.Cmd{
-					Path:   "/root/go/src/Hybrid_LCW/github.com/KETI-Hybrid/hybridctl-v1/cmd/register/register",
+					Path:   "../../cmd/register/register",
 					Args:   arguments,
 					Stdout: os.Stdout,
 					Stderr: os.Stderr,

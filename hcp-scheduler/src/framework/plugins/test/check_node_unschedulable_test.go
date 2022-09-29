@@ -1,11 +1,11 @@
 package test
 
 import (
-	// "github.com/KETI-Hybrid/hcp-scheduler-v1/pkg/algorithm/predicates"
+	// "hcp-scheduler/pkg/algorithm/predicates"
 
 	"testing"
 
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/resourceinfo"
+	"hcp-scheduler/src/resourceinfo"
 
 	"k8s.io/klog"
 )

@@ -18,8 +18,8 @@ package test
 
 /*
 import (
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/pkg/algorithm/predicates"
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/pkg/resourceinfo"
+	"hcp-scheduler/pkg/algorithm/predicates"
+	"hcp-scheduler/pkg/resourceinfo"
 	"fmt"
 	"strings"
 	"testing"

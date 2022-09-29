@@ -15,13 +15,13 @@
 package cmd
 
 import (
-	// "github.com/KETI-Hybrid/hybridctl-v1/pkg/handler"
+	// "hybridctl/pkg/handler"
 	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/KETI-Hybrid/hcp-analytic-engine-v1/pkg/handler"
+	"hcp-analytic-engine/pkg/handler"
 
 	"github.com/spf13/cobra"
 )

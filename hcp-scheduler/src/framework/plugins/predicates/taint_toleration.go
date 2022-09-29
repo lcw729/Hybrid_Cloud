@@ -1,8 +1,8 @@
 package predicates
 
 import (
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/framework/plugins"
-	"github.com/KETI-Hybrid/hcp-scheduler-v1/src/resourceinfo"
+	"hcp-scheduler/src/framework/plugins"
+	"hcp-scheduler/src/resourceinfo"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/klog"

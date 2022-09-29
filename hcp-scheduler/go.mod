@@ -1,9 +1,10 @@
-module github.com/KETI-Hybrid/hcp-scheduler-v1
+module hcp-scheduler
 
 go 1.18
 
 require (
-	github.com/KETI-Hybrid/hcp-pkg v0.0.0-20220922020245-a21a27848fbd
+	github.com/google/uuid v1.3.0
+	hcp-pkg v0.0.0
 	k8s.io/api v0.25.2
 	k8s.io/apimachinery v0.25.2
 	k8s.io/apiserver v0.25.2
@@ -73,3 +74,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace hcp-pkg => ../hcp-pkg

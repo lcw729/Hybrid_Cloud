@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KETI-Hybrid/hcp-analytic-engine-v1/pkg/handler"
-	"github.com/KETI-Hybrid/hcp-analytic-engine-v1/pkg/metric"
+	"hcp-analytic-engine/pkg/handler"
+	"hcp-analytic-engine/pkg/metric"
 
-	resource "github.com/KETI-Hybrid/hcp-pkg/hcp-resource/hcppolicy"
+	resource "hcp-pkg/hcp-resource/hcppolicy"
 
-	clusterManager "github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+	clusterManager "hcp-pkg/util/clusterManager"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"

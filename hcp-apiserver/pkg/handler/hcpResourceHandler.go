@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/KETI-Hybrid/hcp-pkg/apis/resource/v1alpha1"
-	"github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+	"hcp-pkg/apis/resource/v1alpha1"
+	"hcp-pkg/util/clusterManager"
 
 	"github.com/gorilla/mux"
 	appsv1 "k8s.io/api/apps/v1"
@@ -336,8 +336,6 @@ func deleteHCPHAS(hcpdeployment *v1alpha1.HCPDeployment, name string) string {
 
 		target_clientset := cm.Cluster_kubeClients[target.Cluster]
 		target_config := cm.Cluster_configs[target.Cluster]
-		vpa_clientset, _ := vpaclientset.NewForConfig(target_config)
-
 		// hpa 삭제
 		klog.Infof("[2-1]Delete HPA %s in cluster %s\n", name, target.Cluster)
 		_, err := target_clientset.AutoscalingV2beta1().HorizontalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
@@ -355,21 +353,27 @@ func deleteHCPHAS(hcpdeployment *v1alpha1.HCPDeployment, name string) string {
 			msg += err.Error() + "\n"
 		}
 
-		// vpa 삭제
-		klog.Infof("[2-1]Delete VPA %s in cluster %s\n", name, target.Cluster)
-		_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-		if !errors.IsNotFound(err) {
-			err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
-			if err != nil {
-				msg += err.Error() + "\n"
-			} else {
-				str := "Succeed to delete vpa " + name
-				klog.Infof("Succeed to delete vpa %s \n", name)
-				msg += str + "\n"
-			}
+		vpa_clientset, err := vpaclientset.NewForConfig(target_config)
+		if err != nil {
+			klog.Info(err)
 		} else {
-			klog.Error(err)
-			msg += err.Error() + "\n"
+
+			// vpa 삭제
+			klog.Infof("[2-1]Delete VPA %s in cluster %s\n", name, target.Cluster)
+			_, err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+			if !errors.IsNotFound(err) {
+				err = vpa_clientset.AutoscalingV1beta2().VerticalPodAutoscalers(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+				if err != nil {
+					msg += err.Error() + "\n"
+				} else {
+					str := "Succeed to delete vpa " + name
+					klog.Infof("Succeed to delete vpa %s \n", name)
+					msg += str + "\n"
+				}
+			} else {
+				klog.Error(err)
+				msg += err.Error() + "\n"
+			}
 		}
 
 		// has 삭제

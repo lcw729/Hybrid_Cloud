@@ -19,19 +19,21 @@ package main
 import (
 	// "Hybrid_Cloud/hcp-policy-engine/pkg/controller"
 
-	controller "Hybrid_Cloud/hcp-policy-engine/pkg/controller"
-	"Hybrid_Cloud/util/clusterManager"
 	"flag"
 	"fmt"
 	"time"
 
-	v1alpha1hcppolicy "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+	"hcp-pkg/util/clusterManager"
+
+	controller "hcp-policy-engine/pkg/controller"
+
+	v1alpha1hcppolicy "hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 
 	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/klog/v2"
 
-	informers "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/informers/externalversions"
+	informers "hcp-pkg/client/hcppolicy/v1alpha1/informers/externalversions"
 
 	"k8s.io/sample-controller/pkg/signals"
 )

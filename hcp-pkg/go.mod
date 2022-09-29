@@ -1,4 +1,4 @@
-module github.com/KETI-Hybrid/hcp-pkg
+module hcp-pkg
 
 go 1.18
 
@@ -32,7 +32,10 @@ require (
 
 require github.com/pkg/errors v0.9.1 // indirect
 
-require github.com/KETI-Hybrid/hybridctl-v1 v0.0.0-20220921091710-d35ecc504062
+require (
+	github.com/google/uuid v1.3.0
+	hybridctl v0.0.0
+)
 
 require (
 	cloud.google.com/go/compute v1.7.0 // indirect
@@ -46,7 +49,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
@@ -76,8 +78,11 @@ require (
 )
 
 replace (
+
 	admiralty.io/multicluster-controller => admiralty.io/multicluster-controller v0.1.0
 	github.com/go-logr/logr => github.com/go-logr/logr v0.4.0
+	hcp-apiserver => ../hcp-apiserver
+	hybridctl => ../hybridctl
 	// k8s.io/client-go => k8s.io/client-go v0.17.2
 	k8s.io/api => k8s.io/api v0.23.4
 

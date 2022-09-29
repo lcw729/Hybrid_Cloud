@@ -2,18 +2,20 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"time"
 
-	"github.com/KETI-Hybrid/hcp-pkg/util/clusterManager"
+	"hcp-pkg/util/clusterManager"
 
-	controller "github.com/KETI-Hybrid/hcp-scheduler-v1/src/controller"
+	controller "hcp-scheduler/src/controller"
 
 	kubeinformers "k8s.io/client-go/informers"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/klog/v2"
 
-	informers "github.com/KETI-Hybrid/hcp-pkg/client/resource/v1alpha1/informers/externalversions"
+	informers "hcp-pkg/client/resource/v1alpha1/informers/externalversions"
 
+	"github.com/google/uuid"
 	"k8s.io/sample-controller/pkg/signals"
 )
 
@@ -21,6 +23,7 @@ func main() {
 	klog.InitFlags(nil)
 	flag.Parse()
 
+	fmt.Println(uuid.ClockSequence())
 	cm, err := clusterManager.NewClusterManager()
 	if err != nil {
 		klog.Errorln(err)

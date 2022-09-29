@@ -1,13 +1,14 @@
 package controller
 
 import (
-	v1alpha1hcppolicy "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned"
 	"fmt"
 	"time"
 
-	hcppolicyscheme "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/clientset/versioned/scheme"
-	informers "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/informers/externalversions/hcppolicy/v1alpha1"
-	lister "Hybrid_Cloud/pkg/client/hcppolicy/v1alpha1/listers/hcppolicy/v1alpha1"
+	v1alpha1hcppolicy "hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned"
+
+	hcppolicyscheme "hcp-pkg/client/hcppolicy/v1alpha1/clientset/versioned/scheme"
+	informers "hcp-pkg/client/hcppolicy/v1alpha1/informers/externalversions/hcppolicy/v1alpha1"
+	lister "hcp-pkg/client/hcppolicy/v1alpha1/listers/hcppolicy/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

@@ -10,9 +10,9 @@ import (
 	"reflect"
 	"strings"
 
-	apiserverutil "github.com/KETI-Hybrid/hcp-apiserver-v1/pkg/util"
+	apiserverutil "hcp-apiserver/pkg/util"
 
-	"github.com/KETI-Hybrid/hybridctl-v1/util"
+	"hybridctl/util"
 
 	"github.com/olekukonko/tablewriter"
 	"google.golang.org/api/option"

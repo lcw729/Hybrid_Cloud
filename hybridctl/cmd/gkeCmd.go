@@ -3,11 +3,11 @@ package cmd
 import (
 	"log"
 
-	"github.com/KETI-Hybrid/hcp-apiserver-v1/pkg/util"
+	"hcp-apiserver/pkg/util"
 
-	cobrautil "github.com/KETI-Hybrid/hybridctl-v1/util"
+	cobrautil "hybridctl/util"
 
-	// cobrautil "github.com/KETI-Hybrid/hybridctl-v1/util"
+	// cobrautil "hybridctl/util"
 	"encoding/json"
 	"fmt"
 	"os"

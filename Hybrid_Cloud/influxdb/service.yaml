@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb
+  namespace: hcp
+  # 여기부터
+  labels:
+    component: influxdb
+    app: influxdb
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    # 여기까지 새거
+spec:
+  ports:
+  - port: 8086
+    protocol: TCP
+    targetPort: 8086
+    nodePort: 31051
+  selector:
+    app: influxdb
+  type: LoadBalancer
+
+

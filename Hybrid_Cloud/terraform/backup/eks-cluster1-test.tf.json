@@ -1,0 +1,32 @@
+{
+ "resource": {
+  "aws_eks_node_group": {
+   "test": {
+    "cluster_name": "${aws_eks_cluster.eks-cluster1.name}",
+    "node_group_name": "test",
+    "node_role_arn": "${aws_iam_role.terraform-eks-node.arn}",
+    "subnet_ids": "${aws_subnet.terraform-eks-private-subnet[*].id}",
+    "instance_types": [
+     "m5.large"
+    ],
+    "disk_size": "50",
+    "labels": {
+     "role": "terraform-eks-m5-large"
+    },
+    "scaling_config": {
+     "desired_size": "1",
+     "min_size": "1",
+     "max_size": "1"
+    },
+    "depends_on": [
+     "aws_iam_role_policy_attachment.terraform-eks-node-AmazonEKSWorkerNodePolicy",
+     "aws_iam_role_policy_attachment.terraform-eks-node-AmazonEKS_CNI_Policy",
+     "aws_iam_role_policy_attachment.terraform-eks-node-AmazonEC2ContainerRegistryReadOnly"
+    ],
+    "tags": {
+     "Name": "${aws_eks_cluster.eks-cluster1.name}-terraform-eks-m5-large-Node"
+    }
+   }
+  }
+ }
+}
